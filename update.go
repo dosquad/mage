@@ -13,8 +13,8 @@ import (
 
 // Update any updates should be added here.
 func Update(ctx context.Context) {
-	// mg.CtxDeps(ctx, UpdateGoWorkspace)
-	mg.CtxDeps(ctx, UpdateGolangCILint)
+	mg.CtxDeps(ctx, UpdateGoWorkspace)
+	mg.CtxDeps(ctx, UpdateGolangciLint)
 	mg.CtxDeps(ctx, UpdateGitIgnore)
 }
 
@@ -24,25 +24,25 @@ func UpdateGoWorkspace() error {
 	if _, err := os.Stat(goworkspaceFile); os.IsNotExist(err) {
 		return shellcmd.RunAll(
 			"go work init",
-			"go work use -r .",
+			"go work use . ./magefiles",
 		)
 	}
 
 	return nil
 }
 
-func UpdateGolangCILint() error {
+func UpdateGolangciLint() error {
 	golangciLintFile := helper.MustGetWD(".golangci.yml")
 
-	if _, err := os.Stat(golangciLintFile); os.IsNotExist(err) {
-		return helper.HTTPWriteFile(
-			golangciLintConfigURL,
-			golangciLintFile,
-			0,
-		)
-	}
+	// if _, err := os.Stat(golangciLintFile); os.IsNotExist(err) || force {
+	return helper.HTTPWriteFile(
+		golangciLintConfigURL,
+		golangciLintFile,
+		0,
+	)
+	// }
 
-	return nil
+	// return nil
 }
 
 func UpdateGitIgnore() error {
