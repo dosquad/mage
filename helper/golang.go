@@ -16,3 +16,9 @@ func GetModuleName() (string, error) {
 
 	return sp[0], nil
 }
+
+func MustModuleName() string {
+	module, err := GetModuleName()
+	PanicIfError(err, "unable to retrieve module name")
+	return module
+}

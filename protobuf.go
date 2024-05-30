@@ -97,12 +97,40 @@ func InstallProtocGenGoGRPC(_ context.Context) error {
 	return installProtocGenGoGRPC().Ensure()
 }
 
+//nolint:gochecknoglobals // ignore globals
+var protocGenGoTwirp *bintool.BinTool
+
+func installProtocGenGoTwirp() *bintool.BinTool {
+	if protocGenGoTwirp == nil {
+		protocGenGoTwirp = bintool.Must(bintool.NewGo(
+			"github.com/twitchtv/twirp/protoc-gen-twirp",
+			protocGenGoTwirpVersion,
+			bintool.WithFolder(helper.MustGetProtobufPath()),
+		))
+	}
+
+	return protocGenGoTwirp
+}
+func InstallProtocGenGoTwirp(_ context.Context) error {
+	return installProtocGenGoTwirp().Ensure()
+}
+
 func Protobuf(ctx context.Context) {
 	mg.CtxDeps(ctx, InstallProtoc)
 	mg.CtxDeps(ctx, InstallProtocGenGo)
 	mg.CtxDeps(ctx, InstallProtocGenGoGRPC)
 	mg.CtxDeps(ctx, ProtobufGenGoGRPC)
 	mg.CtxDeps(ctx, ProtobufGenGo)
+}
+
+func ProtobufWithTwirp(ctx context.Context) {
+	mg.CtxDeps(ctx, InstallProtoc)
+	mg.CtxDeps(ctx, InstallProtocGenGo)
+	mg.CtxDeps(ctx, InstallProtocGenGoGRPC)
+	mg.CtxDeps(ctx, InstallProtocGenGoTwirp)
+	mg.CtxDeps(ctx, ProtobufGenGoGRPC)
+	mg.CtxDeps(ctx, ProtobufGenGo)
+	mg.CtxDeps(ctx, ProtobufGenGoTwirp)
 }
 
 func runProtoCommand(cmd *bintool.BinTool, args []string) error {
@@ -118,72 +146,58 @@ func ProtobufGenGo(ctx context.Context) error {
 	mg.CtxDeps(ctx, InstallProtoc)
 	mg.CtxDeps(ctx, InstallProtocGenGo)
 
-	var moduleName string
-	{
-		var err error
-		moduleName, err = helper.GetModuleName()
-		if err != nil {
-			return err
-		}
-	}
-
-	coreArgs := []string{
+	return protobufGen(ctx, []string{
 		"--proto_path=" + helper.MustGetWD("artifacts", "protobuf", "include"),
-		"--go_opt=module=" + moduleName,
+		"--go_opt=module=" + helper.MustModuleName(),
 		"--go_out=.",
-	}
-	protobufPaths := helper.ProtobufIncludePaths()
-
-	for _, protoPath := range helper.ProtobufTargets() {
-		// if !helper.TargetNeedRefresh(
-		// 	strings.Replace(protoPath, ".proto", ".pb.go", 1),
-		// 	protoPath,
-		// ) {
-		// 	helper.PrintInfo("Skipping Protocol Buffer Gen Go Path: %s", protoPath)
-		// 	continue
-		// }
-		if err := runProtoCommand(protoc,
-			append(
-				append(coreArgs, protobufPaths...),
-				" "+protoPath,
-			),
-		); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	})
 }
 
 func ProtobufGenGoGRPC(ctx context.Context) error {
 	mg.CtxDeps(ctx, InstallProtoc)
 	mg.CtxDeps(ctx, InstallProtocGenGoGRPC)
 
-	var moduleName string
-	{
-		var err error
-		moduleName, err = helper.GetModuleName()
-		if err != nil {
-			return err
-		}
-	}
-
-	coreArgs := []string{
+	return protobufGen(ctx, []string{
 		"--proto_path=" + helper.MustGetWD("artifacts", "protobuf", "include"),
-		"--go-grpc_opt=module=" + moduleName,
+		"--go-grpc_opt=module=" + helper.MustModuleName(),
 		"--go-grpc_out=.",
 		"--go-grpc_opt=require_unimplemented_servers=false",
-	}
+	})
+}
+
+func ProtobufGenGoTwirp(ctx context.Context) error {
+	mg.CtxDeps(ctx, InstallProtoc)
+	mg.CtxDeps(ctx, InstallProtocGenGoTwirp)
+
+	return protobufGen(ctx, []string{
+		"--proto_path=" + helper.MustGetWD("artifacts", "protobuf", "include"),
+		"--twirp_opt=module=" + helper.MustModuleName(),
+		"--twirp_out=.",
+	})
+}
+
+func protobufGen(_ context.Context, coreArgs []string) error {
+	// mg.CtxDeps(ctx, InstallProtoc)
+	// mg.CtxDeps(ctx, InstallProtocGenGoGRPC)
+
+	// var moduleName string
+	// {
+	// 	var err error
+	// 	moduleName, err = helper.GetModuleName()
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
+
+	// coreArgs := []string{
+	// 	"--proto_path=" + helper.MustGetWD("artifacts", "protobuf", "include"),
+	// 	"--go-grpc_opt=module=" + moduleName,
+	// 	"--go-grpc_out=.",
+	// 	"--go-grpc_opt=require_unimplemented_servers=false",
+	// }
 	protobufPaths := helper.ProtobufIncludePaths()
 
 	for _, protoPath := range helper.ProtobufTargets() {
-		// if !helper.TargetNeedRefresh(
-		// 	strings.Replace(protoPath, ".proto", "_grpc.pb.go", 1),
-		// 	protoPath,
-		// ) {
-		// 	helper.PrintInfo("Skipping Protocol Buffer Gen Go GRPC Path: %s", protoPath)
-		// 	continue
-		// }
 		if err := runProtoCommand(protoc,
 			append(
 				append(coreArgs, protobufPaths...),
