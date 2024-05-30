@@ -172,14 +172,23 @@ func extractAndWriteFile(dest string, zf *zip.File) error {
 	}()
 
 	if zf.FileInfo().IsDir() {
-		return nil
+		// create the directory and return.
+		return os.MkdirAll(
+			path,
+			permbits.Force(zf.Mode(),
+				permbits.UserExecute, permbits.GroupExecute,
+			),
+		)
 	}
 
 	mode := zf.Mode()
-	if !permbits.Is(mode, permbits.UserWrite) {
-		mode += permbits.UserWrite
-	}
-	if err := os.MkdirAll(filepath.Dir(path), mode); err != nil {
+	mode = permbits.Force(mode, permbits.UserWrite, permbits.GroupWrite)
+	if err := os.MkdirAll(
+		filepath.Dir(path),
+		permbits.Force(mode,
+			permbits.UserExecute, permbits.GroupExecute,
+		),
+	); err != nil {
 		return err
 	}
 

@@ -1,15 +1,13 @@
 module github.com/dosquad/mage
 
-go 1.22.2
-
-toolchain go1.22.3
+go 1.22.3
 
 require (
 	github.com/dosquad/go-giturl v0.0.0-20240529044908-80f368d13ad5
 	github.com/fatih/color v1.9.0
 	github.com/go-resty/resty/v2 v2.13.1
 	github.com/magefile/mage v1.15.0
-	github.com/na4ma4/go-permbits v0.4.0
+	github.com/na4ma4/go-permbits v0.5.0
 	github.com/princjef/mageutil v1.0.0
 	go.uber.org/multierr v1.11.0
 )
