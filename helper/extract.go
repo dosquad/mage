@@ -86,28 +86,26 @@ func DownloadToCache(src string) (string, error) {
 		}
 	}
 
-	var tmpDir string
+	var tmpFile string
 	{
-		var err error
-		tmpDir, err = os.MkdirTemp("", "download-archive*")
+		f, err := os.CreateTemp(mg.CacheDir(), "download-archive*")
 		if err != nil {
 			return "", err
 		}
-		if len(tmpDir) < len("download-archive") {
-			return "", fmt.Errorf("temporary directory name too short: %s", tmpDir)
-		}
+		tmpFile = f.Name()
+		// if len(tmpDir) < len("download-archive") {
+		// 	return "", fmt.Errorf("temporary directory name too short: %s", tmpDir)
+		// }
 	}
-	defer os.RemoveAll(tmpDir)
-	PrintDebug("Temporary Directory: %s", tmpDir)
-
-	client := resty.New()
-	client.SetOutputDirectory(tmpDir)
+	defer func() { _ = os.Remove(tmpFile) }()
+	PrintDebug("Temporary File: %s", tmpFile)
 
 	var resp *resty.Response
 	{
 		var err error
+		client := resty.New()
 		resp, err = client.R().
-			SetOutput("archive.dat").
+			SetOutput(tmpFile).
 			Get(src)
 		if err != nil {
 			return "", err
@@ -116,39 +114,19 @@ func DownloadToCache(src string) (string, error) {
 
 	resp.Header().Get("Content-Disposition")
 	var destArchive string
-	var filename string
 	{
 		_, params, err := mime.ParseMediaType(resp.Header().Get("Content-Disposition"))
 		if err != nil {
 			return "", err
 		}
-		filename = params["filename"]
-		destArchive, err = filepath.Abs(filepath.Join(mg.CacheDir(), filename))
+		destArchive, err = SanitizeArchivePath(mg.CacheDir(), params["filename"])
 		if err != nil {
 			return "", err
 		}
-	}
-
-	var absCacheDir string
-	{
-		var err error
-		absCacheDir, err = filepath.Abs(mg.CacheDir())
-		if err != nil {
-			return "", err
-		}
-	}
-
-	if !strings.HasPrefix(destArchive, absCacheDir) {
-		return "", fmt.Errorf(
-			"destination archive filename is an attempted exploit (%s) : '%s' is not inside '%s'",
-			filename,
-			destArchive,
-			absCacheDir,
-		)
 	}
 
 	if err := os.Rename(
-		filepath.Join(tmpDir, "archive.dat"),
+		tmpFile,
 		destArchive,
 	); err != nil {
 		return "", err
@@ -158,13 +136,13 @@ func DownloadToCache(src string) (string, error) {
 }
 
 // Sanitize archive file pathing from "G305: Zip Slip vulnerability".
-func SanitizeArchivePath(d, t string) (string, error) {
-	v := filepath.Join(d, t)
-	if strings.HasPrefix(v, filepath.Clean(d)) {
+func SanitizeArchivePath(dest, target string) (string, error) {
+	v := filepath.Join(dest, target)
+	if strings.HasPrefix(v, filepath.Clean(dest)) {
 		return v, nil
 	}
 
-	return "", fmt.Errorf("%s: %s", "content filepath is tainted", t)
+	return "", fmt.Errorf("%s: %s", "content filepath is tainted", target)
 }
 
 // Closure to address file descriptors issue with all the deferred .Close() methods.

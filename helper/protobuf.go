@@ -58,6 +58,20 @@ func GolangListModules() ([]Module, error) {
 	return out, nil
 }
 
+func GetProtocVersion() string {
+	if v := GetEnv("PROTOC_VERSION", ""); v != "" {
+		return v
+	}
+
+	protocVer, err := HTTPGetLatestGitHubVersion("protocolbuffers/protobuf")
+	if err != nil {
+		PrintWarning("Protocol Buffer Error: %s", err)
+		return "latest"
+	}
+
+	return protocVer
+}
+
 func GetProtobufVersion() string {
 	ver, err := shellcmd.Command(`go list -f '{{.Version}}' -m "google.golang.org/protobuf"`).Output()
 	if err != nil {
