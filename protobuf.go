@@ -167,10 +167,13 @@ func ProtobufGenGoGRPC(ctx context.Context) error {
 
 func ProtobufGenGoTwirp(ctx context.Context) error {
 	mg.CtxDeps(ctx, InstallProtoc)
+	mg.CtxDeps(ctx, InstallProtocGenGo)
 	mg.CtxDeps(ctx, InstallProtocGenGoTwirp)
 
 	return protobufGen(ctx, []string{
 		"--proto_path=" + helper.MustGetWD("artifacts", "protobuf", "include"),
+		"--go_opt=module=" + helper.MustModuleName(),
+		"--go_out=.",
 		"--twirp_opt=module=" + helper.MustModuleName(),
 		"--twirp_out=.",
 	})
@@ -197,11 +200,11 @@ func protobufGen(_ context.Context, coreArgs []string) error {
 	// }
 	protobufPaths := helper.ProtobufIncludePaths()
 
-	for _, protoPath := range helper.ProtobufTargets() {
+	for _, protoPathFunc := range helper.ProtobufTargets() {
 		if err := runProtoCommand(protoc,
 			append(
 				append(coreArgs, protobufPaths...),
-				" "+protoPath,
+				" "+strings.Join(protoPathFunc(), " "),
 			),
 		); err != nil {
 			return err

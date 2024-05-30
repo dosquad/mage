@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -67,25 +68,30 @@ func GetProtobufVersion() string {
 	return strings.TrimSpace(string(ver))
 }
 
-func ProtobufTargets() []string {
-	return FilesMatch(MustGetWD(), "*.proto")
-}
-
 // func ProtobufTargets() []string {
-// 	paths := map[string]interface{}{}
-// 	for _, match := range FilesMatch(MustGetWD(), "*.proto") {
-// 		paths[filepath.Dir(match)] = nil
-// 	}
-
-// 	out := make([]string, len(paths))
-// 	idx := 0
-// 	for path := range paths {
-// 		out[idx] = filepath.Join(path, "*.proto")
-// 		idx += 1
-// 	}
-
-// 	return out
+// 	return FilesMatch(MustGetWD(), "*.proto")
 // }
+
+type ProtobufTargetFunc func() []string
+
+func ProtobufTargets() []ProtobufTargetFunc {
+	paths := map[string]interface{}{}
+	for _, match := range FilesMatch(MustGetWD(), "*.proto") {
+		paths[filepath.Dir(match)] = nil
+	}
+
+	out := make([]ProtobufTargetFunc, len(paths))
+	idx := 0
+	for path := range paths {
+		out[idx] = func() []string {
+			matches, _ := filepath.Glob(filepath.Join(path, "*.proto"))
+			return matches
+		}
+		idx++
+	}
+
+	return out
+}
 
 func ProtobufIncludePaths() []string {
 	out := []string{}
