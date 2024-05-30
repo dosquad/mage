@@ -1,13 +1,18 @@
 package mage
 
 import (
+	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/sh"
 	"go.uber.org/multierr"
 )
 
 // Clean remove generated files.
 func Clean() error {
-	if err := golangciLint.Command("cache clean").Run(); err != nil {
+	if err := helper.BinGolangCILint().Ensure(); err != nil {
+		return err
+	}
+
+	if err := helper.BinGolangCILint().Command("cache clean").Run(); err != nil {
 		return err
 	}
 
@@ -17,20 +22,14 @@ func Clean() error {
 	)
 }
 
-// CleanLight remove generated files.
+// CleanLight avoids removing `artifacts/data` but flushes golangci-lint cache.
 func CleanLight() error {
-	if err := golangciLint.Command("cache clean").Run(); err != nil {
+	if err := helper.BinGolangCILint().Ensure(); err != nil {
 		return err
 	}
 
-	for _, path := range []string{
-		"artifacts/bin",
-		"artifacts/build",
-		"artifacts/protobuf",
-	} {
-		if err := sh.Rm(path); err != nil {
-			return err
-		}
+	if err := helper.BinGolangCILint().Command("cache clean").Run(); err != nil {
+		return err
 	}
 
 	return multierr.Combine(

@@ -21,6 +21,7 @@ func ModTidy() error {
 	}
 
 	wd := helper.MustGetWD()
+	defer func() { _ = os.Chdir(wd) }()
 
 	scanner := bufio.NewScanner(bytes.NewReader(listout))
 	for scanner.Scan() {
@@ -35,10 +36,6 @@ func ModTidy() error {
 				return err
 			}
 		}
-	}
-
-	if err := os.Chdir(wd); err != nil {
-		return err
 	}
 
 	return nil

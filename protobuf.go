@@ -10,22 +10,27 @@ import (
 	"github.com/princjef/mageutil/bintool"
 )
 
+// InstallProtoc install protoc command.
 func InstallProtoc(_ context.Context) error {
 	return helper.BinProtoc().Ensure()
 }
 
+// InstallProtocGenGo install protoc-gen-go command.
 func InstallProtocGenGo(_ context.Context) error {
 	return helper.BinProtocGenGo().Ensure()
 }
 
+// InstallProtocGenGoGRPC install protoc-gen-go-grpc command.
 func InstallProtocGenGoGRPC(_ context.Context) error {
 	return helper.BinProtocGenGoGRPC().Ensure()
 }
 
+// InstallProtocGenGoTwirp install protoc-gen-go-twirp command.
 func InstallProtocGenGoTwirp(_ context.Context) error {
 	return helper.BinProtocGenGoTwirp().Ensure()
 }
 
+// Protobuf install and generate golang Protocol Buffer files.
 func Protobuf(ctx context.Context) {
 	mg.CtxDeps(ctx, InstallProtoc)
 	mg.CtxDeps(ctx, InstallProtocGenGo)
@@ -34,6 +39,7 @@ func Protobuf(ctx context.Context) {
 	mg.CtxDeps(ctx, ProtobufGenGoGRPC)
 }
 
+// ProtobufWithTwirp install and generate golang Protocol Buffer files (including Twirp).
 func ProtobufWithTwirp(ctx context.Context) {
 	mg.CtxDeps(ctx, InstallProtoc)
 	mg.CtxDeps(ctx, InstallProtocGenGo)
@@ -53,6 +59,7 @@ func runProtoCommand(cmd *bintool.BinTool, args []string) error {
 	return cmd.Command(strings.Join(args, " ")).Run()
 }
 
+// ProtobufGenGo run protoc-gen-go to generate code.
 func ProtobufGenGo(ctx context.Context) error {
 	mg.CtxDeps(ctx, InstallProtoc)
 	mg.CtxDeps(ctx, InstallProtocGenGo)
@@ -64,6 +71,7 @@ func ProtobufGenGo(ctx context.Context) error {
 	})
 }
 
+// ProtobufGenGoGRPC run protoc-gen-go-grpc to generate code.
 func ProtobufGenGoGRPC(ctx context.Context) error {
 	mg.CtxDeps(ctx, InstallProtoc)
 	mg.CtxDeps(ctx, InstallProtocGenGoGRPC)
@@ -76,6 +84,7 @@ func ProtobufGenGoGRPC(ctx context.Context) error {
 	})
 }
 
+// ProtobufGenGoTwirp run protoc-gen-go-twirp to generate code.
 func ProtobufGenGoTwirp(ctx context.Context) error {
 	mg.CtxDeps(ctx, InstallProtoc)
 	mg.CtxDeps(ctx, InstallProtocGenGo)

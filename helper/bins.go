@@ -14,12 +14,31 @@ const (
 )
 
 //nolint:gochecknoglobals // ignore globals
+var golangciLint *bintool.BinTool
+
+func BinGolangCILint() *bintool.BinTool {
+	if golangciLint == nil {
+		ver := GetEnv("GOLANGCILINT_VERSION", golangciLintVersion)
+		PrintInfo("Golang CI Lint Version: %s", ver)
+		golangciLint = bintool.Must(bintool.New(
+			"golangci-lint{{.BinExt}}",
+			golangciLintVersion,
+			"https://github.com/golangci/golangci-lint/releases/download/"+
+				"v{{.Version}}/golangci-lint-{{.Version}}-{{.GOOS}}-{{.GOARCH}}{{.ArchiveExt}}",
+			bintool.WithFolder(MustGetGoBin()),
+		))
+	}
+
+	return golangciLint
+}
+
+//nolint:gochecknoglobals // ignore globals
 var govulncheck *bintool.BinTool
 
 func BinGovulncheck() *bintool.BinTool {
 	if govulncheck == nil {
 		ver := GetEnv("GOVULNCHECK_VERSION", govulncheckVersion)
-		PrintInfo("Golang Vulnerability Check: %s", ver)
+		PrintInfo("Golang Vulnerability Check Version: %s", ver)
 		govulncheck = bintool.Must(bintool.NewGo(
 			"golang.org/x/vuln/cmd/govulncheck",
 			ver,

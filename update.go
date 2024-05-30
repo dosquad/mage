@@ -11,13 +11,19 @@ import (
 	"github.com/princjef/mageutil/shellcmd"
 )
 
-// Update any updates should be added here.
+//nolint:lll // long URL
+const (
+	golangciLintConfigURL = "https://gist.githubusercontent.com/na4ma4/f165f6c9af35cda6b330efdcc07a9e26/raw/7a8433c1e515bd82d1865ed9070b9caff9995703/.golangci.yml"
+)
+
+// Update executes the set of updates.
 func Update(ctx context.Context) {
 	mg.CtxDeps(ctx, UpdateGoWorkspace)
 	mg.CtxDeps(ctx, UpdateGolangciLint)
 	mg.CtxDeps(ctx, UpdateGitIgnore)
 }
 
+// UpdateGoWorkspace create the go.work file if it is missing.
 func UpdateGoWorkspace() error {
 	goworkspaceFile := helper.MustGetWD("go.work")
 
@@ -31,6 +37,7 @@ func UpdateGoWorkspace() error {
 	return nil
 }
 
+// UpdateGolangciLint updates the .golangci.yml from the gist.
 func UpdateGolangciLint() error {
 	golangciLintFile := helper.MustGetWD(".golangci.yml")
 
@@ -45,6 +52,7 @@ func UpdateGolangciLint() error {
 	// return nil
 }
 
+// UpdateGitIgnore updates the .gitignore from a set list.
 func UpdateGitIgnore() error {
 	gitignoreFile := helper.MustGetWD(".gitignore")
 
