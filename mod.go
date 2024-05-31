@@ -32,7 +32,7 @@ func ModTidy() error {
 				return err
 			}
 
-			if err := shellcmd.Command("go mod tidy").Run(); err != nil {
+			if err := shellcmd.Command("go mod tidy -go=" + helper.GolangVersionRaw()).Run(); err != nil {
 				return err
 			}
 		}

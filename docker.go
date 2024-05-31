@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
@@ -44,13 +45,9 @@ func dockerBuildArtifacts(cfg *helper.DockerConfig) error {
 }
 
 func dockerBuildCommand(ctx context.Context, args []string) error {
-	mg.CtxDeps(ctx, Update.DockerIgnoreFile)
-
 	cfg := helper.MustDockerLoadConfig()
-	if err := dockerBuildArtifacts(cfg); err != nil {
-		return err
-	}
 
+	var once sync.Once
 	tags := cfg.GetTags()
 
 	if len(tags) == 0 {
@@ -66,7 +63,18 @@ func dockerBuildCommand(ctx context.Context, args []string) error {
 			continue
 		}
 
-		helper.PrintInfo("Building Docker Image[%s]: %s:%s", strings.Join(cfg.Platforms, ","), cfg.Image, tag)
+		{
+			var outErr error
+			once.Do(func() {
+				mg.CtxDeps(ctx, Update.DockerIgnoreFile)
+				outErr = dockerBuildArtifacts(cfg)
+			})
+			if outErr != nil {
+				return outErr
+			}
+		}
+
+		helper.PrintInfo("Building Docker Image[%s]: %s:%s", strings.Join(cfg.Platforms, ","), cfg.GetImage(), tag)
 
 		// return nil
 		dockerErr = multierr.Append(dockerErr, dockerCommand(

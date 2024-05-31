@@ -15,6 +15,7 @@ func LDFlags(debug bool) []string {
 		"-X main.date=" + time.Now().Format(time.RFC3339),
 		"-X main.builtBy=magefiles",
 		"-X main.repo=" + GitURL(),
+		"-X main.goVersion=" + GolangVersionRaw(),
 	}
 
 	if debug {

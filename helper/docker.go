@@ -48,6 +48,18 @@ func (d DockerConfig) GetTags() []string {
 	return []string{"dev"}
 }
 
+func (d DockerConfig) GetImage() string {
+	if v := GetEnv("DOCKER_REPO", ""); v != "" {
+		return v
+	}
+
+	if v := GetEnv("DOCKER_IMAGE", ""); v != "" {
+		return v
+	}
+
+	return d.Image
+}
+
 func (d DockerConfig) IsBlocked(in string) bool {
 	for _, tag := range d.BlockedTags {
 		if strings.EqualFold(tag, in) {
@@ -80,11 +92,11 @@ func (d DockerConfig) ArgsTag(tag string) (string, error) {
 		return "", fmt.Errorf("tag is blocked: %s", tag)
 	}
 
-	if d.Image == "" {
+	if d.GetImage() == "" {
 		return "", errors.New("image is not set")
 	}
 
-	return `--tag "` + d.Image + `:` + tag + `"`, nil
+	return `--tag "` + d.GetImage() + `:` + tag + `"`, nil
 }
 
 func (d DockerConfig) Args() []string {
@@ -105,20 +117,13 @@ func (d DockerConfig) Args() []string {
 
 func MustDockerLoadConfig() *DockerConfig {
 	cfg, err := DockerLoadConfig()
-	PanicIfError(err, "unable to load mage docker config")
+	if !errors.Is(err, os.ErrNotExist) {
+		PanicIfError(err, "unable to load mage docker config")
+	}
 	return cfg
 }
 
 func DockerLoadConfig() (*DockerConfig, error) {
-	var f *os.File
-	{
-		var err error
-		f, err = os.Open(MustGetWD(".docker.yml"))
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	cfg := &DockerConfig{
 		Platforms:   []string{"linux/amd64"},
 		BlockedTags: []string{"dev"},
@@ -126,9 +131,19 @@ func DockerLoadConfig() (*DockerConfig, error) {
 			"VERSION": GitHeadTagDescribe(),
 		},
 	}
+
+	var f *os.File
+	{
+		var err error
+		f, err = os.Open(MustGetWD(".docker.yml"))
+		if err != nil {
+			return cfg, err
+		}
+	}
+
 	{
 		if err := yaml.NewDecoder(f).Decode(&cfg); err != nil {
-			return nil, err
+			return cfg, err
 		}
 	}
 

@@ -22,3 +22,11 @@ func MustModuleName() string {
 	PanicIfError(err, "unable to retrieve module name")
 	return module
 }
+
+func GolangVersion() string {
+	return MustGetOutput("go env GOVERSION")
+}
+
+func GolangVersionRaw() string {
+	return strings.TrimPrefix(GolangVersion(), "go")
+}
