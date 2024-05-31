@@ -16,9 +16,14 @@ func Clean() error {
 		return err
 	}
 
+	rmFunc := func(path string) error {
+		helper.PrintInfo("Removing path: %s", path)
+		return sh.Rm(path)
+	}
+
 	return multierr.Combine(
-		sh.Rm("artifacts"),
-		sh.Rm(".makefiles"),
+		rmFunc("artifacts"),
+		rmFunc(".makefiles"),
 	)
 }
 
@@ -32,10 +37,18 @@ func CleanLight() error {
 		return err
 	}
 
+	rmFunc := func(path string) error {
+		helper.PrintInfo("Removing path: %s", path)
+		return sh.Rm(path)
+	}
+
 	return multierr.Combine(
-		sh.Rm(".makefiles"),
-		sh.Rm("artifacts/bin"),
-		sh.Rm("artifacts/build"),
-		sh.Rm("artifacts/protobuf"),
+		rmFunc(".makefiles"),
+		rmFunc("artifacts/.versioncache.yaml"),
+		rmFunc("artifacts/bin"),
+		rmFunc("artifacts/build"),
+		rmFunc("artifacts/config"),
+		rmFunc("artifacts/lint"),
+		rmFunc("artifacts/protobuf"),
 	)
 }

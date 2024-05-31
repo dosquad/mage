@@ -10,11 +10,16 @@ import (
 )
 
 type DockerConfig struct {
-	Image       string            `yaml:"image,omitempty"`
-	Platforms   []string          `yaml:"platforms,omitempty"`
-	Tag         interface{}       `yaml:"tag,omitempty"`
-	BlockedTags []string          `yaml:"blocked_tags,omitempty"`
-	BuildArgs   map[string]string `yaml:"build_args,omitempty"`
+	Image       string                 `yaml:"image,omitempty"`
+	Platforms   []string               `yaml:"platforms,omitempty"`
+	Tag         interface{}            `yaml:"tag,omitempty"`
+	BlockedTags []string               `yaml:"blocked_tags,omitempty"`
+	BuildArgs   map[string]string      `yaml:"build_args,omitempty"`
+	Kubernetes  DockerConfigKubernetes `yaml:"kubernetes,omitempty"`
+}
+
+type DockerConfigKubernetes struct {
+	PodSelector string `yaml:"pod-selector,omitempty"`
 }
 
 type BuildPlatform struct {
@@ -130,6 +135,7 @@ func DockerLoadConfig() (*DockerConfig, error) {
 		BuildArgs: map[string]string{
 			"VERSION": GitHeadTagDescribe(),
 		},
+		Kubernetes: DockerConfigKubernetes{},
 	}
 
 	var f *os.File

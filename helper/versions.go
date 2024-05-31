@@ -129,7 +129,7 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 	case ProtocGenGoTwirpVersion:
 		return vc.SetVersion(key, vc.getGithubVersion("twitchtv/twirp"))
 	case GolangciLintVersion:
-		return vc.SetVersion(key, vc.getGithubVersion("golangci/golangci-lint"))
+		return vc.SetVersion(key, vc.getGolangcilintVersion())
 	}
 
 	return ""
@@ -140,6 +140,14 @@ func (vc VersionCache) getGithubVersion(slug string) string {
 	return ver
 }
 
+func (vc VersionCache) getGolangcilintVersion() string {
+	if v := vc.getGithubVersion("golangci/golangci-lint"); v != "" {
+		return strings.TrimPrefix(v, "v")
+	}
+
+	return ""
+}
+
 func (vc VersionCache) getProtocVersion() string {
 	protocVer, err := HTTPGetLatestGitHubVersion("protocolbuffers/protobuf")
 	if err != nil {
@@ -147,7 +155,7 @@ func (vc VersionCache) getProtocVersion() string {
 		return "latest"
 	}
 
-	return protocVer
+	return strings.TrimPrefix(protocVer, "v")
 }
 
 func (vc VersionCache) getProtobufVersion() string {

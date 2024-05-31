@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"errors"
+	"path/filepath"
 	"time"
 )
 
@@ -29,4 +31,19 @@ func LDFlags(debug bool) []string {
 		"-s",
 		"-w",
 	)
+}
+
+func MustFirstCommandName() string {
+	cmd, err := FirstCommandName()
+	PanicIfError(err, "unable to find command name")
+	return cmd
+}
+
+func FirstCommandName() (string, error) {
+	paths := MustCommandPaths()
+	if len(paths) < 1 {
+		return "", errors.New("command not found")
+	}
+
+	return filepath.Base(paths[0]), nil
 }

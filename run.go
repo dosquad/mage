@@ -2,9 +2,7 @@ package mage
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"path/filepath"
 
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
@@ -30,16 +28,39 @@ func (Run) Release(ctx context.Context, cmd string, args string) error {
 	return shellcmd.Command(fmt.Sprintf("%s %s", ct.OutputArtifact, args)).Run()
 }
 
+// Mirrord start service with Mirrord intercepts.
+func (Run) Mirrord(ctx context.Context) error {
+	cfg := helper.MustDockerLoadConfig()
+	cfgFile := helper.MustGetWD("mirrord.yaml")
+
+	if !helper.FileExists(cfgFile) {
+		return fmt.Errorf("Mirrord configuration file (%s) missing", cfgFile)
+	}
+
+	mg.CtxDeps(ctx, Build.Debug)
+	ct := helper.NewCommandTemplate(true, fmt.Sprintf("./cmd/%s", helper.MustFirstCommandName()))
+
+	// targetCmd := fmt.Sprintf("artifacts/build/debug/%s/%s/%s", Cfg.OOS, Cfg.Arch, Cfg.BaseDir)
+
+	targetPod := helper.Must[string](
+		helper.KubernetesGetPodWithSelector(cfg.Kubernetes.PodSelector),
+	)
+	return shellcmd.Command(
+		fmt.Sprintf(
+			"mirrord exec --config-file %s -t %s -n %s %s",
+			cfgFile,
+			targetPod,
+			helper.Must[string](helper.KubernetesGetCurrentContext()),
+			ct.OutputArtifact,
+		),
+	).Run()
+}
+
 // Runc builds and executes the first found command with debug tags and the supplied arguments.
 func Runc(ctx context.Context, args string) error {
 	mg.CtxDeps(ctx, Build.Debug)
 
-	paths := helper.MustCommandPaths()
-	if len(paths) < 1 {
-		return errors.New("command not found")
-	}
-
-	ct := helper.NewCommandTemplate(true, fmt.Sprintf("./cmd/%s", filepath.Base(paths[0])))
+	ct := helper.NewCommandTemplate(true, fmt.Sprintf("./cmd/%s", helper.MustFirstCommandName()))
 
 	return shellcmd.Command(fmt.Sprintf("%s %s", ct.OutputArtifact, args)).Run()
 }
