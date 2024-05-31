@@ -68,7 +68,7 @@ func (Protobuf) GenGo(ctx context.Context) error {
 	mg.CtxDeps(ctx, Protobuf.InstallProtocGenGo)
 
 	return protobufGen(ctx, []string{
-		"--proto_path=" + helper.MustGetWD("artifacts", "protobuf", "include"),
+		"--proto_path=" + helper.MustGetArtifactPath("protobuf", "include"),
 		"--go_opt=module=" + helper.MustModuleName(),
 		"--go_out=.",
 	})
@@ -80,7 +80,7 @@ func (Protobuf) GenGoGRPC(ctx context.Context) error {
 	mg.CtxDeps(ctx, Protobuf.InstallProtocGenGoGRPC)
 
 	return protobufGen(ctx, []string{
-		"--proto_path=" + helper.MustGetWD("artifacts", "protobuf", "include"),
+		"--proto_path=" + helper.MustGetArtifactPath("protobuf", "include"),
 		"--go-grpc_opt=module=" + helper.MustModuleName(),
 		"--go-grpc_out=.",
 		"--go-grpc_opt=require_unimplemented_servers=false",
@@ -94,7 +94,7 @@ func (Protobuf) GenGoTwirp(ctx context.Context) error {
 	mg.CtxDeps(ctx, Protobuf.InstallProtocGenGoTwirp)
 
 	return protobufGen(ctx, []string{
-		"--proto_path=" + helper.MustGetWD("artifacts", "protobuf", "include"),
+		"--proto_path=" + helper.MustGetArtifactPath("protobuf", "include"),
 		"--go_opt=module=" + helper.MustModuleName(),
 		"--go_out=.",
 		"--twirp_opt=module=" + helper.MustModuleName(),
@@ -116,7 +116,7 @@ func protobufGen(_ context.Context, coreArgs []string) error {
 	// }
 
 	// coreArgs := []string{
-	// 	"--proto_path=" + helper.MustGetWD("artifacts", "protobuf", "include"),
+	// 	"--proto_path=" + helper.MustGetArtifactPath("protobuf", "include"),
 	// 	"--go-grpc_opt=module=" + moduleName,
 	// 	"--go-grpc_out=.",
 	// 	"--go-grpc_opt=require_unimplemented_servers=false",

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/princjef/mageutil/shellcmd"
@@ -56,30 +55,6 @@ func GolangListModules() ([]Module, error) {
 	}
 
 	return out, nil
-}
-
-func GetProtocVersion() string {
-	if v := GetEnv("PROTOC_VERSION", ""); v != "" {
-		return v
-	}
-
-	protocVer, err := HTTPGetLatestGitHubVersion("protocolbuffers/protobuf")
-	if err != nil {
-		PrintWarning("Protocol Buffer Error: %s", err)
-		return "latest"
-	}
-
-	return protocVer
-}
-
-func GetProtobufVersion() string {
-	ver, err := shellcmd.Command(`go list -f '{{.Version}}' -m "google.golang.org/protobuf"`).Output()
-	if err != nil {
-		PrintWarning("Warning: did not find google.golang.org/protobuf in go.mod, defaulting to latest")
-		return "latest"
-	}
-
-	return strings.TrimSpace(string(ver))
 }
 
 // func ProtobufTargets() []string {

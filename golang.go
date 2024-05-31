@@ -27,7 +27,7 @@ func (Golang) Vulncheck(ctx context.Context) error {
 
 // Test run test suite and save coverage report.
 func (Golang) Test() error {
-	coverPath := helper.MustGetWD("artifacts", "coverage")
+	coverPath := helper.MustGetArtifactPath("coverage")
 
 	helper.MustMakeDir(coverPath, 0)
 

@@ -40,7 +40,8 @@ func HTTPGetLatestGitHubVersion(slug string) (string, error) {
 	location := resp.Header().Get("location")
 	if strings.Contains(location, "/releases/tag/") {
 		sp := strings.Split(location, "/releases/tag/")
-		return strings.TrimPrefix(sp[len(sp)-1], "v"), nil
+		// return strings.TrimPrefix(sp[len(sp)-1], "v"), nil
+		return sp[len(sp)-1], nil
 	}
 
 	return "", errors.New("unable to parse location")

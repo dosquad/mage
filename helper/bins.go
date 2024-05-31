@@ -6,23 +6,17 @@ import (
 	"github.com/princjef/mageutil/bintool"
 )
 
-const (
-	golangciLintVersion     = "1.59.0"
-	govulncheckVersion      = "latest"
-	protocGenGoGRPCVersion  = "latest"
-	protocGenGoTwirpVersion = "v8.1.3"
-)
-
 //nolint:gochecknoglobals // ignore globals
 var golangciLint *bintool.BinTool
 
 func BinGolangCILint() *bintool.BinTool {
 	if golangciLint == nil {
-		ver := GetEnv("GOLANGCILINT_VERSION", golangciLintVersion)
+		// ver := GetEnv("GOLANGCILINT_VERSION", golangciLintVersion)
+		ver := MustVersionLoadCache().GetVersion(GolangciLintVersion)
 		PrintInfo("Golang CI Lint Version: %s", ver)
 		golangciLint = bintool.Must(bintool.New(
 			"golangci-lint{{.BinExt}}",
-			golangciLintVersion,
+			ver,
 			"https://github.com/golangci/golangci-lint/releases/download/"+
 				"v{{.Version}}/golangci-lint-{{.Version}}-{{.GOOS}}-{{.GOARCH}}{{.ArchiveExt}}",
 			bintool.WithFolder(MustGetGoBin()),
@@ -37,7 +31,8 @@ var govulncheck *bintool.BinTool
 
 func BinGovulncheck() *bintool.BinTool {
 	if govulncheck == nil {
-		ver := GetEnv("GOVULNCHECK_VERSION", govulncheckVersion)
+		// ver := GetEnv("GOVULNCHECK_VERSION", govulncheckVersion)
+		ver := MustVersionLoadCache().GetVersion(GovulncheckVersion)
 		PrintInfo("Golang Vulnerability Check Version: %s", ver)
 		govulncheck = bintool.Must(bintool.NewGo(
 			"golang.org/x/vuln/cmd/govulncheck",
@@ -67,13 +62,13 @@ func BinProtoc() *bintool.BinTool {
 			goArch = "aarch_64"
 		}
 
-		protocVer := GetProtocVersion()
+		protocVer := MustVersionLoadCache().GetVersion(ProtocVersion)
 
 		PrintInfo("Protocol Buffer Version: %s", protocVer)
 		PanicIfError(ExtractArchive(
 			"https://github.com/protocolbuffers/protobuf/releases/download/v"+protocVer+"/"+
 				"protoc-"+protocVer+"-"+goOperatingSystem+"-"+goArch+".zip",
-			MustGetWD("artifacts", "protobuf"),
+			MustGetArtifactPath("protobuf"),
 		), "Extract Archive")
 
 		protoc = bintool.Must(bintool.New(
@@ -81,7 +76,7 @@ func BinProtoc() *bintool.BinTool {
 			protocVer,
 			"https://github.com/protocolbuffers/protobuf/releases/download/v"+protocVer+"/"+
 				"protoc-"+protocVer+"-"+goOperatingSystem+"-"+goArch+".zip",
-			bintool.WithFolder(MustGetWD("artifacts", "protobuf", "bin")),
+			bintool.WithFolder(MustGetArtifactPath("protobuf", "bin")),
 		))
 	}
 
@@ -93,7 +88,8 @@ var protocGenGo *bintool.BinTool
 
 func BinProtocGenGo() *bintool.BinTool {
 	if protocGenGo == nil {
-		ver := GetEnv("PROTOCGENGO_VERSION", GetProtobufVersion())
+		// ver := GetEnv("PROTOCGENGO_VERSION", GetProtobufVersion())
+		ver := MustVersionLoadCache().GetVersion(ProtocGenGoVersion)
 		PrintInfo("Protocol Buffer Golang Version: %s", ver)
 		protocGenGo = bintool.Must(bintool.NewGo(
 			"google.golang.org/protobuf/cmd/protoc-gen-go",
@@ -110,7 +106,8 @@ var protocGenGoGRPC *bintool.BinTool
 
 func BinProtocGenGoGRPC() *bintool.BinTool {
 	if protocGenGoGRPC == nil {
-		ver := GetEnv("PROTOCGENGOGRPC_VERSION", protocGenGoGRPCVersion)
+		// ver := GetEnv("PROTOCGENGOGRPC_VERSION", protocGenGoGRPCVersion)
+		ver := MustVersionLoadCache().GetVersion(ProtocGenGoGRPCVersion)
 		PrintInfo("Protocol Buffer Golang gRPC Version: %s", ver)
 		protocGenGoGRPC = bintool.Must(bintool.NewGo(
 			"google.golang.org/grpc/cmd/protoc-gen-go-grpc",
@@ -127,7 +124,8 @@ var protocGenGoTwirp *bintool.BinTool
 
 func BinProtocGenGoTwirp() *bintool.BinTool {
 	if protocGenGoTwirp == nil {
-		ver := GetEnv("PROTOCGENGOTWIRP_VERSION", protocGenGoTwirpVersion)
+		// ver := GetEnv("PROTOCGENGOTWIRP_VERSION", protocGenGoTwirpVersion)
+		ver := MustVersionLoadCache().GetVersion(ProtocGenGoTwirpVersion)
 		PrintInfo("Protocol Buffer Golang Twirp Version: %s", ver)
 		protocGenGoTwirp = bintool.Must(bintool.NewGo(
 			"github.com/twitchtv/twirp/protoc-gen-twirp",

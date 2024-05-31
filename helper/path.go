@@ -24,13 +24,18 @@ func MustGetGoBin() string {
 		return filepath.Join(goPath, "bin")
 	}
 
-	return filepath.Join(MustGetWD(), "artifacts", "bin")
+	return MustGetArtifactPath("bin")
 }
 
 func MustGetProtobufPath() string {
-	protobufPath := filepath.Join(MustGetWD(), "artifacts", "protobuf", "bin")
+	protobufPath := MustGetArtifactPath("protobuf", "bin")
 	// _ = os.MkdirAll(protobufPath, permbits.MustString("ug=rwx,o=rx"))
 	return protobufPath
+}
+
+// MustGetArtifactPath get artifact directory or panic if unable to.
+func MustGetArtifactPath(path ...string) string {
+	return MustGetWD(append([]string{"artifacts"}, path...)...)
 }
 
 // MustGetWD get working directory or panic if unable to.
