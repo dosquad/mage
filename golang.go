@@ -45,3 +45,12 @@ func (Golang) Test() error {
 
 	return helper.FilterCoverageOutput(filepath.Join(coverPath, "cover.out"))
 }
+
+// Lint run golangci-lint.
+func (Golang) Lint() error {
+	if err := helper.BinGolangCILint().Ensure(); err != nil {
+		return err
+	}
+
+	return helper.BinGolangCILint().Command("run ./... --sort-results --max-same-issues 0 --max-issues-per-linter 0").Run()
+}

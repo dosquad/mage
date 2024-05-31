@@ -13,7 +13,7 @@ import (
 
 // Install protoc, lint, test & build debug.
 func Install(ctx context.Context) {
-	mg.CtxDeps(ctx, mage.Lint.Golangci)
+	mg.CtxDeps(ctx, mage.Golang.Lint)
 	mg.CtxDeps(ctx, mage.Golang.Test)
 }
 

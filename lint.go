@@ -1,7 +1,8 @@
 package mage
 
 import (
-	"github.com/dosquad/mage/helper"
+	"context"
+
 	"github.com/magefile/mage/mg"
 )
 
@@ -13,11 +14,7 @@ type Lint mg.Namespace
 // 	mg.CtxDeps(ctx, LintGolangci)
 // }
 
-// Golangci run golangci-lint.
-func (Lint) Golangci() error {
-	if err := helper.BinGolangCILint().Ensure(); err != nil {
-		return err
-	}
-
-	return helper.BinGolangCILint().Command("run ./... --sort-results --max-same-issues 0 --max-issues-per-linter 0").Run()
+// Golangci Golang linters.
+func (Lint) Golang(ctx context.Context) {
+	mg.CtxDeps(ctx, Golang.Lint)
 }
