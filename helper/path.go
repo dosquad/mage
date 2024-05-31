@@ -5,6 +5,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	"github.com/na4ma4/go-permbits"
 )
 
 // MustGetGoBin get GOBIN.
@@ -32,18 +34,18 @@ func MustGetProtobufPath() string {
 }
 
 // MustGetWD get working directory or panic if unable to.
-func MustGetWD(filename ...string) string {
+func MustGetWD(path ...string) string {
 	wd, err := os.Getwd()
 	PanicIfError(err, "unable to get working directory")
 
-	return filepath.Join(append([]string{wd}, filename...)...)
+	return filepath.Join(append([]string{wd}, path...)...)
 }
 
 // MustGetHomeDir get user home directory or panic if unable to.
-func MustGetHomeDir(filename ...string) string {
+func MustGetHomeDir(path ...string) string {
 	homeDir, err := os.UserHomeDir()
 	PanicIfError(err, "unable to get user home directory")
-	return filepath.Join(append([]string{homeDir}, filename...)...)
+	return filepath.Join(append([]string{homeDir}, path...)...)
 }
 
 // MustMakeDir make directory, including parents if required.
@@ -123,4 +125,17 @@ func MustCommandPaths() []string {
 	}
 
 	return []string{}
+}
+
+// MustGetVSCodePath get generated .vscode directory.
+//
+// if the directory does not exist then it will be created.
+//
+// if the directory cannot be created then panic.
+func MustGetVSCodePath(path ...string) string {
+	vscPath := filepath.Join(append([]string{MustGetWD()}, path...)...)
+
+	MustMakeDir(vscPath, permbits.MustString("ug=rwx,o=rx"))
+
+	return vscPath
 }

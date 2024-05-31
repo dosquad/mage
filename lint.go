@@ -1,19 +1,20 @@
 package mage
 
 import (
-	"context"
-
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
 )
 
-// Lint run all linters.
-func Lint(ctx context.Context) {
-	mg.CtxDeps(ctx, LintGolangci)
-}
+// Lint namespace is defined to group Lint functions.
+type Lint mg.Namespace
 
-// LintGolangci run golangci-lint.
-func LintGolangci() error {
+// // Lint run all linters.
+// func Lint(ctx context.Context) {
+// 	mg.CtxDeps(ctx, LintGolangci)
+// }
+
+// Golangci run golangci-lint.
+func (Lint) Golangci() error {
 	if err := helper.BinGolangCILint().Ensure(); err != nil {
 		return err
 	}

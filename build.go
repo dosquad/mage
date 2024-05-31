@@ -1,7 +1,6 @@
 package mage
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 
@@ -25,32 +24,22 @@ const (
 		`"{{.CommandDir}}"`
 )
 
-// Build builds a release binary.
-func Build(ctx context.Context) {
-	mg.CtxDeps(ctx, BuildDebug)
-	mg.CtxDeps(ctx, BuildRelease)
-}
+// Build namespace is defined to group Build functions.
+type Build mg.Namespace
 
-// BuildDebug create debug artifact.
-func BuildDebug() error {
+// // Build builds a release binary.
+// func Build(ctx context.Context) {
+// 	mg.CtxDeps(ctx, BuildDebug)
+// 	mg.CtxDeps(ctx, BuildRelease)
+// }
+
+// Debug create debug artifact.
+func (Build) Debug() error {
 	paths := helper.MustCommandPaths()
 
 	for _, cmdPath := range paths {
 		ct := helper.NewCommandTemplate(true, cmdPath)
-		var out string
-		{
-			var err error
-			out, err = ct.Render(commandTemplate)
-			if err != nil {
-				return err
-			}
-		}
-
-		if err := os.MkdirAll(filepath.Base(ct.OutputArtifact), permbits.MustString("a=rx,u+w")); err != nil {
-			return err
-		}
-
-		if err := shellcmd.Command(out).Run(); err != nil {
+		if err := buildArtifact(ct); err != nil {
 			return err
 		}
 	}
@@ -58,28 +47,36 @@ func BuildDebug() error {
 	return nil
 }
 
-// BuildRelease create debug artifact.
-func BuildRelease() error {
+// Release create debug artifact.
+func (Build) Release() error {
 	paths := helper.MustCommandPaths()
 
 	for _, cmdPath := range paths {
 		ct := helper.NewCommandTemplate(false, cmdPath)
-		var out string
-		{
-			var err error
-			out, err = ct.Render(commandTemplate)
-			if err != nil {
-				return err
-			}
-		}
-
-		if err := os.MkdirAll(filepath.Base(ct.OutputArtifact), permbits.MustString("a=rx,u+w")); err != nil {
+		if err := buildArtifact(ct); err != nil {
 			return err
 		}
+	}
 
-		if err := shellcmd.Command(out).Run(); err != nil {
+	return nil
+}
+
+func buildArtifact(ct *helper.CommandTemplate) error {
+	var out string
+	{
+		var err error
+		out, err = ct.Render(commandTemplate)
+		if err != nil {
 			return err
 		}
+	}
+
+	if err := os.MkdirAll(filepath.Base(ct.OutputArtifact), permbits.MustString("a=rx,u+w")); err != nil {
+		return err
+	}
+
+	if err := shellcmd.Command(out).Run(); err != nil {
+		return err
 	}
 
 	return nil

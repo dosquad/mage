@@ -55,24 +55,30 @@ func NewCommandTemplate(debug bool, commandDir string) *CommandTemplate {
 		HomeDir:     MustGetHomeDir(),
 	}
 
-	if debug {
-		o.OutputArtifact = "artifacts/build/debug/" + o.GoOS + "/" + o.GoArch + "/" + o.CommandName
-	} else {
-		o.OutputArtifact = "artifacts/build/release/" + o.GoOS + "/" + o.GoArch + "/" + o.CommandName
-	}
-
-	if o.GitHeadTag == "" {
-		o.GitHeadTag = "0.0.0"
-	}
-
-	if debug {
-		o.GitHeadTag += "+debug"
-	}
+	o.apply()
 
 	return o
 }
 
+func (t *CommandTemplate) apply() {
+	if t.Debug {
+		t.OutputArtifact = "artifacts/build/debug/" + t.GoOS + "/" + t.GoArch + "/" + t.CommandName
+	} else {
+		t.OutputArtifact = "artifacts/build/release/" + t.GoOS + "/" + t.GoArch + "/" + t.CommandName
+	}
+
+	if t.GitHeadTag == "" {
+		t.GitHeadTag = "0.0.0"
+	}
+
+	if t.Debug {
+		t.GitHeadTag += "+debug"
+	}
+}
+
 func (t *CommandTemplate) Render(cmd string) (string, error) {
+	t.apply()
+
 	var tmpl *template.Template
 	{
 		var err error

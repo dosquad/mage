@@ -2,19 +2,46 @@ package mage
 
 import (
 	"context"
+	"fmt"
+	"path/filepath"
 
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
+	"github.com/princjef/mageutil/shellcmd"
 )
 
+// Golang namespace is defined to group Golang functions.
+type Golang mg.Namespace
+
 // InstallGovulncheck installs govulncheck.
-func InstallGovulncheck(_ context.Context) error {
+func (Golang) InstallGovulncheck(_ context.Context) error {
 	return helper.BinGovulncheck().Ensure()
 }
 
-// GolangVulncheck runs govulncheck.
-func GolangVulncheck(ctx context.Context) error {
-	mg.CtxDeps(ctx, InstallGovulncheck)
+// Vulncheck runs govulncheck.
+func (Golang) Vulncheck(ctx context.Context) error {
+	mg.CtxDeps(ctx, Golang.InstallGovulncheck)
 
 	return helper.BinGovulncheck().Command("./...").Run()
+}
+
+// Test run test suite and save coverage report.
+func (Golang) Test() error {
+	coverPath := helper.MustGetWD("artifacts", "coverage")
+
+	helper.MustMakeDir(coverPath, 0)
+
+	cmd := fmt.Sprintf(""+
+		"go test "+
+		"-race "+
+		"-covermode=atomic "+
+		"-coverprofile=\"%s/cover.out\" "+
+		"\"./...\"",
+		coverPath)
+
+	if err := shellcmd.Command(cmd).Run(); err != nil {
+		return err
+	}
+
+	return helper.FilterCoverageOutput(filepath.Join(coverPath, "cover.out"))
 }

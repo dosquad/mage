@@ -1,9 +1,11 @@
 package helper
 
-import "time"
+import (
+	"time"
+)
 
 func LDFlags(debug bool) []string {
-	headTag := GitHeadTag()
+	headTag := GitHeadTagDescribe()
 	if headTag == "" {
 		headTag = "0.0.0"
 	}
@@ -12,7 +14,7 @@ func LDFlags(debug bool) []string {
 		"-X main.commit=" + GitHash(),
 		"-X main.date=" + time.Now().Format(time.RFC3339),
 		"-X main.builtBy=magefiles",
-		"-X main.repo=$(GIT_SLUG)",
+		"-X main.repo=" + GitURL(),
 	}
 
 	if debug {

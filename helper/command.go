@@ -11,3 +11,17 @@ func MustGetOutput(cmd string) string {
 	PanicIfError(err, fmt.Sprintf("unable to run command: %s", cmd))
 	return string(out)
 }
+
+func ArgsFromAny(in []any) []string {
+	out := []string{}
+	for _, item := range in {
+		switch v := item.(type) {
+		case string:
+			out = append(out, v)
+		case []string:
+			out = append(out, v...)
+		}
+	}
+
+	return out
+}

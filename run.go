@@ -11,30 +11,35 @@ import (
 	"github.com/princjef/mageutil/shellcmd"
 )
 
-// RunDebug builds and executes the specified command and arguments with debug build flags.
-func RunDebug(ctx context.Context, cmd string, args string) error {
-	mg.CtxDeps(ctx, BuildDebug)
+// Run namespace is defined to group Run functions.
+type Run mg.Namespace
+
+// Debug builds and executes the specified command and arguments with debug build flags.
+func (Run) Debug(ctx context.Context, cmd string, args string) error {
+	mg.CtxDeps(ctx, Build.Debug)
 	ct := helper.NewCommandTemplate(true, fmt.Sprintf("./cmd/%s", cmd))
 
 	return shellcmd.Command(fmt.Sprintf("%s %s", ct.OutputArtifact, args)).Run()
 }
 
-// RunRelease builds and executes the specified command and arguments with release build flags.
-func RunRelease(ctx context.Context, cmd string, args string) error {
-	mg.CtxDeps(ctx, BuildRelease)
+// Release builds and executes the specified command and arguments with release build flags.
+func (Run) Release(ctx context.Context, cmd string, args string) error {
+	mg.CtxDeps(ctx, Build.Release)
 	ct := helper.NewCommandTemplate(false, fmt.Sprintf("./cmd/%s", cmd))
 
 	return shellcmd.Command(fmt.Sprintf("%s %s", ct.OutputArtifact, args)).Run()
 }
 
-// Run builds and executes the first found command with debug tags and the supplied arguments.
-func Run(ctx context.Context, args string) error {
-	mg.CtxDeps(ctx, BuildDebug)
+// Runc builds and executes the first found command with debug tags and the supplied arguments.
+func Runc(ctx context.Context, args string) error {
+	mg.CtxDeps(ctx, Build.Debug)
 
 	paths := helper.MustCommandPaths()
 	if len(paths) < 1 {
 		return errors.New("command not found")
 	}
 
-	return RunDebug(ctx, filepath.Base(paths[0]), args)
+	ct := helper.NewCommandTemplate(true, fmt.Sprintf("./cmd/%s", filepath.Base(paths[0])))
+
+	return shellcmd.Command(fmt.Sprintf("%s %s", ct.OutputArtifact, args)).Run()
 }
