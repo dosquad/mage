@@ -1,7 +1,7 @@
 package mage
 
 import (
-	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"sync"
@@ -21,13 +21,6 @@ const (
 // Update namespace is defined to group Update functions.
 type Update mg.Namespace
 
-// // Update executes the set of updates.
-// func Update(ctx context.Context) {
-// 	mg.CtxDeps(ctx, UpdateGoWorkspace)
-// 	mg.CtxDeps(ctx, UpdateGolangciLint)
-// 	mg.CtxDeps(ctx, UpdateGitIgnore)
-// }
-
 // GoWorkspace create the go.work file if it is missing.
 func (Update) GoWorkspace() error {
 	goworkspaceFile := helper.MustGetWD("go.work")
@@ -45,16 +38,45 @@ func (Update) GoWorkspace() error {
 // GolangciLint updates the .golangci.yml from the gist.
 func (Update) GolangciLint() error {
 	golangciLintFile := helper.MustGetWD(".golangci.yml")
+	golangciLocalFile := helper.MustGetWD(".golangci.local.yml")
+	golangciRemoteFile := helper.MustGetWD(".golangci.remote.yml")
+	etag := helper.Must[helper.ETag](helper.ETagLoadConfig())
 
-	// if _, err := os.Stat(golangciLintFile); os.IsNotExist(err) || force {
-	return helper.HTTPWriteFile(
+	if !helper.FileExists(golangciLocalFile) {
+		return helper.HTTPWriteFile(
+			golangciLintConfigURL,
+			golangciLintFile,
+			etag.GetItem(".golangci.yml"),
+			0,
+		)
+	}
+
+	if err := helper.HTTPWriteFile(
 		golangciLintConfigURL,
-		golangciLintFile,
+		golangciRemoteFile,
+		etag.GetItem(".golangci.yml"),
 		0,
-	)
-	// }
+	); err != nil {
+		return fmt.Errorf("unable to retrieve HTTP source file: %w", err)
+	}
+	defer func() {
+		_ = os.Remove(golangciRemoteFile)
+	}()
 
-	// return nil
+	var yamlData []byte
+	{
+		var err error
+		yamlData, err = helper.MergeYaml(golangciRemoteFile, golangciLocalFile)
+		if err != nil {
+			return fmt.Errorf("unable to merge remote and local config: %w", err)
+		}
+	}
+
+	if err := os.WriteFile(golangciLintFile, yamlData, permbits.MustString("ug=rw,o=r")); err != nil {
+		return fmt.Errorf("unable to write golangci ling config: %w", err)
+	}
+
+	return nil
 }
 
 // GitIgnore updates the .gitignore from a set list.
@@ -82,28 +104,37 @@ func (Update) GitIgnore() error {
 	return nil
 }
 
-// DockerIgnoreFile writes the .dockerignore file if it does not exist.
-func (Update) DockerIgnoreFile() error {
-	dockerignoreFile := helper.MustGetWD(".gitignore")
+// DockerIgnore writes the .dockerignore file if it does not exist.
+func (Update) DockerIgnore() error {
+	dockerignoreFile := helper.MustGetWD(".dockerignore")
 
-	buf := bytes.NewBuffer(nil)
+	once := sync.Once{}
+
 	for _, line := range []string{
 		".makefiles",
 		".git",
 		".github",
 	} {
-		if _, err := buf.WriteString(line + "\n"); err != nil {
-			return fmt.Errorf("unable to write line to buffer: %w", err)
+		if !helper.FileLineExists(dockerignoreFile, line) {
+			once.Do(func() {
+				if rn, err := helper.FileLastRune(dockerignoreFile); err == nil && rn != '\n' {
+					_ = helper.FileAppendLine(dockerignoreFile, 0, "")
+				}
+			})
+			color.Blue("Adding path to .dockerignore: %s", line)
+			if err := helper.FileAppendLine(dockerignoreFile, 0, line); err != nil {
+				return err
+			}
 		}
 	}
 
-	if !helper.FileExists(dockerignoreFile) {
-		return os.WriteFile(
-			dockerignoreFile,
-			buf.Bytes(),
-			permbits.MustString("a=rw"),
-		)
-	}
+	return nil
+}
+
+func UpdateE(ctx context.Context) error {
+	mg.CtxDeps(ctx, Update.GolangciLint)
+	mg.CtxDeps(ctx, Update.GitIgnore)
+	mg.CtxDeps(ctx, Update.DockerIgnore)
 
 	return nil
 }

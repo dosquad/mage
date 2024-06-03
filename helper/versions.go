@@ -31,6 +31,7 @@ const (
 	ProtocGenGoVersion      VersionKey = "protoc-gen-go"
 	ProtocGenGoGRPCVersion  VersionKey = "protoc-gen-go-grpc"
 	ProtocGenGoTwirpVersion VersionKey = "protoc-gen-go-twirp"
+	YQVersion               VersionKey = "yq"
 )
 
 const (
@@ -58,6 +59,7 @@ func VersionLoadCache() (*VersionCache, error) {
 		ProtocGenGoVersion:      "",
 		ProtocGenGoGRPCVersion:  "latest",
 		ProtocGenGoTwirpVersion: "",
+		YQVersion:               "",
 	}
 
 	var f *os.File
@@ -130,6 +132,8 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 		return vc.SetVersion(key, vc.getGithubVersion("twitchtv/twirp"))
 	case GolangciLintVersion:
 		return vc.SetVersion(key, vc.getGolangcilintVersion())
+	case YQVersion:
+		return vc.SetVersion(key, vc.getGithubVersion("mikefarah/yq"))
 	}
 
 	return ""
@@ -167,38 +171,3 @@ func (vc VersionCache) getProtobufVersion() string {
 
 	return strings.TrimSpace(string(ver))
 }
-
-// func MustDockerLoadConfig() *DockerConfig {
-// 	cfg, err := DockerLoadConfig()
-// 	if !errors.Is(err, os.ErrNotExist) {
-// 		PanicIfError(err, "unable to load mage docker config")
-// 	}
-// 	return cfg
-// }
-
-// func DockerLoadConfig() (*DockerConfig, error) {
-// 	cfg := &DockerConfig{
-// 		Platforms:   []string{"linux/amd64"},
-// 		BlockedTags: []string{"dev"},
-// 		BuildArgs: map[string]string{
-// 			"VERSION": GitHeadTagDescribe(),
-// 		},
-// 	}
-
-// 	var f *os.File
-// 	{
-// 		var err error
-// 		f, err = os.Open(MustGetWD(".docker.yml"))
-// 		if err != nil {
-// 			return cfg, err
-// 		}
-// 	}
-
-// 	{
-// 		if err := yaml.NewDecoder(f).Decode(&cfg); err != nil {
-// 			return cfg, err
-// 		}
-// 	}
-
-// 	return cfg, nil
-// }

@@ -38,7 +38,7 @@ func NewCommandTemplate(debug bool, commandDir string) *CommandTemplate {
 		CGO:    GetEnv("CGO_ENABLED", "0"),
 		GoOS:   runtime.GOOS,
 		GoArch: runtime.GOARCH,
-		GoArm:  strings.TrimSpace(MustGetOutput(`go env GOARM`)),
+		GoArm:  strings.TrimSpace(Must[string](GetOutput(`go env GOARM`))),
 
 		GitRev:     GitHeadRev(),
 		GitHash:    GitHash(),

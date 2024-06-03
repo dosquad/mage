@@ -10,6 +10,7 @@ import (
 	"github.com/princjef/mageutil/shellcmd"
 )
 
+// Module is a module returned by `go list`.
 type Module struct {
 	Path       string       `json:"Path"`       // module path
 	Query      string       `json:"Query"`      // version query corresponding to this version
@@ -30,10 +31,13 @@ type Module struct {
 	Reuse      bool         `json:"Reuse"`      // reuse of old module info is safe
 }
 
+// ModuleError is the possible error when loading a module.
 type ModuleError struct {
 	Err string `json:"Err"` // the error itself
 }
 
+// GolangListModules executes `go list -m all` and returned the parsed
+// Module slice.
 func GolangListModules() ([]Module, error) {
 	out := []Module{}
 	var modList []byte
@@ -57,18 +61,29 @@ func GolangListModules() ([]Module, error) {
 	return out, nil
 }
 
-// func ProtobufTargets() []string {
-// 	return FilesMatch(MustGetWD(), "*.proto")
-// }
-
+// ProtobufTargetFunc returned by ProtobufTargets, each ProtobufTargetFunc
+// returns a list of `*.proto` files in each directory.
 type ProtobufTargetFunc func() []string
 
+// ProtobufTargets returns a slice of functions that return a list of files
+// in a specific directory
+//
+// example:
+// root
+// |-blah1 [test1.proto, test2.proto]
+// \-blah2 [testa.proto, testb.proto]
+//
+// returns two functions,
+// one that returns [/root/blah1/test1.proto, /root/blah1/test2.proto]
+// and another that returns [/root/blah2/testa.proto /root/blah2/testb.proto].
 func ProtobufTargets() []ProtobufTargetFunc {
+	// Use a map to create a unique list of directories that contain `*.proto`.
 	paths := map[string]interface{}{}
 	for _, match := range FilesMatch(MustGetWD(), "*.proto") {
 		paths[filepath.Dir(match)] = nil
 	}
 
+	// Create slice of functions with length of map.
 	out := make([]ProtobufTargetFunc, len(paths))
 	idx := 0
 	for path := range paths {
@@ -82,6 +97,8 @@ func ProtobufTargets() []ProtobufTargetFunc {
 	return out
 }
 
+// ProtobufIncludePaths returns the `--proto_path` arguments for the protocol buffer
+// gen command.
 func ProtobufIncludePaths() []string {
 	out := []string{}
 	modules, _ := GolangListModules()
@@ -94,7 +111,3 @@ func ProtobufIncludePaths() []string {
 	}
 	return out
 }
-
-// func ProtobufFileNameModify(in string) string {
-// 	return strings.Replace(in, ".proto", ".pb.go", 1)
-// }

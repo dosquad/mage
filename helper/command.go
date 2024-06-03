@@ -1,15 +1,14 @@
 package helper
 
 import (
-	"fmt"
+	"strings"
 
 	"github.com/princjef/mageutil/shellcmd"
 )
 
-func MustGetOutput(cmd string) string {
+func GetOutput(cmd string) (string, error) {
 	out, err := shellcmd.Command(cmd).Output()
-	PanicIfError(err, fmt.Sprintf("unable to run command: %s", cmd))
-	return string(out)
+	return strings.TrimSpace(string(out)), err
 }
 
 func ArgsFromAny(in []any) []string {

@@ -14,6 +14,7 @@ import (
 type Mirrord mg.Namespace
 
 // VsCodeDebugConfig generates debug launch.json in service project dir.
+// TODO update this to use command paths.
 func (Mirrord) VsCodeDebugConfig(_ context.Context) error {
 	launchCfg := fmt.Sprintf(`{
 		// Use IntelliSense to learn about possible attributes.

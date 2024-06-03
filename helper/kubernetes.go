@@ -7,11 +7,6 @@ import (
 	"github.com/princjef/mageutil/shellcmd"
 )
 
-// func MustString(in string, err error) string {
-// 	PanicIfError(err, "must not return error")
-// 	return in
-// }
-
 func KubernetesGetPodWithSelector(selector string) (string, error) {
 	out, err := shellcmd.Command(fmt.Sprintf(`kubectl get pod -l %s -o name`, selector)).Output()
 	return strings.TrimSpace(string(out)), err

@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// LDFlags returns the ldflags argument for `go build`.
 func LDFlags(debug bool) []string {
 	headTag := GitHeadTagDescribe()
 	if headTag == "" {
@@ -31,12 +32,6 @@ func LDFlags(debug bool) []string {
 		"-s",
 		"-w",
 	)
-}
-
-func MustFirstCommandName() string {
-	cmd, err := FirstCommandName()
-	PanicIfError(err, "unable to find command name")
-	return cmd
 }
 
 func FirstCommandName() (string, error) {

@@ -45,7 +45,7 @@ func dockerBuildArtifacts(cfg *helper.DockerConfig) error {
 }
 
 func dockerBuildCommand(ctx context.Context, args []string) error {
-	cfg := helper.MustDockerLoadConfig()
+	cfg := helper.Must[*helper.DockerConfig](helper.DockerLoadConfig())
 
 	var once sync.Once
 	tags := cfg.GetTags()
@@ -66,7 +66,7 @@ func dockerBuildCommand(ctx context.Context, args []string) error {
 		{
 			var outErr error
 			once.Do(func() {
-				mg.CtxDeps(ctx, Update.DockerIgnoreFile)
+				mg.CtxDeps(ctx, Update.DockerIgnore)
 				outErr = dockerBuildArtifacts(cfg)
 			})
 			if outErr != nil {

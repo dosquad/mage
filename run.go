@@ -30,7 +30,7 @@ func (Run) Release(ctx context.Context, cmd string, args string) error {
 
 // Mirrord start service with Mirrord intercepts.
 func (Run) Mirrord(ctx context.Context) error {
-	cfg := helper.MustDockerLoadConfig()
+	cfg := helper.Must[*helper.DockerConfig](helper.DockerLoadConfig())
 	cfgFile := helper.MustGetWD("mirrord.yaml")
 
 	if !helper.FileExists(cfgFile) {
@@ -38,7 +38,7 @@ func (Run) Mirrord(ctx context.Context) error {
 	}
 
 	mg.CtxDeps(ctx, Build.Debug)
-	ct := helper.NewCommandTemplate(true, fmt.Sprintf("./cmd/%s", helper.MustFirstCommandName()))
+	ct := helper.NewCommandTemplate(true, fmt.Sprintf("./cmd/%s", helper.Must[string](helper.FirstCommandName())))
 
 	// targetCmd := fmt.Sprintf("artifacts/build/debug/%s/%s/%s", Cfg.OOS, Cfg.Arch, Cfg.BaseDir)
 
@@ -56,11 +56,15 @@ func (Run) Mirrord(ctx context.Context) error {
 	).Run()
 }
 
-// Runc builds and executes the first found command with debug tags and the supplied arguments.
-func Runc(ctx context.Context, args string) error {
-	mg.CtxDeps(ctx, Build.Debug)
+// RunE builds with debug tags and the supplied arguments the command specified by RUN_CMD
+// or the first found command if the environment is not specified.
+func RunE(_ context.Context, args string) error {
+	cmdName := helper.GetEnv("RUN_CMD", helper.Must[string](helper.FirstCommandName()))
+	ct := helper.NewCommandTemplate(true, fmt.Sprintf("./cmd/%s", cmdName))
 
-	ct := helper.NewCommandTemplate(true, fmt.Sprintf("./cmd/%s", helper.MustFirstCommandName()))
+	if err := buildArtifact(ct); err != nil {
+		return err
+	}
 
 	return shellcmd.Command(fmt.Sprintf("%s %s", ct.OutputArtifact, args)).Run()
 }

@@ -5,9 +5,22 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/na4ma4/go-permbits"
 )
+
+func GetRelativePath(path string) (string, bool) {
+	root := filepath.Clean(MustGetWD())
+	path = filepath.Clean(path)
+
+	after, ok := strings.CutPrefix(path, root)
+	if ok {
+		return "." + after, true
+	}
+
+	return after, false
+}
 
 // MustGetGoBin get GOBIN.
 //
@@ -40,16 +53,13 @@ func MustGetArtifactPath(path ...string) string {
 
 // MustGetWD get working directory or panic if unable to.
 func MustGetWD(path ...string) string {
-	wd, err := os.Getwd()
-	PanicIfError(err, "unable to get working directory")
-
+	wd := Must[string](os.Getwd())
 	return filepath.Join(append([]string{wd}, path...)...)
 }
 
 // MustGetHomeDir get user home directory or panic if unable to.
 func MustGetHomeDir(path ...string) string {
-	homeDir, err := os.UserHomeDir()
-	PanicIfError(err, "unable to get user home directory")
+	homeDir := Must[string](os.UserHomeDir())
 	return filepath.Join(append([]string{homeDir}, path...)...)
 }
 

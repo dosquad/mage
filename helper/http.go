@@ -3,18 +3,48 @@ package helper
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
 	"github.com/go-resty/resty/v2"
 )
 
-func HTTPWriteFile(rawURL, filename string, fileperm os.FileMode) error {
+func HTTPWriteFile(rawURL, filename string, eTag *ETagItem, fileperm os.FileMode) error {
 	client := resty.New()
-	if _, err := client.R().
-		SetOutput(filename).
-		Get(rawURL); err != nil {
-		return err
+	eTagVal := ""
+	if eTag != nil && FileExists(filename) {
+		eTagVal = eTag.Value
+	}
+
+	var resp *resty.Response
+	{
+		var err error
+		resp, err = client.R().
+			SetOutput(filename+".tmp").
+			SetHeader("If-None-Match", eTagVal).
+			EnableTrace().
+			Get(rawURL)
+		if err != nil {
+			return err
+		}
+	}
+
+	switch resp.StatusCode() {
+	case http.StatusNotModified:
+		if err := os.Remove(filename + ".tmp"); err != nil {
+			return fmt.Errorf("unable to remove temporary file: %w", err)
+		}
+	case http.StatusOK:
+		if eTag != nil {
+			eTag.Value = resp.Header().Get("etag")
+			if err := eTag.Save(); err != nil {
+				return err
+			}
+		}
+		if err := os.Rename(filename+".tmp", filename); err != nil {
+			return fmt.Errorf("unable to replace file with temporary file: %w", err)
+		}
 	}
 
 	if fileperm != 0 {

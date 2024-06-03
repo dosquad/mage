@@ -9,6 +9,7 @@ import (
 //nolint:gochecknoglobals // ignore globals
 var golangciLint *bintool.BinTool
 
+// BinGolangCILint returns a singleton for golangci-lint.
 func BinGolangCILint() *bintool.BinTool {
 	if golangciLint == nil {
 		// ver := GetEnv("GOLANGCILINT_VERSION", golangciLintVersion)
@@ -29,6 +30,7 @@ func BinGolangCILint() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var govulncheck *bintool.BinTool
 
+// BinGovulncheck returns a singleton for govulncheck.
 func BinGovulncheck() *bintool.BinTool {
 	if govulncheck == nil {
 		// ver := GetEnv("GOVULNCHECK_VERSION", govulncheckVersion)
@@ -48,6 +50,7 @@ func BinGovulncheck() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var protoc *bintool.BinTool
 
+// BinProtoc returns a singleton for protoc, also downloads the includes.
 func BinProtoc() *bintool.BinTool {
 	if protoc == nil {
 		goOperatingSystem, goArch := runtime.GOOS, runtime.GOARCH
@@ -86,6 +89,7 @@ func BinProtoc() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var protocGenGo *bintool.BinTool
 
+// BinProtocGenGo returns a singleton for protoc-gen-go.
 func BinProtocGenGo() *bintool.BinTool {
 	if protocGenGo == nil {
 		// ver := GetEnv("PROTOCGENGO_VERSION", GetProtobufVersion())
@@ -104,6 +108,7 @@ func BinProtocGenGo() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var protocGenGoGRPC *bintool.BinTool
 
+// BinProtocGenGoGRPC returns a singleton for protoc-gen-go-grpc.
 func BinProtocGenGoGRPC() *bintool.BinTool {
 	if protocGenGoGRPC == nil {
 		// ver := GetEnv("PROTOCGENGOGRPC_VERSION", protocGenGoGRPCVersion)
@@ -122,6 +127,7 @@ func BinProtocGenGoGRPC() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var protocGenGoTwirp *bintool.BinTool
 
+// BinProtocGenGoTwirp returns a singleton for protoc-gen-twirp.
 func BinProtocGenGoTwirp() *bintool.BinTool {
 	if protocGenGoTwirp == nil {
 		// ver := GetEnv("PROTOCGENGOTWIRP_VERSION", protocGenGoTwirpVersion)
@@ -135,4 +141,22 @@ func BinProtocGenGoTwirp() *bintool.BinTool {
 	}
 
 	return protocGenGoTwirp
+}
+
+//nolint:gochecknoglobals // ignore globals
+var yq *bintool.BinTool
+
+// BinYQ returns a singleton for yq.
+func BinYQ() *bintool.BinTool {
+	if yq == nil {
+		ver := MustVersionLoadCache().GetVersion(YQVersion)
+		PrintInfo("YQ Version: %s", ver)
+		yq = bintool.Must(bintool.NewGo(
+			"github.com/mikefarah/yq/v4",
+			ver,
+			bintool.WithFolder(MustGetGoBin()),
+		))
+	}
+
+	return yq
 }

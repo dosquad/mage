@@ -17,14 +17,8 @@ func GetModuleName() (string, error) {
 	return sp[0], nil
 }
 
-func MustModuleName() string {
-	module, err := GetModuleName()
-	PanicIfError(err, "unable to retrieve module name")
-	return module
-}
-
 func GolangVersion() string {
-	return MustGetOutput("go env GOVERSION")
+	return Must[string](GetOutput("go env GOVERSION"))
 }
 
 func GolangVersionRaw() string {

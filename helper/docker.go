@@ -120,14 +120,6 @@ func (d DockerConfig) Args() []string {
 	return out
 }
 
-func MustDockerLoadConfig() *DockerConfig {
-	cfg, err := DockerLoadConfig()
-	if !errors.Is(err, os.ErrNotExist) {
-		PanicIfError(err, "unable to load mage docker config")
-	}
-	return cfg
-}
-
 func DockerLoadConfig() (*DockerConfig, error) {
 	cfg := &DockerConfig{
 		Platforms:   []string{"linux/amd64"},
@@ -146,6 +138,7 @@ func DockerLoadConfig() (*DockerConfig, error) {
 			return cfg, err
 		}
 	}
+	defer f.Close()
 
 	{
 		if err := yaml.NewDecoder(f).Decode(&cfg); err != nil {

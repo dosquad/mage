@@ -14,13 +14,13 @@ import (
 type Golang mg.Namespace
 
 // InstallGovulncheck installs govulncheck.
-func (Golang) InstallGovulncheck(_ context.Context) error {
+func (Golang) installGovulncheck(_ context.Context) error {
 	return helper.BinGovulncheck().Ensure()
 }
 
 // Vulncheck runs govulncheck.
 func (Golang) Vulncheck(ctx context.Context) error {
-	mg.CtxDeps(ctx, Golang.InstallGovulncheck)
+	mg.CtxDeps(ctx, Golang.installGovulncheck)
 
 	return helper.BinGovulncheck().Command("./...").Run()
 }

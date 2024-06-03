@@ -64,7 +64,7 @@ func GitURL() string {
 }
 
 func GitHeadRev() string {
-	return strings.TrimSpace(MustGetOutput(`git rev-parse --short HEAD`))
+	return strings.TrimSpace(Must[string](GetOutput(`git rev-parse --short HEAD`)))
 }
 
 func GitHeadTagDescribe() string {
