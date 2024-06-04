@@ -16,7 +16,7 @@ func ModTidy() error {
 	var listout []byte
 	{
 		var err error
-		listout, err = shellcmd.Command("go list -m -f '{{.Dir}}'").Output()
+		listout, err = helper.Command("go list -m -f '{{.Dir}}'")
 		helper.PanicIfError(err, "unable to get go list output")
 	}
 

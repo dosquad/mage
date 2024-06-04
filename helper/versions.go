@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/na4ma4/go-permbits"
-	"github.com/princjef/mageutil/shellcmd"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gopkg.in/yaml.v3"
@@ -32,6 +31,7 @@ const (
 	ProtocGenGoGRPCVersion  VersionKey = "protoc-gen-go-grpc"
 	ProtocGenGoTwirpVersion VersionKey = "protoc-gen-go-twirp"
 	YQVersion               VersionKey = "yq"
+	BufVersion              VersionKey = "buf"
 )
 
 const (
@@ -134,6 +134,8 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 		return vc.SetVersion(key, vc.getGolangcilintVersion())
 	case YQVersion:
 		return vc.SetVersion(key, vc.getGithubVersion("mikefarah/yq"))
+	case BufVersion:
+		return vc.SetVersion(key, vc.getGithubVersion("bufbuild/buf"))
 	}
 
 	return ""
@@ -163,7 +165,7 @@ func (vc VersionCache) getProtocVersion() string {
 }
 
 func (vc VersionCache) getProtobufVersion() string {
-	ver, err := shellcmd.Command(`go list -f '{{.Version}}' -m "google.golang.org/protobuf"`).Output()
+	ver, err := Command(`go list -f '{{.Version}}' -m "google.golang.org/protobuf"`)
 	if err != nil {
 		PrintWarning("Warning: did not find google.golang.org/protobuf in go.mod, defaulting to latest")
 		return "latest"

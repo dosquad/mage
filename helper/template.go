@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"fmt"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -38,7 +39,7 @@ func NewCommandTemplate(debug bool, commandDir string) *CommandTemplate {
 		CGO:    GetEnv("CGO_ENABLED", "0"),
 		GoOS:   runtime.GOOS,
 		GoArch: runtime.GOARCH,
-		GoArm:  strings.TrimSpace(Must[string](GetOutput(`go env GOARM`))),
+		GoArm:  Must[string](CommandString(`go env GOARM`)),
 
 		GitRev:     GitHeadRev(),
 		GitHash:    GitHash(),
@@ -84,13 +85,13 @@ func (t *CommandTemplate) Render(cmd string) (string, error) {
 		var err error
 		tmpl, err = template.New("").Parse(cmd)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("unable to parse command template: %w", err)
 		}
 	}
 
 	sb := &strings.Builder{}
 	if err := tmpl.Execute(sb, t); err != nil {
-		return "", err
+		return "", fmt.Errorf("unable to execute command template: %w", err)
 	}
 
 	return sb.String(), nil

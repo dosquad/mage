@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"time"
-
-	"github.com/princjef/mageutil/shellcmd"
 )
 
 // Module is a module returned by `go list`.
@@ -43,9 +41,9 @@ func GolangListModules() ([]Module, error) {
 	var modList []byte
 	{
 		var err error
-		modList, err = shellcmd.Command(`go list -json -m all`).Output()
+		modList, err = Command(`go list -json -m all`)
 		if err != nil {
-			return out, err
+			return out, fmt.Errorf("unable execute 'go list': %w", err)
 		}
 	}
 
@@ -53,7 +51,7 @@ func GolangListModules() ([]Module, error) {
 	for d.More() {
 		item := Module{}
 		if err := d.Decode(&item); err != nil {
-			return out, err
+			return out, fmt.Errorf("unable decode 'go list' output: %w", err)
 		}
 		out = append(out, item)
 	}

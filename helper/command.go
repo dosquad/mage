@@ -1,15 +1,9 @@
 package helper
 
-import (
-	"strings"
-
-	"github.com/princjef/mageutil/shellcmd"
-)
-
-func GetOutput(cmd string) (string, error) {
-	out, err := shellcmd.Command(cmd).Output()
-	return strings.TrimSpace(string(out)), err
-}
+// func GetOutput(cmd string) (string, error) {
+// 	out, err := shellcmd.Command(cmd).Output()
+// 	return strings.TrimSpace(string(out)), err
+// }
 
 func ArgsFromAny(in []any) []string {
 	out := []string{}

@@ -18,3 +18,19 @@ func PanicIfError(err error, prependStr string) {
 		panic(es)
 	}
 }
+
+func IfErrorf(format string, a ...any) error {
+	for _, i := range a {
+		if v, ok := i.(error); ok && v != nil {
+			return fmt.Errorf(format, a...)
+		}
+	}
+
+	return nil
+}
+
+func IfErrorfWrap[T any](format string) func(T, error) (T, error) {
+	return func(t T, err error) (T, error) {
+		return t, IfErrorf(format, err)
+	}
+}

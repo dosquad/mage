@@ -1,23 +1,37 @@
 package helper
 
 import (
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/dosquad/go-giturl"
 	"github.com/dosquad/mage/semver"
-	"github.com/princjef/mageutil/shellcmd"
 )
 
 func GitHash() string {
-	out, err := shellcmd.Command("git show -s --format=%h").Output()
+	out, err := Command("git show -s --format=%h")
 	if err != nil {
 		return ""
 	}
 	return strings.TrimSpace(string(out))
 }
 
+func GitCommitTime() time.Time {
+	out, err := CommandString(`git log -1 --format="%at"`)
+	if err != nil {
+		return time.Time{}
+	}
+
+	if v, err := strconv.ParseInt(out, 10, 64); err == nil {
+		return time.Unix(v, 0)
+	}
+
+	return time.Time{}
+}
+
 func GitHeadTag() string {
-	out, err := shellcmd.Command("git describe --tags --exact-match HEAD 2>/dev/null").Output()
+	out, err := Command("git describe --tags --exact-match HEAD 2>/dev/null")
 	if err != nil {
 		return ""
 	}
@@ -25,7 +39,7 @@ func GitHeadTag() string {
 }
 
 func GitSlug() string {
-	out, err := shellcmd.Command("git config --get remote.origin.url").Output()
+	out, err := Command("git config --get remote.origin.url")
 	if err != nil {
 		return ""
 	}
@@ -41,7 +55,7 @@ func GitSlug() string {
 }
 
 func GitURL() string {
-	out, err := shellcmd.Command("git config --get remote.origin.url").Output()
+	out, err := Command("git config --get remote.origin.url")
 	if err != nil {
 		return ""
 	}
@@ -64,11 +78,11 @@ func GitURL() string {
 }
 
 func GitHeadRev() string {
-	return strings.TrimSpace(Must[string](GetOutput(`git rev-parse --short HEAD`)))
+	return Must[string](CommandString(`git rev-parse --short HEAD`))
 }
 
 func GitHeadTagDescribe() string {
-	out, err := shellcmd.Command("git describe --tags HEAD").Output()
+	out, err := Command("git describe --tags HEAD")
 	if err != nil {
 		return "v0.0.0"
 	}
@@ -77,7 +91,7 @@ func GitHeadTagDescribe() string {
 }
 
 func GitSemver() string {
-	out, err := shellcmd.Command("git describe --tags HEAD").Output()
+	out, err := Command("git describe --tags HEAD")
 	if err != nil {
 		return "v0.0.0"
 	}

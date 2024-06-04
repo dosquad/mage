@@ -17,6 +17,7 @@ require (
 require (
 	github.com/VividCortex/ewma v1.1.1 // indirect
 	github.com/cheggaaa/pb/v3 v3.0.4 // indirect
+	github.com/dosquad/go-cliversion v0.1.1-0.20240604051839-b1ff7c635af9 // indirect
 	github.com/google/go-jsonnet v0.20.0 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect

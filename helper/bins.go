@@ -7,6 +7,23 @@ import (
 )
 
 //nolint:gochecknoglobals // ignore globals
+var bufTool *bintool.BinTool
+
+func Buf() *bintool.BinTool {
+	if bufTool == nil {
+		ver := MustVersionLoadCache().GetVersion(BufVersion)
+		PrintInfo("Buf Version: %s", ver)
+		bufTool = bintool.Must(bintool.NewGo(
+			"github.com/bufbuild/buf/cmd/buf",
+			ver,
+			bintool.WithFolder(MustGetGoBin()),
+		))
+	}
+
+	return bufTool
+}
+
+//nolint:gochecknoglobals // ignore globals
 var golangciLint *bintool.BinTool
 
 // BinGolangCILint returns a singleton for golangci-lint.
