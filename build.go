@@ -61,6 +61,20 @@ func (Build) Release() error {
 	return nil
 }
 
+// ReleaseCommand create debug artifact for the specified command.
+func (Build) ReleaseCommand(cmd string) error {
+	paths := helper.MustCommandPaths()
+
+	for _, cmdPath := range paths {
+		ct := helper.NewCommandTemplate(false, cmdPath)
+		if err := buildArtifact(ct); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func buildArtifact(ct *helper.CommandTemplate) error {
 	var out string
 	{
@@ -71,7 +85,7 @@ func buildArtifact(ct *helper.CommandTemplate) error {
 		}
 	}
 
-	if err := os.MkdirAll(filepath.Base(ct.OutputArtifact), permbits.MustString("a=rx,u+w")); err != nil {
+	if err := os.MkdirAll(filepath.Dir(ct.OutputArtifact), permbits.MustString("a=rx,u+w")); err != nil {
 		return err
 	}
 
