@@ -2,6 +2,7 @@ package mage
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/dosquad/mage/helper"
@@ -42,9 +43,26 @@ func (Run) Mirrord(ctx context.Context) error {
 
 	// targetCmd := fmt.Sprintf("artifacts/build/debug/%s/%s/%s", Cfg.OOS, Cfg.Arch, Cfg.BaseDir)
 
-	targetPod := helper.Must[string](
-		helper.KubernetesGetPodWithSelector(cfg.Kubernetes.PodSelector),
-	)
+	if cfg.Mirrord.Targetless {
+		return shellcmd.Command(
+			fmt.Sprintf(
+				"mirrord exec --config-file %s %s",
+				cfgFile,
+				ct.OutputArtifact,
+			),
+		).Run()
+	}
+
+	var targetPod string
+	{
+		if cfg.Kubernetes.PodSelector == "" {
+			panic(errors.New("kubernetes.pod-selector in .docker.yml must not be empty, " +
+				"example: 'deployment=slackrobot-router'"))
+		}
+		targetPod = helper.Must[string](
+			helper.KubernetesGetPodWithSelector(cfg.Kubernetes.PodSelector),
+		)
+	}
 	return shellcmd.Command(
 		fmt.Sprintf(
 			"mirrord exec --config-file %s -t %s -n %s %s",

@@ -16,9 +16,15 @@ type DockerConfig struct {
 	BlockedTags []string               `yaml:"blocked_tags,omitempty"`
 	BuildArgs   map[string]string      `yaml:"build_args,omitempty"`
 	Kubernetes  DockerConfigKubernetes `yaml:"kubernetes,omitempty"`
+	Mirrord     DockerConfigMirrord    `yaml:"mirrord,omitempty"`
+}
+
+type DockerConfigMirrord struct {
+	Targetless bool `yaml:"targetless,omitempty"`
 }
 
 type DockerConfigKubernetes struct {
+	Deployment  string `yaml:"deployment,omitempty"`
 	PodSelector string `yaml:"pod-selector,omitempty"`
 }
 
