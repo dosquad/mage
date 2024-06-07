@@ -15,7 +15,7 @@ import (
 
 //nolint:lll // long URL
 const (
-	golangciLintConfigURL = "https://gist.githubusercontent.com/na4ma4/f165f6c9af35cda6b330efdcc07a9e26/raw/7a8433c1e515bd82d1865ed9070b9caff9995703/.golangci.yml"
+	golangciLintConfigURL = "https://gist.githubusercontent.com/na4ma4/f165f6c9af35cda6b330efdcc07a9e26/raw/.golangci.yml"
 )
 
 // Update namespace is defined to group Update functions.
@@ -43,6 +43,7 @@ func (Update) GolangciLint() error {
 	etag := helper.Must[helper.ETag](helper.ETagLoadConfig())
 
 	if !helper.FileExists(golangciLocalFile) {
+		helper.PrintDebug("Downloading file directly")
 		return helper.HTTPWriteFile(
 			golangciLintConfigURL,
 			golangciLintFile,
@@ -51,6 +52,7 @@ func (Update) GolangciLint() error {
 		)
 	}
 
+	helper.PrintDebug("Downloading remote config to .golangci.remote.yml")
 	if err := helper.HTTPWriteFile(
 		golangciLintConfigURL,
 		golangciRemoteFile,
@@ -60,18 +62,21 @@ func (Update) GolangciLint() error {
 		return fmt.Errorf("unable to retrieve HTTP source file: %w", err)
 	}
 	defer func() {
+		helper.PrintDebug("Removing remote config cache .golangci.remote.yml")
 		_ = os.Remove(golangciRemoteFile)
 	}()
 
 	var yamlData []byte
 	{
 		var err error
+		helper.PrintDebug("Merging .golangci.remote.yml and .golangci.local.yml")
 		yamlData, err = helper.MergeYaml(golangciRemoteFile, golangciLocalFile)
 		if err != nil {
 			return fmt.Errorf("unable to merge remote and local config: %w", err)
 		}
 	}
 
+	helper.PrintDebug("Writing merged config to .golangci.yml")
 	if err := os.WriteFile(golangciLintFile, yamlData, permbits.MustString("ug=rw,o=r")); err != nil {
 		return fmt.Errorf("unable to write golangci ling config: %w", err)
 	}
