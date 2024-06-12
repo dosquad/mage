@@ -134,12 +134,12 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 	case ProtocGenGoTwirpVersion:
 		return vc.SetVersion(key, vc.getGithubVersion("twitchtv/twirp"))
 	case ProtocGenGoGRPCVersion:
-		v, err := HTTPGetLatestGitHubReleaseMatchingTag("grpc/grpc-go", regexp.MustCompile(`^cmd/protoc-gen-go-grpc/v`))
+		v, err := HTTPGetLatestGitHubReleaseMatchingTag("grpc/grpc-go", regexp.MustCompile(`^cmd/protoc-gen-go-grpc/`))
 		if err != nil {
 			return "latest"
 		}
 
-		return vc.SetVersion(key, strings.TrimPrefix(v, "cmd/protoc-gen-go-grpc/v"))
+		return vc.SetVersion(key, strings.TrimPrefix(v, "cmd/protoc-gen-go-grpc/"))
 	case GolangciLintVersion:
 		return vc.SetVersion(key, vc.getGolangcilintVersion())
 	case YQVersion:
