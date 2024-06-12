@@ -3,6 +3,7 @@ package helper
 import (
 	"errors"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/na4ma4/go-permbits"
@@ -32,6 +33,7 @@ const (
 	ProtocGenGoTwirpVersion VersionKey = "protoc-gen-go-twirp"
 	YQVersion               VersionKey = "yq"
 	BufVersion              VersionKey = "buf"
+	GoreleaserVersion       VersionKey = "goreleaser"
 )
 
 const (
@@ -57,9 +59,10 @@ func VersionLoadCache() (*VersionCache, error) {
 		GovulncheckVersion:      "latest",
 		ProtocVersion:           "",
 		ProtocGenGoVersion:      "",
-		ProtocGenGoGRPCVersion:  "latest",
+		ProtocGenGoGRPCVersion:  "",
 		ProtocGenGoTwirpVersion: "",
 		YQVersion:               "",
+		GoreleaserVersion:       "",
 	}
 
 	var f *os.File
@@ -130,12 +133,23 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 		return vc.SetVersion(key, vc.getProtobufVersion())
 	case ProtocGenGoTwirpVersion:
 		return vc.SetVersion(key, vc.getGithubVersion("twitchtv/twirp"))
+	case ProtocGenGoGRPCVersion:
+		v, err := HTTPGetLatestGitHubReleaseMatchingTag("grpc/grpc-go", regexp.MustCompile(`^cmd/protoc-gen-go-grpc/v`))
+		if err != nil {
+			return "latest"
+		}
+
+		return vc.SetVersion(key, strings.TrimPrefix(v, "cmd/protoc-gen-go-grpc/v"))
 	case GolangciLintVersion:
 		return vc.SetVersion(key, vc.getGolangcilintVersion())
 	case YQVersion:
 		return vc.SetVersion(key, vc.getGithubVersion("mikefarah/yq"))
 	case BufVersion:
 		return vc.SetVersion(key, vc.getGithubVersion("bufbuild/buf"))
+	case GoreleaserVersion:
+		ver := vc.SetVersion(key, strings.TrimPrefix(vc.getGithubVersion("goreleaser/goreleaser"), "v"))
+
+		return ver
 	}
 
 	return ""

@@ -11,9 +11,11 @@ import (
 	"github.com/na4ma4/go-permbits"
 )
 
-func FileExists(path string) bool {
-	if _, err := os.Stat(path); err == nil {
-		return true
+func FileExists(path ...string) bool {
+	for _, p := range path {
+		if _, err := os.Stat(p); err == nil {
+			return true
+		}
 	}
 
 	return false

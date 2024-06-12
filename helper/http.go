@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/go-resty/resty/v2"
@@ -83,6 +84,39 @@ func HTTPGetLatestGitHubVersion(slug string) (string, error) {
 	}
 
 	return "", errors.New("unable to parse location")
+}
+
+// repositoryRelease represents a GitHub release in a repository.
+type repositoryRelease struct {
+	TagName string `json:"tag_name,omitempty"`
+	Name    string `json:"name,omitempty"`
+}
+
+type repositoryReleaseResult []repositoryRelease
+
+func HTTPGetLatestGitHubReleaseMatchingTag(slug string, r *regexp.Regexp) (string, error) {
+	client := resty.New()
+	client.SetRedirectPolicy(resty.NoRedirectPolicy())
+
+	resp, _ := client.R().
+		SetResult(repositoryReleaseResult{}).
+		SetHeader("Content-Type", "application/vnd.github+json").
+		SetHeader("X-GitHub-Api-Version", "2022-11-28").
+		Get(fmt.Sprintf("https://api.github.com/repos/%s/releases", slug))
+
+	if resp == nil {
+		return "", errors.New("response is nil")
+	}
+
+	if v, ok := resp.Result().(*repositoryReleaseResult); ok && v != nil {
+		for _, release := range *v {
+			if r.MatchString(release.TagName) {
+				return release.TagName, nil
+			}
+		}
+	}
+
+	return "", errors.New("matching tag not found")
 }
 
 func restyTrace(resp *resty.Response, err error) {

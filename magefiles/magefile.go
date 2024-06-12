@@ -11,10 +11,10 @@ import (
 	"github.com/dosquad/mage"
 )
 
-// Install protoc, lint, test & build debug.
-func Install(ctx context.Context) {
+// TestLocal protoc, lint, test & build debug.
+func TestLocal(ctx context.Context) {
 	mg.CtxDeps(ctx, mage.Golang.Lint)
 	mg.CtxDeps(ctx, mage.Golang.Test)
 }
 
-var Default = Install
+var Default = TestLocal

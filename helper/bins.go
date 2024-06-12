@@ -4,6 +4,8 @@ import (
 	"runtime"
 
 	"github.com/princjef/mageutil/bintool"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 //nolint:gochecknoglobals // ignore globals
@@ -62,6 +64,38 @@ func BinGovulncheck() *bintool.BinTool {
 	}
 
 	return govulncheck
+}
+
+//nolint:gochecknoglobals // ignore globals
+var goreleaser *bintool.BinTool
+
+// BinGoreleaser returns a singleton for goreleaser.
+func BinGoreleaser() *bintool.BinTool {
+	if goreleaser == nil {
+		ver := MustVersionLoadCache().GetVersion(GoreleaserVersion)
+		PrintInfo("Goreleaser Version: %s", ver)
+
+		goOperatingSystem, goArch := runtime.GOOS, runtime.GOARCH
+		goOperatingSystem = cases.Title(language.English).String(goOperatingSystem)
+
+		switch runtime.GOARCH {
+		case "amd64":
+			goArch = "x86_64"
+		}
+
+		url := "https://github.com/goreleaser/goreleaser/releases/download/v" + ver + "/" +
+			"goreleaser_" + goOperatingSystem + "_" + goArch + "{{.ArchiveExt}}"
+		PrintDebug("Goreleaser URL: %s", url)
+
+		goreleaser = bintool.Must(bintool.New(
+			"goreleaser{{.BinExt}}",
+			ver,
+			url,
+			bintool.WithFolder(MustGetGoBin()),
+		))
+	}
+
+	return goreleaser
 }
 
 //nolint:gochecknoglobals // ignore globals
@@ -128,7 +162,6 @@ var protocGenGoGRPC *bintool.BinTool
 // BinProtocGenGoGRPC returns a singleton for protoc-gen-go-grpc.
 func BinProtocGenGoGRPC() *bintool.BinTool {
 	if protocGenGoGRPC == nil {
-		// ver := GetEnv("PROTOCGENGOGRPC_VERSION", protocGenGoGRPCVersion)
 		ver := MustVersionLoadCache().GetVersion(ProtocGenGoGRPCVersion)
 		PrintInfo("Protocol Buffer Golang gRPC Version: %s", ver)
 		protocGenGoGRPC = bintool.Must(bintool.NewGo(
