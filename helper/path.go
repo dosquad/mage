@@ -148,7 +148,7 @@ func MustCommandPaths() []string {
 //
 // if the directory cannot be created then panic.
 func MustGetVSCodePath(path ...string) string {
-	vscPath := filepath.Join(append([]string{MustGetWD()}, path...)...)
+	vscPath := MustGetWD(append([]string{".vscode"}, path...)...)
 
 	MustMakeDir(vscPath, permbits.MustString("ug=rwx,o=rx"))
 
