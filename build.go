@@ -3,11 +3,14 @@ package mage
 import (
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
 	"github.com/na4ma4/go-permbits"
 	"github.com/princjef/mageutil/shellcmd"
+	"go.uber.org/multierr"
 )
 
 const (
@@ -16,8 +19,9 @@ const (
 		`GOARCH={{.GoArch}} ` +
 		`GOARM={{.GoArm}} ` +
 		`go build ` +
-		`{{if .Debug}}-tags=debug {{end}}` +
+		`{{if .Debug}}-tags=debug {{else}}-tags=release {{end}}` +
 		`-buildmode=default ` +
+		`{{if not .Debug}}-trimpath {{end}}` +
 		`-v ` +
 		`-ldflags "{{.LDFlags}}" ` +
 		`-o "{{.OutputArtifact}}" ` +
@@ -33,27 +37,36 @@ type Build mg.Namespace
 // 	mg.CtxDeps(ctx, BuildRelease)
 // }
 
-// Debug create debug artifact.
+// Debug creates the debug artifacts.
 func (Build) Debug() error {
-	paths := helper.MustCommandPaths()
-
-	for _, cmdPath := range paths {
-		ct := helper.NewCommandTemplate(true, cmdPath)
-		if err := buildArtifact(ct); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return buildCommand(true, "")
 }
 
-// Release create debug artifact.
+// Release creates the release artifacts.
 func (Build) Release() error {
+	return buildCommand(false, "")
+}
+
+// DebugCommand creates a debug artifact for the specified command.
+func (Build) DebugCommand(cmd string) error {
+	return buildCommand(true, cmd)
+}
+
+// ReleaseCommand creates a release artifact for the specified command.
+func (Build) ReleaseCommand(cmd string) error {
+	return buildCommand(false, cmd)
+}
+
+func buildCommand(debug bool, cmd string) error {
 	paths := helper.MustCommandPaths()
 
 	for _, cmdPath := range paths {
-		ct := helper.NewCommandTemplate(false, cmdPath)
-		if err := buildArtifact(ct); err != nil {
+		if cmd != "" && filepath.Base(cmdPath) != cmd {
+			continue
+		}
+
+		ct := helper.NewCommandTemplate(debug, cmdPath)
+		if err := buildPlatformIterator(ct, buildArtifact); err != nil {
 			return err
 		}
 	}
@@ -61,18 +74,22 @@ func (Build) Release() error {
 	return nil
 }
 
-// ReleaseCommand create debug artifact for the specified command.
-func (Build) ReleaseCommand(cmd string) error {
-	paths := helper.MustCommandPaths()
+func buildPlatformIterator(ct *helper.CommandTemplate, f func(*helper.CommandTemplate) error) error {
+	var err error
+	platforms := strings.Split(helper.GetEnv("PLATFORMS", runtime.GOOS+"/"+runtime.GOARCH), ",")
 
-	for _, cmdPath := range paths {
-		ct := helper.NewCommandTemplate(false, cmdPath)
-		if err := buildArtifact(ct); err != nil {
-			return err
+	for _, platform := range platforms {
+		ctp := helper.NewCommandTemplate(ct.Debug, ct.CommandDir)
+		sp := strings.Split(platform, "/")
+		if len(sp) != 2 {
+			continue
 		}
+		ctp.GoOS = sp[0]
+		ctp.GoArch = sp[1]
+		err = multierr.Append(err, f(ctp))
 	}
 
-	return nil
+	return err
 }
 
 func buildArtifact(ct *helper.CommandTemplate) error {
