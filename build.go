@@ -81,7 +81,7 @@ func buildPlatformIterator(ct *helper.CommandTemplate, f func(*helper.CommandTem
 	for _, platform := range platforms {
 		ctp := helper.NewCommandTemplate(ct.Debug, ct.CommandDir)
 		sp := strings.Split(platform, "/")
-		if len(sp) != 2 {
+		if len(sp) != 2 { //nolint:mnd // "os/arch"
 			continue
 		}
 		ctp.GoOS = sp[0]

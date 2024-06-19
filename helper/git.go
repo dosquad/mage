@@ -18,9 +18,13 @@ func GitHash() string {
 }
 
 func GitCommitTime() time.Time {
-	out, err := CommandString(`git log -1 --format="%at"`)
-	if err != nil {
-		return time.Time{}
+	var out string
+	{
+		var err error
+		out, err = CommandString(`git log -1 --format="%at"`)
+		if err != nil {
+			return time.Time{}
+		}
 	}
 
 	if v, err := strconv.ParseInt(out, 10, 64); err == nil {

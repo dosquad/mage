@@ -16,15 +16,15 @@ type Run mg.Namespace
 // Debug builds and executes the specified command and arguments with debug build flags.
 func (Run) Debug(ctx context.Context, cmd string, args string) error {
 	mg.CtxDeps(ctx, Build.Debug)
-	ct := helper.NewCommandTemplate(true, fmt.Sprintf("./cmd/%s", cmd))
+	ct := helper.NewCommandTemplate(true, "./cmd/"+cmd)
 
-	return shellcmd.Command(fmt.Sprintf("%s %s", ct.OutputArtifact, args)).Run()
+	return shellcmd.Command(ct.OutputArtifact + " " + args).Run()
 }
 
 // Release builds and executes the specified command and arguments with release build flags.
 func (Run) Release(ctx context.Context, cmd string, args string) error {
 	mg.CtxDeps(ctx, Build.Release)
-	ct := helper.NewCommandTemplate(false, fmt.Sprintf("./cmd/%s", cmd))
+	ct := helper.NewCommandTemplate(false, "./cmd/"+cmd)
 
 	return shellcmd.Command(fmt.Sprintf("%s %s", ct.OutputArtifact, args)).Run()
 }
@@ -39,7 +39,7 @@ func (Run) Mirrord(ctx context.Context) error {
 	}
 
 	mg.CtxDeps(ctx, Build.Debug)
-	ct := helper.NewCommandTemplate(true, fmt.Sprintf("./cmd/%s", helper.Must[string](helper.FirstCommandName())))
+	ct := helper.NewCommandTemplate(true, "./cmd/"+helper.Must[string](helper.FirstCommandName()))
 
 	// targetCmd := fmt.Sprintf("artifacts/build/debug/%s/%s/%s", Cfg.OOS, Cfg.Arch, Cfg.BaseDir)
 
@@ -78,7 +78,7 @@ func (Run) Mirrord(ctx context.Context) error {
 // or the first found command if the environment is not specified.
 func RunE(_ context.Context, args string) error {
 	cmdName := helper.GetEnv("RUN_CMD", helper.Must[string](helper.FirstCommandName()))
-	ct := helper.NewCommandTemplate(true, fmt.Sprintf("./cmd/%s", cmdName))
+	ct := helper.NewCommandTemplate(true, "./cmd/"+cmdName)
 
 	if err := buildArtifact(ct); err != nil {
 		return err

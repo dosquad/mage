@@ -25,6 +25,7 @@ func (vk VersionKey) Key() string {
 }
 
 const (
+	latestTag                          = "latest"
 	GolangciLintVersion     VersionKey = "golangci-lint"
 	GovulncheckVersion      VersionKey = "govulncheck"
 	ProtocVersion           VersionKey = "protoc"
@@ -34,6 +35,8 @@ const (
 	YQVersion               VersionKey = "yq"
 	BufVersion              VersionKey = "buf"
 	GoreleaserVersion       VersionKey = "goreleaser"
+	WireVersion             VersionKey = "wire"
+	VerdumpVersion          VersionKey = "verdump"
 )
 
 const (
@@ -55,14 +58,17 @@ func MustVersionLoadCache() *VersionCache {
 
 func VersionLoadCache() (*VersionCache, error) {
 	cache := &VersionCache{
+		BufVersion:              "",
 		GolangciLintVersion:     "",
-		GovulncheckVersion:      "latest",
+		GovulncheckVersion:      latestTag,
 		ProtocVersion:           "",
 		ProtocGenGoVersion:      "",
 		ProtocGenGoGRPCVersion:  "",
 		ProtocGenGoTwirpVersion: "",
 		YQVersion:               "",
 		GoreleaserVersion:       "",
+		WireVersion:             "",
+		VerdumpVersion:          latestTag,
 	}
 
 	var f *os.File
@@ -136,7 +142,7 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 	case ProtocGenGoGRPCVersion:
 		v, err := HTTPGetLatestGitHubReleaseMatchingTag("grpc/grpc-go", regexp.MustCompile(`^cmd/protoc-gen-go-grpc/`))
 		if err != nil {
-			return "latest"
+			return latestTag
 		}
 
 		return vc.SetVersion(key, strings.TrimPrefix(v, "cmd/protoc-gen-go-grpc/"))
@@ -148,8 +154,11 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 		return vc.SetVersion(key, vc.getGithubVersion("bufbuild/buf"))
 	case GoreleaserVersion:
 		ver := vc.SetVersion(key, strings.TrimPrefix(vc.getGithubVersion("goreleaser/goreleaser"), "v"))
-
 		return ver
+	case WireVersion:
+		return vc.SetVersion(key, vc.getGithubVersion("google/wire"))
+	case VerdumpVersion:
+		return vc.SetVersion(key, vc.getGithubVersion("dosquad/mage"))
 	}
 
 	return ""

@@ -13,7 +13,6 @@ import (
 	"github.com/princjef/mageutil/shellcmd"
 )
 
-//nolint:lll // long URL
 const (
 	golangciLintConfigURL = "https://gist.githubusercontent.com/na4ma4/f165f6c9af35cda6b330efdcc07a9e26/raw/.golangci.yml"
 )

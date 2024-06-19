@@ -14,6 +14,7 @@ func CommandString(cmd string) (string, error) {
 	return strings.TrimSpace(string(out)), err
 }
 
+//nolint:forbidigo // print output.
 func Command(cmd string) ([]byte, error) {
 	if mg.Debug() || mg.Verbose() {
 		fmt.Printf("%s %s\n", color.MagentaString(">"), color.New(color.Bold).Sprintf(cmd))

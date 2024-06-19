@@ -153,5 +153,4 @@ func restyTrace(resp *resty.Response, err error) {
 	PrintDebug("  RequestAttempt: %d", ti.RequestAttempt)
 	PrintDebug("  RemoteAddr    : %s", ti.RemoteAddr.String())
 	PrintDebug("")
-
 }

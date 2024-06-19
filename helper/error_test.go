@@ -9,6 +9,8 @@ import (
 )
 
 func TestIfErrorf(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		format      string
 		args        []any
@@ -31,5 +33,4 @@ func TestIfErrorf(t *testing.T) {
 			}
 		})
 	}
-
 }

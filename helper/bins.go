@@ -78,8 +78,7 @@ func BinGoreleaser() *bintool.BinTool {
 		goOperatingSystem, goArch := runtime.GOOS, runtime.GOARCH
 		goOperatingSystem = cases.Title(language.English).String(goOperatingSystem)
 
-		switch runtime.GOARCH {
-		case "amd64":
+		if runtime.GOARCH == "amd64" {
 			goArch = "x86_64"
 		}
 
@@ -209,4 +208,42 @@ func BinYQ() *bintool.BinTool {
 	}
 
 	return yq
+}
+
+//nolint:gochecknoglobals // ignore globals
+var wirebin *bintool.BinTool
+
+// BinWire returns a singleton for wirebin.
+func BinWire() *bintool.BinTool {
+	if wirebin == nil {
+		_ = BinVerdump().Ensure()
+		ver := MustVersionLoadCache().GetVersion(WireVersion)
+		PrintInfo("Wire Version: %s", ver)
+		wirebin = bintool.Must(bintool.NewGo(
+			"github.com/google/wire/cmd/wire",
+			ver,
+			bintool.WithFolder(MustGetGoBin()),
+			bintool.WithVersionCmd(MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
+		))
+	}
+
+	return wirebin
+}
+
+//nolint:gochecknoglobals // ignore globals
+var verdump *bintool.BinTool
+
+// BinVerdump returns a singleton for verdump.
+func BinVerdump() *bintool.BinTool {
+	if verdump == nil {
+		ver := MustVersionLoadCache().GetVersion(VerdumpVersion)
+		PrintInfo("Verdump Version: %s", ver)
+		verdump = bintool.Must(bintool.NewGo(
+			"github.com/dosquad/mage/cmd/verdump",
+			ver,
+			bintool.WithFolder(MustGetGoBin()),
+		))
+	}
+
+	return verdump
 }

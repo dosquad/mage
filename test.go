@@ -9,10 +9,12 @@ import (
 
 // Test runs all tests depending on presence of files (go.mod=golang:test, etc).
 func Test(ctx context.Context) error {
-	if helper.FileExists(
-		helper.MustGetWD("go.mod"),
-	) {
-		mg.SerialCtxDeps(ctx, Golang.Test)
+	if helper.FileExistsInPath("*.proto", helper.MustGetWD()) {
+		mg.SerialCtxDeps(ctx, Protobuf.installProtoc)
+		mg.SerialCtxDeps(ctx, Protobuf.installProtocGenGo)
+		mg.SerialCtxDeps(ctx, Protobuf.installProtocGenGoGRPC)
+		mg.SerialCtxDeps(ctx, Protobuf.GenGo)
+		mg.SerialCtxDeps(ctx, Protobuf.GenGoGRPC)
 	}
 
 	if helper.FileExists(
@@ -22,6 +24,12 @@ func Test(ctx context.Context) error {
 		helper.MustGetWD(".golangci.json"),
 	) {
 		mg.SerialCtxDeps(ctx, Golang.Lint)
+	}
+
+	if helper.FileExists(
+		helper.MustGetWD("go.mod"),
+	) {
+		mg.SerialCtxDeps(ctx, Golang.Test)
 	}
 
 	if helper.FileExists(

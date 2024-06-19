@@ -4,12 +4,46 @@ import (
 	"bufio"
 	"errors"
 	"io"
+	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/na4ma4/go-permbits"
 )
+
+func fileExistsInPath(glob, rootDir string) bool {
+	found := false
+	_ = filepath.WalkDir(rootDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			if match, matchErr := filepath.Glob(filepath.Join(path, glob)); matchErr == nil {
+				if len(match) > 0 {
+					found = true
+					return errors.New("file found")
+				}
+			}
+		}
+
+		return nil
+	})
+
+	return found
+}
+
+func FileExistsInPath(glob string, path ...string) bool {
+	for _, p := range path {
+		if fileExistsInPath(glob, p) {
+			return true
+		}
+	}
+
+	return false
+}
 
 func FileExists(path ...string) bool {
 	for _, p := range path {

@@ -28,16 +28,16 @@ func GetRelativePath(path string) (string, bool) {
 // value using GOPATH.
 //
 // if GOPATH is not set, use (pwd)/artifacts/bin .
-func MustGetGoBin() string {
+func MustGetGoBin(path ...string) string {
 	if goBin := GetEnv("GOBIN", ""); goBin != "" {
-		return goBin
+		return filepath.Join(append([]string{goBin}, path...)...)
 	}
 
 	if goPath := GetEnv("GOPATH", ""); goPath != "" {
-		return filepath.Join(goPath, "bin")
+		return filepath.Join(append([]string{goPath, "bin"}, path...)...)
 	}
 
-	return MustGetArtifactPath("bin")
+	return MustGetArtifactPath(append([]string{"bin"}, path...)...)
 }
 
 func MustGetProtobufPath() string {
@@ -129,9 +129,7 @@ func MustCommandPaths() []string {
 				return nil
 			}
 
-			out = append(out,
-				fmt.Sprintf("./cmd/%s", d.Name()),
-			)
+			out = append(out, "./cmd/"+d.Name())
 
 			return nil
 		})

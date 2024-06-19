@@ -38,7 +38,7 @@ func (Install) CommandAll(_ context.Context) error {
 
 // Command installs a release version of a supplied command.
 func (Install) Command(_ context.Context, cmd string) error {
-	ct := helper.NewCommandTemplate(false, fmt.Sprintf("./cmd/%s", cmd))
+	ct := helper.NewCommandTemplate(false, "./cmd/"+cmd)
 	if err := buildArtifact(ct); err != nil {
 		return err
 	}
