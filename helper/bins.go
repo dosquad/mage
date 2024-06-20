@@ -161,12 +161,14 @@ var protocGenGoGRPC *bintool.BinTool
 // BinProtocGenGoGRPC returns a singleton for protoc-gen-go-grpc.
 func BinProtocGenGoGRPC() *bintool.BinTool {
 	if protocGenGoGRPC == nil {
+		_ = BinVerdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(ProtocGenGoGRPCVersion)
 		PrintInfo("Protocol Buffer Golang gRPC Version: %s", ver)
 		protocGenGoGRPC = bintool.Must(bintool.NewGo(
 			"google.golang.org/grpc/cmd/protoc-gen-go-grpc",
 			ver,
 			bintool.WithFolder(MustGetProtobufPath()),
+			bintool.WithVersionCmd(MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
 		))
 	}
 

@@ -68,7 +68,7 @@ func VersionLoadCache() (*VersionCache, error) {
 		YQVersion:               "",
 		GoreleaserVersion:       "",
 		WireVersion:             "",
-		VerdumpVersion:          latestTag,
+		VerdumpVersion:          "",
 	}
 
 	var f *os.File
@@ -124,8 +124,8 @@ func (vc VersionCache) SetVersion(key VersionKey, value string) string {
 }
 
 func (vc VersionCache) GetVersion(key VersionKey) string {
-	if out, ok := vc[key]; ok && out != "" {
-		return out
+	if v, ok := vc[key]; ok && v != "" {
+		return v
 	}
 
 	if v := GetEnv(key.String(), ""); v != "" {
