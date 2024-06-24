@@ -9,7 +9,7 @@ import (
 
 // Test runs all tests depending on presence of files (go.mod=golang:test, etc).
 func Test(ctx context.Context) error {
-	if helper.FileExistsInPath("*.proto", helper.MustGetWD()) {
+	if helper.FileExistsInPath("*.proto", helper.MustGetGitTopLevel()) {
 		mg.SerialCtxDeps(ctx, Protobuf.installProtoc)
 		mg.SerialCtxDeps(ctx, Protobuf.installProtocGenGo)
 		mg.SerialCtxDeps(ctx, Protobuf.installProtocGenGoGRPC)
@@ -18,29 +18,29 @@ func Test(ctx context.Context) error {
 	}
 
 	if helper.FileExists(
-		helper.MustGetWD(".golangci.yml"),
-		helper.MustGetWD(".golangci.yaml"),
-		helper.MustGetWD(".golangci.toml"),
-		helper.MustGetWD(".golangci.json"),
+		helper.MustGetGitTopLevel(".golangci.yml"),
+		helper.MustGetGitTopLevel(".golangci.yaml"),
+		helper.MustGetGitTopLevel(".golangci.toml"),
+		helper.MustGetGitTopLevel(".golangci.json"),
 	) {
 		mg.SerialCtxDeps(ctx, Golang.Lint)
 	}
 
 	if helper.FileExists(
-		helper.MustGetWD("go.mod"),
+		helper.MustGetGitTopLevel("go.mod"),
 	) {
 		mg.SerialCtxDeps(ctx, Golang.Test)
 	}
 
 	if helper.FileExists(
-		helper.MustGetWD(".goreleaser.yml"),
+		helper.MustGetGitTopLevel(".goreleaser.yml"),
 	) {
 		mg.SerialCtxDeps(ctx, Goreleaser.Healthcheck)
 		mg.SerialCtxDeps(ctx, Goreleaser.Lint)
 	}
 
 	if helper.FileExists(
-		helper.MustGetWD("Dockerfile"),
+		helper.MustGetGitTopLevel("Dockerfile"),
 	) {
 		mg.SerialCtxDeps(ctx, Docker.Test)
 	}

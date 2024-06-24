@@ -13,10 +13,12 @@ func TestFileExistsInPath(t *testing.T) {
 		t.Errorf("FileExistsInPath: [artifacts](*.randomfile) got '%t', want '%t'", v, false)
 	}
 
-	_ = os.MkdirAll("artifacts/testdata", permbits.MustString("ug=rwx,o=rx"))
-	_ = os.WriteFile("artifacts/testdata/test.proto", []byte("testfile"), permbits.MustString("ug=rw,o=r"))
+	localPath := helper.MustGetArtifactPath("testdata")
 
-	if v := helper.FileExistsInPath("*.proto", "artifacts"); !v {
+	_ = os.MkdirAll(localPath, permbits.MustString("ug=rwx,o=rx"))
+	_ = os.WriteFile(localPath+"/test.proto", []byte("testfile"), permbits.MustString("ug=rw,o=r"))
+
+	if v := helper.FileExistsInPath("*.proto", helper.MustGetArtifactPath()); !v {
 		t.Errorf("FileExistsInPath: [artifacts/testdata](*.proto) got '%t', want '%t'", v, true)
 	}
 }

@@ -22,7 +22,7 @@ type Update mg.Namespace
 
 // GoWorkspace create the go.work file if it is missing.
 func (Update) GoWorkspace() error {
-	goworkspaceFile := helper.MustGetWD("go.work")
+	goworkspaceFile := helper.MustGetGitTopLevel("go.work")
 
 	if _, err := os.Stat(goworkspaceFile); os.IsNotExist(err) {
 		return shellcmd.RunAll(
@@ -36,9 +36,9 @@ func (Update) GoWorkspace() error {
 
 // GolangciLint updates the .golangci.yml from the gist.
 func (Update) GolangciLint() error {
-	golangciLintFile := helper.MustGetWD(".golangci.yml")
-	golangciLocalFile := helper.MustGetWD(".golangci.local.yml")
-	golangciRemoteFile := helper.MustGetWD(".golangci.remote.yml")
+	golangciLintFile := helper.MustGetGitTopLevel(".golangci.yml")
+	golangciLocalFile := helper.MustGetGitTopLevel(".golangci.local.yml")
+	golangciRemoteFile := helper.MustGetGitTopLevel(".golangci.remote.yml")
 	etag := helper.Must[helper.ETag](helper.ETagLoadConfig())
 
 	if !helper.FileExists(golangciLocalFile) {
@@ -85,7 +85,7 @@ func (Update) GolangciLint() error {
 
 // GitIgnore updates the .gitignore from a set list.
 func (Update) GitIgnore() error {
-	gitignoreFile := helper.MustGetWD(".gitignore")
+	gitignoreFile := helper.MustGetGitTopLevel(".gitignore")
 
 	once := sync.Once{}
 
@@ -110,7 +110,7 @@ func (Update) GitIgnore() error {
 
 // DockerIgnore writes the .dockerignore file if it does not exist.
 func (Update) DockerIgnore() error {
-	dockerignoreFile := helper.MustGetWD(".dockerignore")
+	dockerignoreFile := helper.MustGetGitTopLevel(".dockerignore")
 
 	once := sync.Once{}
 

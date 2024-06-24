@@ -12,8 +12,15 @@ import (
 	"github.com/magefile/mage/mg"
 )
 
-func HTTPWriteFile(rawURL, filename string, eTag *ETagItem, fileperm os.FileMode) error {
+//nolint:gocognit // ignore complexity.
+func HTTPWriteFile(rawURL, filename string, eTag *ETagItem, fileperm os.FileMode, opts ...RestyOpt) error {
 	client := resty.New()
+	for _, opt := range opts {
+		if opt != nil {
+			opt(client)
+		}
+	}
+
 	eTagVal := ""
 	if eTag != nil && FileExists(filename) {
 		eTagVal = eTag.Value
@@ -68,8 +75,14 @@ func HTTPWriteFile(rawURL, filename string, eTag *ETagItem, fileperm os.FileMode
 	return nil
 }
 
-func HTTPGetLatestGitHubVersion(slug string) (string, error) {
+func HTTPGetLatestGitHubVersion(slug string, opts ...RestyOpt) (string, error) {
 	client := resty.New()
+	for _, opt := range opts {
+		if opt != nil {
+			opt(client)
+		}
+	}
+
 	client.SetRedirectPolicy(resty.NoRedirectPolicy())
 
 	resp, _ := client.R().
@@ -97,8 +110,13 @@ type repositoryRelease struct {
 
 type repositoryReleaseResult []repositoryRelease
 
-func HTTPGetLatestGitHubReleaseMatchingTag(slug string, r *regexp.Regexp) (string, error) {
+func HTTPGetLatestGitHubReleaseMatchingTag(slug string, r *regexp.Regexp, opts ...RestyOpt) (string, error) {
 	client := resty.New()
+	for _, opt := range opts {
+		if opt != nil {
+			opt(client)
+		}
+	}
 	client.SetRedirectPolicy(resty.NoRedirectPolicy())
 
 	resp, _ := client.R().

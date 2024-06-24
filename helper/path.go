@@ -8,10 +8,11 @@ import (
 	"strings"
 
 	"github.com/na4ma4/go-permbits"
+	"github.com/princjef/mageutil/shellcmd"
 )
 
 func GetRelativePath(path string) (string, bool) {
-	root := filepath.Clean(MustGetWD())
+	root := filepath.Clean(MustGetGitTopLevel())
 	path = filepath.Clean(path)
 
 	after, ok := strings.CutPrefix(path, root)
@@ -48,7 +49,7 @@ func MustGetProtobufPath() string {
 
 // MustGetArtifactPath get artifact directory or panic if unable to.
 func MustGetArtifactPath(path ...string) string {
-	return MustGetWD(append([]string{"artifacts"}, path...)...)
+	return MustGetGitTopLevel(append([]string{"artifacts"}, path...)...)
 }
 
 // MustGetWD get working directory or panic if unable to.
@@ -79,7 +80,7 @@ func MustMakeDir(path string, fileperm os.FileMode) {
 // //
 // // if the output directory cannot be created then panic.
 // func mustGetCoverageOutPath() string {
-// 	outPath := filepath.Join(mustGetWD(), "artifacts", "coverage")
+// 	outPath := filepath.Join(MustGetGitTopLevel(), "artifacts", "coverage")
 
 // 	mustMakeDir(outPath)
 
@@ -113,9 +114,9 @@ func FilesMatch(baseDir, pattern string) []string {
 }
 
 func MustCommandPaths() []string {
-	if FileExists(MustGetWD("cmd")) {
+	if FileExists(MustGetGitTopLevel("cmd")) {
 		out := []string{}
-		wd := MustGetWD("cmd")
+		wd := MustGetGitTopLevel("cmd")
 		_ = filepath.WalkDir(wd, func(path string, d fs.DirEntry, walkErr error) error {
 			if walkErr != nil {
 				return walkErr
@@ -125,7 +126,7 @@ func MustCommandPaths() []string {
 				return nil
 			}
 
-			if filepath.Dir(path) != MustGetWD("cmd") {
+			if filepath.Dir(path) != MustGetGitTopLevel("cmd") {
 				return nil
 			}
 
@@ -146,9 +147,34 @@ func MustCommandPaths() []string {
 //
 // if the directory cannot be created then panic.
 func MustGetVSCodePath(path ...string) string {
-	vscPath := MustGetWD(append([]string{".vscode"}, path...)...)
+	vscPath := MustGetGitTopLevel(append([]string{".vscode"}, path...)...)
 
 	MustMakeDir(vscPath, permbits.MustString("ug=rwx,o=rx"))
 
 	return vscPath
+}
+
+func MustGetGitTopLevel(path ...string) string {
+	return Must[string](GetGitTopLevel(path...))
+}
+
+//nolint:gochecknoglobals // caching output from git command.
+var gitTopLevel *string
+
+func GetGitTopLevel(path ...string) (string, error) {
+	if gitTopLevel != nil {
+		return filepath.Join(append([]string{*gitTopLevel}, path...)...), nil
+	}
+
+	out, err := shellcmd.Command(`git rev-parse --show-toplevel`).Output()
+	if err != nil {
+		return "", err
+	}
+
+	localPath := string(out)
+	localPath = strings.TrimSpace(localPath)
+
+	gitTopLevel = &localPath
+
+	return filepath.Join(append([]string{localPath}, path...)...), nil
 }

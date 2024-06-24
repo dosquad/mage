@@ -32,7 +32,7 @@ func (Run) Release(ctx context.Context, cmd string, args string) error {
 // Mirrord start service with Mirrord intercepts.
 func (Run) Mirrord(ctx context.Context) error {
 	cfg := helper.Must[*helper.DockerConfig](helper.DockerLoadConfig())
-	cfgFile := helper.MustGetWD("mirrord.yaml")
+	cfgFile := helper.MustGetGitTopLevel("mirrord.yaml")
 
 	if !helper.FileExists(cfgFile) {
 		return fmt.Errorf("Mirrord configuration file (%s) missing", cfgFile)

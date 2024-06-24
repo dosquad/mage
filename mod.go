@@ -20,7 +20,7 @@ func ModTidy() error {
 		helper.PanicIfError(err, "unable to get go list output")
 	}
 
-	wd := helper.MustGetWD()
+	wd := helper.MustGetGitTopLevel()
 	defer func() { _ = os.Chdir(wd) }()
 
 	scanner := bufio.NewScanner(bytes.NewReader(listout))

@@ -77,7 +77,7 @@ type ProtobufTargetFunc func() []string
 func ProtobufTargets() []ProtobufTargetFunc {
 	// Use a map to create a unique list of directories that contain `*.proto`.
 	paths := map[string]interface{}{}
-	for _, match := range FilesMatch(MustGetWD(), "*.proto") {
+	for _, match := range FilesMatch(MustGetGitTopLevel(), "*.proto") {
 		paths[filepath.Dir(match)] = nil
 	}
 

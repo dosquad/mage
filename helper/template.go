@@ -48,7 +48,7 @@ func NewCommandTemplate(debug bool, commandDir string) *CommandTemplate {
 
 		LDFlags: strings.Join(LDFlags(debug), " "),
 
-		CWD: MustGetWD(),
+		CWD: MustGetGitTopLevel(),
 		// BaseDir: baseDir,
 
 		CommandDir:  commandDir,

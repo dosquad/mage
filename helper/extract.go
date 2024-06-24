@@ -20,7 +20,7 @@ const (
 	copyInChunksSize = 1024
 )
 
-func ExtractArchive(src, dest string) error {
+func ExtractArchive(src, dest string, opts ...RestyOpt) error {
 	PrintDebug("Extract Archive: %s", src)
 	if _, statErr := os.Stat(dest); os.IsNotExist(statErr) {
 		PrintDebug("Create Directory: %s", dest)
@@ -40,7 +40,7 @@ func ExtractArchive(src, dest string) error {
 	PrintDebug("URL: %s", u)
 
 	if u.Scheme == "http" || u.Scheme == "https" {
-		destArchive, err := DownloadToCache(src)
+		destArchive, err := DownloadToCache(src, opts...)
 		if err != nil {
 			return err
 		}
@@ -53,8 +53,14 @@ func ExtractArchive(src, dest string) error {
 	return fmt.Errorf("unknown scheme on source (%s)", src)
 }
 
-func getFilenameForURL(src string) (string, error) {
+func getFilenameForURL(src string, opts ...RestyOpt) (string, error) {
 	client := resty.New()
+	for _, opt := range opts {
+		if opt != nil {
+			opt(client)
+		}
+	}
+
 	var resp *resty.Response
 	{
 		var err error
@@ -74,9 +80,9 @@ func getFilenameForURL(src string) (string, error) {
 	return filepath.Base(filename), nil
 }
 
-func DownloadToCache(src string) (string, error) {
+func DownloadToCache(src string, opts ...RestyOpt) (string, error) {
 	{
-		filename, err := getFilenameForURL(src)
+		filename, err := getFilenameForURL(src, opts...)
 		if err != nil {
 			return "", err
 		}
@@ -104,6 +110,11 @@ func DownloadToCache(src string) (string, error) {
 	{
 		var err error
 		client := resty.New()
+		for _, opt := range opts {
+			if opt != nil {
+				opt(client)
+			}
+		}
 		resp, err = client.R().
 			SetOutput(tmpFile).
 			Get(src)

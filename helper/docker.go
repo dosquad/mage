@@ -139,7 +139,7 @@ func DockerLoadConfig() (*DockerConfig, error) {
 	var f *os.File
 	{
 		var err error
-		f, err = os.Open(MustGetWD(".docker.yml"))
+		f, err = os.Open(MustGetGitTopLevel(".docker.yml"))
 		if err != nil {
 			return cfg, err
 		}
