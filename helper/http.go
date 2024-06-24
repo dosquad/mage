@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/magefile/mage/mg"
 )
 
 func HTTPWriteFile(rawURL, filename string, eTag *ETagItem, fileperm os.FileMode) error {
@@ -31,7 +32,9 @@ func HTTPWriteFile(rawURL, filename string, eTag *ETagItem, fileperm os.FileMode
 			return err
 		}
 
-		restyTrace(resp, err)
+		if mg.Verbose() || mg.Debug() {
+			RestyTrace(resp, err)
+		}
 	}
 
 	PrintDebug("[%s] Status Code: %d", rawURL, resp.StatusCode())
@@ -119,7 +122,7 @@ func HTTPGetLatestGitHubReleaseMatchingTag(slug string, r *regexp.Regexp) (strin
 	return "", errors.New("matching tag not found")
 }
 
-func restyTrace(resp *resty.Response, err error) {
+func RestyTrace(resp *resty.Response, err error) {
 	// Explore response object
 	PrintDebug("Response Info:")
 	PrintDebug("  Error      : %s", err)
