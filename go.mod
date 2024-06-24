@@ -20,6 +20,7 @@ require (
 	github.com/alecthomas/kong v0.9.0 // indirect
 	github.com/alessio/shellescape v1.4.2 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.5 // indirect
+	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect

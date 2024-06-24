@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
+	"io/fs"
 	"mime"
 	"net/url"
 	"os"
@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/h2non/filetype"
 	"github.com/magefile/mage/mg"
 	"github.com/na4ma4/go-permbits"
 )
@@ -50,13 +51,13 @@ func ExtractArchive(src, dest string, opts ...RestyOpt) error {
 
 		defer PrintDebug("ExtractArchive finished")
 
-		return Unzip(destArchive, dest)
+		return Uncompress(destArchive, dest)
 	}
 
 	if strings.HasPrefix(src, "/") { // absolute path
 		defer PrintDebug("ExtractArchive finished")
 
-		return Unzip(src, dest)
+		return Uncompress(src, dest)
 	}
 
 	return fmt.Errorf("unknown scheme on source (%s)", src)
@@ -92,21 +93,22 @@ func getFilenameForURL(src string, opts ...RestyOpt) (string, error) {
 	return filepath.Base(filename), nil
 }
 
-func DownloadToCache(src string, opts ...RestyOpt) (string, error) {
+func DownloadToPath(src, dest string, opts ...RestyOpt) (string, error) {
+	PrintDebug("DownloadToPath(src:%s, dest:%s opts...)", src, dest)
 	{
 		filename, err := getFilenameForURL(src, opts...)
 		if err != nil {
 			return "", err
 		}
 
-		if v := filepath.Join(mg.CacheDir(), filename); FileExists(v) {
+		if v := filepath.Join(dest, filename); FileExists(v) {
 			return v, nil
 		}
 	}
 
 	var tmpFile string
 	{
-		f, err := os.CreateTemp(mg.CacheDir(), "download-archive*")
+		f, err := os.CreateTemp(dest, "download-archive*")
 		if err != nil {
 			return "", err
 		}
@@ -142,7 +144,7 @@ func DownloadToCache(src string, opts ...RestyOpt) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		destArchive, err = SanitizeArchivePath(mg.CacheDir(), params["filename"])
+		destArchive, err = SanitizeArchivePath(dest, params["filename"])
 		if err != nil {
 			return "", err
 		}
@@ -156,6 +158,12 @@ func DownloadToCache(src string, opts ...RestyOpt) (string, error) {
 	}
 
 	return destArchive, nil
+
+}
+
+func DownloadToCache(src string, opts ...RestyOpt) (string, error) {
+	PrintDebug("DownloadToCache(src:%s, opts...)", src)
+	return DownloadToPath(src, mg.CacheDir(), opts...)
 }
 
 // Sanitize archive file pathing from "G305: Zip Slip vulnerability".
@@ -253,6 +261,43 @@ func copyInChunks(dst io.Writer, src io.Reader) error {
 	return nil
 }
 
+func Uncompress(src, dest string) error {
+	var buf []byte
+	{
+		f, fErr := os.Open(src)
+		if fErr != nil {
+			return fmt.Errorf("unable to open source[%s]: %w", src, fErr)
+		}
+
+		buf = make([]byte, 256)
+
+		if _, err := f.Read(buf); err != nil {
+			return fmt.Errorf("unable to read first 256 bytes[%s]: %w", src, err)
+		}
+	}
+	// buf, _ := os.ReadFile(src)
+	kind, err := filetype.Match(buf)
+	if err != nil {
+		return fmt.Errorf("unable to determine compression type: %w", err)
+	}
+
+	if kind == filetype.Unknown {
+		return fmt.Errorf("unknown file type")
+	}
+
+	switch kind.MIME.Type {
+	case "application":
+		switch kind.MIME.Subtype {
+		case "gzip":
+			return Untargz(src, dest)
+		case "zip":
+			return Unzip(src, dest)
+		}
+	}
+
+	return nil
+}
+
 func Untargz(src, dest string) error {
 	PrintDebug("Untargz(%s, %s)", src, dest)
 	dest = filepath.Clean(dest) + string(os.PathSeparator)
@@ -286,28 +331,44 @@ func Untargz(src, dest string) error {
 
 		switch header.Typeflag {
 		case tar.TypeDir:
-			if err := os.Mkdir(header.Name, 0755); err != nil {
-				log.Fatalf("ExtractTarGz: Mkdir() failed: %s", err.Error())
+			var target string
+			{
+				var err error
+				target, err = SanitizeArchivePath(dest, header.Name)
+				if err != nil {
+					return fmt.Errorf("sanitize path failed[%s]: %w", header.Name, err)
+				}
+			}
+			if err := os.Mkdir(target, fs.FileMode(header.Mode)); err != nil {
+				return fmt.Errorf("mkdir failed[%s]: %w", target, err)
 			}
 		case tar.TypeReg:
-			outFile, err := os.Create(header.Name)
-			if err != nil {
-				log.Fatalf("ExtractTarGz: Create() failed: %s", err.Error())
+			var target string
+			{
+				var err error
+				target, err = SanitizeArchivePath(dest, header.Name)
+				if err != nil {
+					return fmt.Errorf("sanitize path failed[%s]: %w", header.Name, err)
+				}
+			}
+			var outFile *os.File
+			{
+				var err error
+				outFile, err = os.Create(target)
+				if err != nil {
+					return fmt.Errorf("unable to create file[%s]: %w", target, err)
+				}
 			}
 			if _, err := io.Copy(outFile, tarReader); err != nil {
-				log.Fatalf("ExtractTarGz: Copy() failed: %s", err.Error())
+				return fmt.Errorf("unable to write file[%s]: %w", target, err)
 			}
 			outFile.Close()
-
 		default:
-			log.Fatalf(
-				"ExtractTarGz: uknown type: %s in %s",
-				header.Typeflag,
-				header.Name)
+			return fmt.Errorf("unknown record type in tarball[%s]: type is %s", header.Name, header.Typeflag)
 		}
-
 	}
 
+	return nil
 }
 
 func Unzip(src, dest string) error {
