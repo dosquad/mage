@@ -271,9 +271,9 @@ func Untargz(src, dest string) error {
 		return fmt.Errorf("unable to decompress stream: %w", err)
 	}
 
-	tarReader := tar.NewReader(uncompressedStream)
+	tarReader := tar.NewReader(tarStream)
 
-	for true {
+	for {
 		header, err := tarReader.Next()
 
 		if err == io.EOF {
@@ -281,7 +281,7 @@ func Untargz(src, dest string) error {
 		}
 
 		if err != nil {
-			log.Fatalf("ExtractTarGz: Next() failed: %s", err.Error())
+			return fmt.Errorf("untar failed: %w", err)
 		}
 
 		switch header.Typeflag {
