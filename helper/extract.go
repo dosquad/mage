@@ -63,7 +63,7 @@ func ExtractArchive(src, dest string, opts ...RestyOpt) error {
 	return fmt.Errorf("unknown scheme on source (%s)", src)
 }
 
-func getFilenameForURL(src string, opts ...RestyOpt) (string, error) {
+func GetFilenameForURL(src string, opts ...RestyOpt) (string, error) {
 	client := resty.New()
 	for _, opt := range opts {
 		if opt != nil {
@@ -96,7 +96,7 @@ func getFilenameForURL(src string, opts ...RestyOpt) (string, error) {
 func DownloadToPath(src, dest string, opts ...RestyOpt) (string, error) {
 	PrintDebug("DownloadToPath(src:%s, dest:%s opts...)", src, dest)
 	{
-		filename, err := getFilenameForURL(src, opts...)
+		filename, err := GetFilenameForURL(src, opts...)
 		if err != nil {
 			return "", err
 		}
