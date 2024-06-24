@@ -1,10 +1,13 @@
 package helper
 
 import (
+	"archive/tar"
 	"archive/zip"
+	"compress/gzip"
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"mime"
 	"net/url"
 	"os"
@@ -39,7 +42,7 @@ func ExtractArchive(src, dest string, opts ...RestyOpt) error {
 	}
 	PrintDebug("URL: %s", u)
 
-	if u.Scheme == "http" || u.Scheme == "https" {
+	if u.Scheme == "http" || u.Scheme == "https" { // URL
 		destArchive, err := DownloadToCache(src, opts...)
 		if err != nil {
 			return err
@@ -48,6 +51,12 @@ func ExtractArchive(src, dest string, opts ...RestyOpt) error {
 		defer PrintDebug("ExtractArchive finished")
 
 		return Unzip(destArchive, dest)
+	}
+
+	if strings.HasPrefix(src, "/") { // absolute path
+		defer PrintDebug("ExtractArchive finished")
+
+		return Unzip(src, dest)
 	}
 
 	return fmt.Errorf("unknown scheme on source (%s)", src)
@@ -65,6 +74,9 @@ func getFilenameForURL(src string, opts ...RestyOpt) (string, error) {
 	{
 		var err error
 		resp, err = client.R().Head(src)
+		// if mg.Debug() {
+		// 	RestyTrace(resp, err)
+		// }
 		if err != nil {
 			return "", err
 		}
@@ -239,6 +251,63 @@ func copyInChunks(dst io.Writer, src io.Reader) error {
 	}
 
 	return nil
+}
+
+func Untargz(src, dest string) error {
+	PrintDebug("Untargz(%s, %s)", src, dest)
+	dest = filepath.Clean(dest) + string(os.PathSeparator)
+
+	var srcStream io.ReadCloser
+	{
+		var err error
+		srcStream, err = os.Open(src)
+		if err != nil {
+			return fmt.Errorf("unable to open source file: %w", err)
+		}
+	}
+
+	tarStream, err := gzip.NewReader(srcStream)
+	if err != nil {
+		return fmt.Errorf("unable to decompress stream: %w", err)
+	}
+
+	tarReader := tar.NewReader(uncompressedStream)
+
+	for true {
+		header, err := tarReader.Next()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			log.Fatalf("ExtractTarGz: Next() failed: %s", err.Error())
+		}
+
+		switch header.Typeflag {
+		case tar.TypeDir:
+			if err := os.Mkdir(header.Name, 0755); err != nil {
+				log.Fatalf("ExtractTarGz: Mkdir() failed: %s", err.Error())
+			}
+		case tar.TypeReg:
+			outFile, err := os.Create(header.Name)
+			if err != nil {
+				log.Fatalf("ExtractTarGz: Create() failed: %s", err.Error())
+			}
+			if _, err := io.Copy(outFile, tarReader); err != nil {
+				log.Fatalf("ExtractTarGz: Copy() failed: %s", err.Error())
+			}
+			outFile.Close()
+
+		default:
+			log.Fatalf(
+				"ExtractTarGz: uknown type: %s in %s",
+				header.Typeflag,
+				header.Name)
+		}
+
+	}
+
 }
 
 func Unzip(src, dest string) error {
