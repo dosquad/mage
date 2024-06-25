@@ -158,7 +158,6 @@ func DownloadToPath(src, dest string, opts ...RestyOpt) (string, error) {
 	}
 
 	return destArchive, nil
-
 }
 
 func DownloadToCache(src string, opts ...RestyOpt) (string, error) {
@@ -269,7 +268,7 @@ func Uncompress(src, dest string) error {
 			return fmt.Errorf("unable to open source[%s]: %w", src, fErr)
 		}
 
-		buf = make([]byte, 256)
+		buf = make([]byte, 256) //nolint:mnd // only need first 256 bytes for identification.
 
 		if _, err := f.Read(buf); err != nil {
 			return fmt.Errorf("unable to read first 256 bytes[%s]: %w", src, err)
@@ -282,10 +281,10 @@ func Uncompress(src, dest string) error {
 	}
 
 	if kind == filetype.Unknown {
-		return fmt.Errorf("unknown file type")
+		return errors.New("unknown file type")
 	}
 
-	switch kind.MIME.Type {
+	switch kind.MIME.Type { //nolint:gocritic // for future code expansion.
 	case "application":
 		switch kind.MIME.Subtype {
 		case "gzip":
@@ -298,6 +297,7 @@ func Uncompress(src, dest string) error {
 	return nil
 }
 
+//nolint:gocognit // untar+decompress(gzip).
 func Untargz(src, dest string) error {
 	PrintDebug("Untargz(%s, %s)", src, dest)
 	dest = filepath.Clean(dest) + string(os.PathSeparator)
@@ -311,22 +311,30 @@ func Untargz(src, dest string) error {
 		}
 	}
 
-	tarStream, err := gzip.NewReader(srcStream)
-	if err != nil {
-		return fmt.Errorf("unable to decompress stream: %w", err)
+	var tarStream *gzip.Reader
+	{
+		var err error
+		tarStream, err = gzip.NewReader(srcStream)
+		if err != nil {
+			return fmt.Errorf("unable to decompress stream: %w", err)
+		}
 	}
 
 	tarReader := tar.NewReader(tarStream)
 
 	for {
-		header, err := tarReader.Next()
+		var header *tar.Header
+		{
+			var err error
+			header, err = tarReader.Next()
 
-		if err == io.EOF {
-			break
-		}
+			if err == io.EOF {
+				break
+			}
 
-		if err != nil {
-			return fmt.Errorf("untar failed: %w", err)
+			if err != nil {
+				return fmt.Errorf("untar failed: %w", err)
+			}
 		}
 
 		switch header.Typeflag {
@@ -339,6 +347,7 @@ func Untargz(src, dest string) error {
 					return fmt.Errorf("sanitize path failed[%s]: %w", header.Name, err)
 				}
 			}
+
 			if err := os.Mkdir(target, fs.FileMode(header.Mode)); err != nil {
 				return fmt.Errorf("mkdir failed[%s]: %w", target, err)
 			}
@@ -351,6 +360,7 @@ func Untargz(src, dest string) error {
 					return fmt.Errorf("sanitize path failed[%s]: %w", header.Name, err)
 				}
 			}
+
 			var outFile *os.File
 			{
 				var err error
@@ -359,16 +369,32 @@ func Untargz(src, dest string) error {
 					return fmt.Errorf("unable to create file[%s]: %w", target, err)
 				}
 			}
-			if _, err := io.Copy(outFile, tarReader); err != nil {
+
+			if _, err := copyBlocks(outFile, tarReader); err != nil {
 				return fmt.Errorf("unable to write file[%s]: %w", target, err)
 			}
 			outFile.Close()
 		default:
-			return fmt.Errorf("unknown record type in tarball[%s]: type is %s", header.Name, header.Typeflag)
+			return fmt.Errorf("unknown record type in tarball[%s]: type is %d", header.Name, header.Typeflag)
 		}
 	}
 
 	return nil
+}
+
+func copyBlocks(dst io.Writer, src io.Reader) (int64, error) {
+	var total int64
+
+	for {
+		n, err := io.CopyN(dst, src, 1024) //nolint:mnd // 1Kb blocks.
+		total += n
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return total, nil
+			}
+			return total, err
+		}
+	}
 }
 
 func Unzip(src, dest string) error {
