@@ -12,7 +12,7 @@ require (
 	github.com/go-resty/resty/v2 v2.13.1
 	github.com/h2non/filetype v1.1.3
 	github.com/magefile/mage v1.15.0
-	github.com/na4ma4/go-permbits v0.5.0
+	github.com/na4ma4/go-permbits v0.5.1
 	github.com/princjef/mageutil v1.0.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/text v0.16.0

@@ -48,6 +48,8 @@ github.com/mattn/go-runewidth v0.0.15 h1:UNAjwbU9l54TA3KzvqLGxwWjHmMgBUVhBiTjelZ
 github.com/mattn/go-runewidth v0.0.15/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/na4ma4/go-permbits v0.5.0 h1:OEi2xvhL/zP8SAztL+EtAvliBpy65ClEvySaqwjC80A=
 github.com/na4ma4/go-permbits v0.5.0/go.mod h1:H6x6cBVERE0vpRiMP95tjjbN/jionjjjzGPqaHTAie4=
+github.com/na4ma4/go-permbits v0.5.1 h1:bC8ZV5Oysbcia7tMo7pgX19RGjuD4ZRF+p8dLxXk1y4=
+github.com/na4ma4/go-permbits v0.5.1/go.mod h1:iOOrz6HQbNi5liXxRp8PfiF7geywq1CYYJCKmcbRgTI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/princjef/mageutil v1.0.0 h1:1OfZcJUMsooPqieOz2ooLjI+uHUo618pdaJsbCXcFjQ=
