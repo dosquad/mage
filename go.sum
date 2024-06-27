@@ -5,6 +5,7 @@ github.com/alecthomas/kong v0.9.0 h1:G5diXxc85KvoV2f0ZRVuMsi45IrBgx9zDNGNj165aPA
 github.com/alecthomas/kong v0.9.0/go.mod h1:Y47y5gKfHp1hDc7CH7OeXgLIpp+Q2m1Ni0L5s3bI8Os=
 github.com/alessio/shellescape v1.4.2 h1:MHPfaU+ddJ0/bYWpgIeUnQUqKrlJ1S7BfEYPM4uEoM0=
 github.com/alessio/shellescape v1.4.2/go.mod h1:PZAiSCk0LJaZkiCSkPv8qIobYglO3FPpyFjDCtHLS30=
+github.com/cheggaaa/pb v2.0.7+incompatible h1:gLKifR1UkZ/kLkda5gC0K6c8g+jU2sINPtBeOiNlMhU=
 github.com/cheggaaa/pb v2.0.7+incompatible/go.mod h1:pQciLPpbU0oxA0h+VJYYLxO+XeDQb5pZijXscXHm81s=
 github.com/cheggaaa/pb/v3 v3.0.4/go.mod h1:7rgWxLrAUcFMkvJuv09+DYi7mMUYi8nO9iOWcvGJPfw=
 github.com/cheggaaa/pb/v3 v3.1.5 h1:QuuUzeM2WsAqG2gMqtzaWithDJv0i+i6UlnwSCI4QLk=
@@ -13,8 +14,12 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dosquad/go-cliversion v0.1.3 h1:0QdDNqYZNcTKtyjlvrtJvbwdXRFu1PupVT+JQ/LEhoc=
 github.com/dosquad/go-cliversion v0.1.3/go.mod h1:yH2QDO4ICjB4USb1bhnsobRYnPufnsjOG3lSikdE2Sc=
+github.com/dosquad/go-cliversion v0.1.4 h1:m0lsIvhY1xuBWN/1Sc5dh39piN1FMxX/wZth/xo+3Zc=
+github.com/dosquad/go-cliversion v0.1.4/go.mod h1:q7p9A47RCoE8Wu+mYNXRz2AmQ5We9/a2Icgeo1yuWVI=
 github.com/dosquad/go-giturl v0.1.0 h1:xUH7zf9P6qQBR92y4a9t2qXVBZNj9bbpEhF0WFlCG6k=
 github.com/dosquad/go-giturl v0.1.0/go.mod h1:1p2odnPipR3BY0nOVyL+M88J5u+eDtfAan0V+8HGtBM=
+github.com/dosquad/go-giturl v0.1.1 h1:5rAICr4ycztRDDia/BzcX5QKyQI6vZ3i8HMbZZT9/sw=
+github.com/dosquad/go-giturl v0.1.1/go.mod h1:rlSpkXg6Ra92tAHXDBLvCy6ddWJt/9Go+5dc2WVtZS8=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/fatih/color v1.9.0/go.mod h1:eQcE1qtQxscV5RaZvpXrrb8Drkc3/DdQ+uUYCNjL+zU=
 github.com/fatih/color v1.17.0 h1:GlRw1BRJxkpqUCBKzKOw098ed57fEsKeNjpTe3cSjK4=
