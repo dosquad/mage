@@ -1,6 +1,8 @@
 module github.com/dosquad/mage/magefiles
 
-go 1.22.4
+go 1.22.2
+
+toolchain go1.22.2
 
 require (
 	github.com/dosquad/mage v0.1.14

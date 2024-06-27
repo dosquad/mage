@@ -1,6 +1,8 @@
 module github.com/dosquad/mage
 
-go 1.22.4
+go 1.22.2
+
+toolchain go1.22.2
 
 require (
 	github.com/dosquad/go-cliversion v0.1.3
