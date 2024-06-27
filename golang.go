@@ -31,12 +31,18 @@ func (Golang) Test() error {
 
 	helper.MustMakeDir(coverPath, 0)
 
+	raceArg := ""
+	if v := helper.GoEnv("CGO_ENABLED", "0"); v == "1" {
+		raceArg = "-race"
+	}
+
 	cmd := fmt.Sprintf(""+
 		"go test "+
-		"-race "+
+		"%s "+
 		"-covermode=atomic "+
 		"-coverprofile=\"%s/cover.out\" "+
 		"\"./...\"",
+		raceArg,
 		coverPath)
 
 	if err := shellcmd.Command(cmd).Run(); err != nil {

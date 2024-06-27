@@ -138,7 +138,9 @@ func (Update) DockerIgnore() error {
 func UpdateE(ctx context.Context) error {
 	mg.CtxDeps(ctx, Update.GolangciLint)
 	mg.CtxDeps(ctx, Update.GitIgnore)
-	mg.CtxDeps(ctx, Update.DockerIgnore)
+	if helper.FileExists("Dockerfile") {
+		mg.CtxDeps(ctx, Update.DockerIgnore)
+	}
 
 	return nil
 }

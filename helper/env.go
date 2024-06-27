@@ -1,6 +1,11 @@
 package helper
 
-import "os"
+import (
+	"os"
+	"strings"
+
+	"github.com/princjef/mageutil/shellcmd"
+)
 
 // GetEnv returns an environment variable value if present, or a
 // default value.
@@ -29,4 +34,13 @@ func SetEnv(key, value string) func() {
 
 func (e *CommandEnv) Revert() {
 	os.Setenv(e.key, e.old)
+}
+
+func GoEnv(key, fallback string) string {
+	out, err := shellcmd.Command("go env " + key).Output()
+	if err != nil {
+		return fallback
+	}
+
+	return strings.TrimSpace(string(out))
 }
