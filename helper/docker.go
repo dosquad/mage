@@ -17,6 +17,7 @@ type DockerConfig struct {
 	BuildArgs   map[string]string      `yaml:"build_args,omitempty"`
 	Kubernetes  DockerConfigKubernetes `yaml:"kubernetes,omitempty"`
 	Mirrord     DockerConfigMirrord    `yaml:"mirrord,omitempty"`
+	Ignore      []string               `yaml:"ignore,omitempty"`
 }
 
 type DockerConfigMirrord struct {
@@ -134,6 +135,11 @@ func DockerLoadConfig() (*DockerConfig, error) {
 			"VERSION": GitHeadTagDescribe(),
 		},
 		Kubernetes: DockerConfigKubernetes{},
+		Ignore: []string{
+			".makefiles",
+			".github",
+			".git",
+		},
 	}
 
 	var f *os.File

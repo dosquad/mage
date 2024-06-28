@@ -110,15 +110,18 @@ func (Update) GitIgnore() error {
 
 // DockerIgnore writes the .dockerignore file if it does not exist.
 func (Update) DockerIgnore() error {
+	var dcfg *helper.DockerConfig
+	{
+		var err error
+		dcfg, err = helper.DockerLoadConfig()
+		helper.PanicIfError(err, "unable to load docker config")
+	}
+
 	dockerignoreFile := helper.MustGetGitTopLevel(".dockerignore")
 
 	once := sync.Once{}
 
-	for _, line := range []string{
-		".makefiles",
-		".git",
-		".github",
-	} {
+	for _, line := range dcfg.Ignore {
 		if !helper.FileLineExists(dockerignoreFile, line) {
 			once.Do(func() {
 				if rn, err := helper.FileLastRune(dockerignoreFile); err == nil && rn != '\n' {
