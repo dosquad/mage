@@ -2,8 +2,10 @@ package helper
 
 import (
 	"fmt"
+	"runtime/debug"
 
 	"github.com/fatih/color"
+	"github.com/magefile/mage/mg"
 )
 
 // PanicIfError panics if passed error is not nil.
@@ -11,6 +13,9 @@ import (
 // prependStr is optional string to prepend to panic error.
 func PanicIfError(err error, prependStr string) {
 	if err != nil {
+		if mg.Debug() || mg.Verbose() {
+			debug.PrintStack()
+		}
 		es := color.RedString("%s", err.Error())
 		if prependStr != "" {
 			panic(fmt.Errorf("%s : %s", color.RedString("%s", prependStr), es))
