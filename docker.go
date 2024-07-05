@@ -34,10 +34,9 @@ func dockerBuildArtifacts(cfg *helper.DockerConfig) error {
 		for _, platform := range cfg.OSArch() {
 			ct.GoOS = platform.OS
 			ct.GoArch = platform.Arch
-		}
-
-		if err := buildArtifact(ct); err != nil {
-			return err
+			if err := buildArtifact(ct); err != nil {
+				return err
+			}
 		}
 	}
 
