@@ -55,6 +55,24 @@ func FileExists(path ...string) bool {
 	return false
 }
 
+func FileWrite(data []byte, path string) error {
+	var f *os.File
+	{
+		var err error
+		f, err = os.Create(path)
+		if err != nil {
+			return err
+		}
+	}
+	defer f.Close()
+
+	if _, err := f.Write(data); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func FileLineExists(filename, targetLine string) bool {
 	var f *os.File
 	{

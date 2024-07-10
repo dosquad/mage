@@ -60,3 +60,13 @@ func (Golang) Lint() error {
 
 	return helper.BinGolangCILint().Command("run ./... --sort-results --max-same-issues 0 --max-issues-per-linter 0").Run()
 }
+
+// Fmt run go fmt.
+func (Golang) Fmt() error {
+	return shellcmd.Command(`go fmt ./...`).Run()
+}
+
+// Vet run go vet.
+func (Golang) Vet() error {
+	return shellcmd.Command(`go vet ./...`).Run()
+}

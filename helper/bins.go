@@ -1,9 +1,11 @@
 package helper
 
 import (
+	"fmt"
 	"runtime"
 
 	"github.com/princjef/mageutil/bintool"
+	"github.com/princjef/mageutil/shellcmd"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -248,4 +250,90 @@ func BinVerdump() *bintool.BinTool {
 	}
 
 	return verdump
+}
+
+//nolint:gochecknoglobals // ignore globals
+var kustomize *bintool.BinTool
+
+func installKustomize() error {
+	var instScript string
+	{
+		var err error
+		instScript, err = DownloadToCache(
+			"https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh",
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	ver := MustVersionLoadCache().GetVersion(KustomizeVersion)
+	PrintInfo("Kustomize Version: %s", ver)
+	instCmd := shellcmd.Command(
+		fmt.Sprintf(
+			`bash "%s" "%s" "%s"`,
+			instScript,
+			ver,
+			MustGetArtifactPath("bin"),
+		),
+	)
+	if err := instCmd.Run(); err != nil {
+		return err
+	}
+
+	PrintDebug("Install script completed")
+
+	return nil
+}
+
+// BinKustomize returns a singleton for kustomize.
+func BinKustomize() *bintool.BinTool {
+	if kustomize == nil {
+		if !FileExists(MustGetArtifactPath("bin", "kustomize")) {
+			PanicIfError(installKustomize(), "unable to install kustomize")
+		}
+
+		kustomize = bintool.Must(bintool.New("kustomize", "", "",
+			bintool.WithFolder(MustGetArtifactPath("bin")),
+			bintool.WithVersionCmd(`{{.FullCmd}} version`),
+		))
+	}
+
+	return kustomize
+}
+
+//nolint:gochecknoglobals // ignore globals
+var kubeControllerGen *bintool.BinTool
+
+// BinKubeControllerGen returns a singleton for kubeControllerGen.
+func BinKubeControllerGen() *bintool.BinTool {
+	if kubeControllerGen == nil {
+		ver := MustVersionLoadCache().GetVersion(KubeControllerGenVersion)
+		PrintInfo("sigs.k8s.io Controller Gen Version: %s", ver)
+		kubeControllerGen = bintool.Must(bintool.NewGo(
+			"sigs.k8s.io/controller-tools/cmd/controller-gen",
+			ver,
+			bintool.WithFolder(MustGetGoBin()),
+		))
+	}
+
+	return kubeControllerGen
+}
+
+//nolint:gochecknoglobals // ignore globals
+var kubeControllerEnvTest *bintool.BinTool
+
+// BinKubeControllerEnvTest returns a singleton for kubeControllerEnvTest.
+func BinKubeControllerEnvTest() *bintool.BinTool {
+	if kubeControllerEnvTest == nil {
+		ver := MustVersionLoadCache().GetVersion(KubeControllerEnvTestVersion)
+		PrintInfo("sigs.k8s.io Controller Runtime Version: %s", ver)
+		kubeControllerEnvTest = bintool.Must(bintool.NewGo(
+			"sigs.k8s.io/controller-runtime/tools/setup-envtest",
+			ver,
+			bintool.WithFolder(MustGetGoBin()),
+		))
+	}
+
+	return kubeControllerEnvTest
 }

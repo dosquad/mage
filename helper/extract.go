@@ -83,14 +83,18 @@ func GetFilenameForURL(src string, opts ...RestyOpt) (string, error) {
 		}
 	}
 
-	resp.Header().Get("Content-Disposition")
-	_, params, err := mime.ParseMediaType(resp.Header().Get("Content-Disposition"))
-	if err != nil {
-		return "", err
+	{
+		cdHeader := resp.Header().Get("Content-Disposition")
+		if cdHeader != "" {
+			_, params, err := mime.ParseMediaType(resp.Header().Get("Content-Disposition"))
+			if err != nil {
+				return "", err
+			}
+			return filepath.Base(params["filename"]), nil
+		}
 	}
-	filename := params["filename"]
 
-	return filepath.Base(filename), nil
+	return filepath.Base(src), nil
 }
 
 func DownloadToPath(src, dest string, opts ...RestyOpt) (string, error) {
@@ -137,16 +141,24 @@ func DownloadToPath(src, dest string, opts ...RestyOpt) (string, error) {
 		}
 	}
 
-	resp.Header().Get("Content-Disposition")
 	var destArchive string
 	{
-		_, params, err := mime.ParseMediaType(resp.Header().Get("Content-Disposition"))
-		if err != nil {
-			return "", err
-		}
-		destArchive, err = SanitizeArchivePath(dest, params["filename"])
-		if err != nil {
-			return "", err
+		cdHeader := resp.Header().Get("Content-Disposition")
+		if cdHeader != "" {
+			_, params, err := mime.ParseMediaType(cdHeader)
+			if err != nil {
+				return "", err
+			}
+			destArchive, err = SanitizeArchivePath(dest, params["filename"])
+			if err != nil {
+				return "", err
+			}
+		} else {
+			var err error
+			destArchive, err = SanitizeArchivePath(dest, filepath.Base(src))
+			if err != nil {
+				return "", err
+			}
 		}
 	}
 

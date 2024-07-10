@@ -25,18 +25,21 @@ func (vk VersionKey) Key() string {
 }
 
 const (
-	latestTag                          = "latest"
-	GolangciLintVersion     VersionKey = "golangci-lint"
-	GovulncheckVersion      VersionKey = "govulncheck"
-	ProtocVersion           VersionKey = "protoc"
-	ProtocGenGoVersion      VersionKey = "protoc-gen-go"
-	ProtocGenGoGRPCVersion  VersionKey = "protoc-gen-go-grpc"
-	ProtocGenGoTwirpVersion VersionKey = "protoc-gen-go-twirp"
-	YQVersion               VersionKey = "yq"
-	BufVersion              VersionKey = "buf"
-	GoreleaserVersion       VersionKey = "goreleaser"
-	WireVersion             VersionKey = "wire"
-	VerdumpVersion          VersionKey = "verdump"
+	latestTag                               = "latest"
+	GolangciLintVersion          VersionKey = "golangci-lint"
+	GovulncheckVersion           VersionKey = "govulncheck"
+	ProtocVersion                VersionKey = "protoc"
+	ProtocGenGoVersion           VersionKey = "protoc-gen-go"
+	ProtocGenGoGRPCVersion       VersionKey = "protoc-gen-go-grpc"
+	ProtocGenGoTwirpVersion      VersionKey = "protoc-gen-go-twirp"
+	YQVersion                    VersionKey = "yq"
+	BufVersion                   VersionKey = "buf"
+	GoreleaserVersion            VersionKey = "goreleaser"
+	WireVersion                  VersionKey = "wire"
+	VerdumpVersion               VersionKey = "verdump"
+	KubeControllerGenVersion     VersionKey = "v0.14.0"
+	KustomizeVersion             VersionKey = "v5.3.0"
+	KubeControllerEnvTestVersion VersionKey = "latest"
 )
 
 const (
@@ -58,17 +61,20 @@ func MustVersionLoadCache() *VersionCache {
 
 func VersionLoadCache() (*VersionCache, error) {
 	cache := &VersionCache{
-		BufVersion:              "",
-		GolangciLintVersion:     "",
-		GovulncheckVersion:      latestTag,
-		ProtocVersion:           "",
-		ProtocGenGoVersion:      "",
-		ProtocGenGoGRPCVersion:  "",
-		ProtocGenGoTwirpVersion: "",
-		YQVersion:               "",
-		GoreleaserVersion:       "",
-		WireVersion:             "",
-		VerdumpVersion:          "",
+		BufVersion:                   "",
+		GolangciLintVersion:          "",
+		GovulncheckVersion:           latestTag,
+		ProtocVersion:                "",
+		ProtocGenGoVersion:           "",
+		ProtocGenGoGRPCVersion:       "",
+		ProtocGenGoTwirpVersion:      "",
+		YQVersion:                    "",
+		GoreleaserVersion:            "",
+		WireVersion:                  "",
+		VerdumpVersion:               "",
+		KustomizeVersion:             "",
+		KubeControllerGenVersion:     "",
+		KubeControllerEnvTestVersion: "",
 	}
 
 	var f *os.File
@@ -159,6 +165,17 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 		return vc.SetVersion(key, vc.getGithubVersion("google/wire"))
 	case VerdumpVersion:
 		return vc.SetVersion(key, vc.getGithubVersion("dosquad/mage"))
+	case KubeControllerGenVersion:
+		return vc.SetVersion(key, vc.getGithubVersion("kubernetes-sigs/controller-tools"))
+	case KustomizeVersion:
+		if after, found := strings.CutPrefix(
+			vc.getGithubVersion("kubernetes-sigs/kustomize"),
+			"kustomize/v",
+		); found {
+			return vc.SetVersion(key, after)
+		}
+	case KubeControllerEnvTestVersion:
+		return vc.SetVersion(key, vc.getGithubVersion("kubernetes-sigs/controller-runtime"))
 	}
 
 	return ""

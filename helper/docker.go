@@ -72,6 +72,17 @@ func (d DockerConfig) GetImage() string {
 	return d.Image
 }
 
+func (d DockerConfig) GetImageRef() string {
+	tags := d.GetTags()
+	image := d.GetImage()
+
+	if len(tags) > 0 {
+		return fmt.Sprintf("%s:%s", image, tags[0])
+	}
+
+	return image + ":dev"
+}
+
 func (d DockerConfig) IsBlocked(in string) bool {
 	for _, tag := range d.BlockedTags {
 		if strings.EqualFold(tag, in) {
