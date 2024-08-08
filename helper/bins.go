@@ -357,19 +357,19 @@ func BinCfssl() *bintool.BinTool {
 }
 
 //nolint:gochecknoglobals // ignore globals
-var cfsslJsonCmd *bintool.BinTool
+var cfsslJSONCmd *bintool.BinTool
 
 // BinCfsslJSON returns a singleton for cfssl.
 func BinCfsslJSON() *bintool.BinTool {
-	if cfsslJsonCmd == nil {
+	if cfsslJSONCmd == nil {
 		ver := MustVersionLoadCache().GetVersion(CFSSLVersion)
 		PrintInfo("cfssl Version: %s", ver)
-		cfsslJsonCmd = bintool.Must(bintool.NewGo(
+		cfsslJSONCmd = bintool.Must(bintool.NewGo(
 			"github.com/cloudflare/cfssl/cmd/cfssljson",
 			ver,
 			bintool.WithFolder(MustGetGoBin()),
 		))
 	}
 
-	return cfsslJsonCmd
+	return cfsslJSONCmd
 }
