@@ -337,3 +337,39 @@ func BinKubeControllerEnvTest() *bintool.BinTool {
 
 	return kubeControllerEnvTest
 }
+
+//nolint:gochecknoglobals // ignore globals
+var cfsslCmd *bintool.BinTool
+
+// BinCfssl returns a singleton for cfssl.
+func BinCfssl() *bintool.BinTool {
+	if cfsslCmd == nil {
+		ver := MustVersionLoadCache().GetVersion(CFSSLVersion)
+		PrintInfo("cfssl Version: %s", ver)
+		cfsslCmd = bintool.Must(bintool.NewGo(
+			"github.com/cloudflare/cfssl/cmd/cfssl",
+			ver,
+			bintool.WithFolder(MustGetGoBin()),
+		))
+	}
+
+	return cfsslCmd
+}
+
+//nolint:gochecknoglobals // ignore globals
+var cfsslJsonCmd *bintool.BinTool
+
+// BinCfsslJSON returns a singleton for cfssl.
+func BinCfsslJSON() *bintool.BinTool {
+	if cfsslJsonCmd == nil {
+		ver := MustVersionLoadCache().GetVersion(CFSSLVersion)
+		PrintInfo("cfssl Version: %s", ver)
+		cfsslJsonCmd = bintool.Must(bintool.NewGo(
+			"github.com/cloudflare/cfssl/cmd/cfssljson",
+			ver,
+			bintool.WithFolder(MustGetGoBin()),
+		))
+	}
+
+	return cfsslJsonCmd
+}

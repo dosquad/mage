@@ -40,6 +40,7 @@ const (
 	KubeControllerGenVersion     VersionKey = "v0.14.0"
 	KustomizeVersion             VersionKey = "v5.3.0"
 	KubeControllerEnvTestVersion VersionKey = "latest"
+	CFSSLVersion                 VersionKey = "cfssl"
 )
 
 const (
@@ -75,6 +76,7 @@ func VersionLoadCache() (*VersionCache, error) {
 		KustomizeVersion:             "",
 		KubeControllerGenVersion:     "",
 		KubeControllerEnvTestVersion: "",
+		CFSSLVersion:                 "",
 	}
 
 	var f *os.File
@@ -176,6 +178,8 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 		}
 	case KubeControllerEnvTestVersion:
 		return vc.SetVersion(key, vc.getGithubVersion("kubernetes-sigs/controller-runtime"))
+	case CFSSLVersion:
+		return vc.SetVersion(key, vc.getGithubVersion("cloudflare/cfssl"))
 	}
 
 	return ""

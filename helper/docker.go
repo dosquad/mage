@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -122,11 +123,13 @@ func (d DockerConfig) ArgsTag(tag string) (string, error) {
 	return `--tag "` + d.GetImage() + `:` + tag + `"`, nil
 }
 
-func (d DockerConfig) Args() []string {
+func (d DockerConfig) Args(ctx context.Context) []string {
 	out := []string{}
 
-	if len(d.Platforms) > 0 {
-		out = append(out, "--platform "+strings.Join(d.Platforms, ","))
+	if !ContextDefaultValue[bool](ctx, DockerLocalPlatform, false) {
+		if len(d.Platforms) > 0 {
+			out = append(out, "--platform "+strings.Join(d.Platforms, ","))
+		}
 	}
 
 	if len(d.BuildArgs) > 0 {

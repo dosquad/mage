@@ -78,7 +78,7 @@ func dockerBuildCommand(ctx context.Context, args []string) error {
 		// return nil
 		dockerErr = multierr.Append(dockerErr, dockerCommand(
 			"buildx build",
-			cfg.Args(),
+			cfg.Args(ctx),
 			tagArg,
 			args,
 		))
@@ -90,6 +90,7 @@ func dockerBuildCommand(ctx context.Context, args []string) error {
 // Build Builds a docker image for the current platform and "loads" the
 // image into the local Docker server.
 func (Docker) Build(ctx context.Context) error {
+	ctx = context.WithValue(ctx, helper.DockerLocalPlatform, true)
 	return dockerBuildCommand(ctx,
 		[]string{
 			"--pull",
