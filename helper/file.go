@@ -3,6 +3,7 @@ package helper
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -11,6 +12,10 @@ import (
 	"time"
 
 	"github.com/na4ma4/go-permbits"
+)
+
+const (
+	fileCopyBufferSize = 512
 )
 
 func fileExistsInPath(glob, rootDir string) bool {
@@ -45,6 +50,7 @@ func FileExistsInPath(glob string, path ...string) bool {
 	return false
 }
 
+// FileExists returns true if any path specified exists.
 func FileExists(path ...string) bool {
 	for _, p := range path {
 		if _, err := os.Stat(p); err == nil {
@@ -179,4 +185,66 @@ func FileNameModifyReplace(from string, to ...string) func(string) []string {
 
 		return out
 	}
+}
+
+var (
+	ErrFileExists = errors.New("file exists")
+)
+
+func FileCopy(src string, dst string) error {
+	{
+		sourceFileStat, err := os.Stat(src)
+		if err != nil {
+			return err
+		}
+
+		if !sourceFileStat.Mode().IsRegular() {
+			return fmt.Errorf("file is not a regular file: %s", src)
+		}
+	}
+
+	var source *os.File
+	{
+		var err error
+		source, err = os.Open(src)
+		if err != nil {
+			return err
+		}
+		defer source.Close()
+	}
+
+	if _, err := os.Stat(dst); err == nil {
+		return fmt.Errorf("%w: %s", ErrFileExists, dst)
+	}
+
+	var destination *os.File
+	{
+		var err error
+		destination, err = os.Create(dst)
+		if err != nil {
+			return err
+		}
+		defer destination.Close()
+	}
+
+	buf := make([]byte, fileCopyBufferSize)
+	for {
+		var n int
+		{
+			var err error
+			n, err = source.Read(buf)
+			if err != nil && err != io.EOF {
+				return err
+			}
+			if n == 0 {
+				break
+			}
+		}
+
+		if _, err := destination.Write(buf[:n]); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

@@ -18,6 +18,12 @@ func Test(ctx context.Context) error {
 	}
 
 	if helper.FileExists(
+		helper.MustGetWD("testdata", "ca-config.json"),
+	) {
+		mg.SerialCtxDeps(ctx, CFSSL.Generate)
+	}
+
+	if helper.FileExists(
 		helper.MustGetGitTopLevel(".golangci.yml"),
 		helper.MustGetGitTopLevel(".golangci.yaml"),
 		helper.MustGetGitTopLevel(".golangci.toml"),

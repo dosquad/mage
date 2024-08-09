@@ -10,6 +10,14 @@ import (
 	"golang.org/x/text/language"
 )
 
+func BinInstall(in *bintool.BinTool) error {
+	if err := in.Ensure(); err != nil {
+		return in.Install()
+	}
+
+	return nil
+}
+
 //nolint:gochecknoglobals // ignore globals
 var bufTool *bintool.BinTool
 
