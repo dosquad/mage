@@ -258,11 +258,13 @@ func (CFSSL) Generate(ctx context.Context) error {
 		if err := cfsslCert(ctx, "client", "cert"); err != nil {
 			return err
 		}
-		if err := helper.FileCopy(
-			mustCertDir("cert-key.pem"),
-			mustCertDir("key.pem"),
-		); err != nil {
-			return err
+		if !helper.FileExists(mustCertDir("key.pem")) {
+			if err := helper.FileCopy(
+				mustCertDir("cert-key.pem"),
+				mustCertDir("key.pem"),
+			); err != nil {
+				return err
+			}
 		}
 	}
 
