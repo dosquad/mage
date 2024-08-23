@@ -27,7 +27,7 @@ func ModTidy() error {
 	for scanner.Scan() {
 		if line := scanner.Text(); line != "" {
 			//nolint:forbidigo // printing output
-			fmt.Printf("%s %s\n", color.MagentaString(">"), color.New(color.Bold).Sprintf("cd "+line))
+			fmt.Printf("%s %s\n", color.MagentaString(">"), color.New(color.Bold).Sprintf("cd %s", line))
 			if err := os.Chdir(line); err != nil {
 				return err
 			}

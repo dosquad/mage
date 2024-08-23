@@ -360,7 +360,7 @@ func Untargz(src, dest string) error {
 				}
 			}
 
-			if err := os.Mkdir(target, fs.FileMode(header.Mode)); err != nil {
+			if err := os.Mkdir(target, fs.FileMode(header.Mode)); err != nil { //nolint:gosec // G115 overflow possible.
 				return fmt.Errorf("mkdir failed[%s]: %w", target, err)
 			}
 		case tar.TypeReg:
