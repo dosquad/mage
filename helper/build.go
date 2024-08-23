@@ -3,6 +3,7 @@ package helper
 import (
 	"errors"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/dosquad/go-cliversion/makever"
@@ -28,6 +29,7 @@ func LDFlags(debug bool) []string {
 		makever.BuildDebug(boolToString(debug)),
 		makever.BuildMethod("magefiles"),
 		makever.BuildVersion(headTag+"+debug"),
+		makever.BuildGoVersion(runtime.Version()),
 		makever.GitCommit(GitHash()),
 		makever.GitRepo(GitURL()),
 		makever.GitSlug(GitSlug()),

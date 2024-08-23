@@ -11,10 +11,11 @@ import (
 type CommandTemplate struct {
 	Debug bool
 
-	CGO    string
-	GoOS   string
-	GoArch string
-	GoArm  string
+	CGO       string
+	GoOS      string
+	GoArch    string
+	GoArm     string
+	GoVersion string
 
 	GitRev     string
 	GitHash    string
@@ -36,10 +37,11 @@ func NewCommandTemplate(debug bool, commandDir string) *CommandTemplate {
 	o := &CommandTemplate{
 		Debug: debug,
 
-		CGO:    GetEnv("CGO_ENABLED", "0"),
-		GoOS:   runtime.GOOS,
-		GoArch: runtime.GOARCH,
-		GoArm:  Must[string](CommandString(`go env GOARM`)),
+		CGO:       GetEnv("CGO_ENABLED", "0"),
+		GoOS:      runtime.GOOS,
+		GoArch:    runtime.GOARCH,
+		GoArm:     Must[string](CommandString(`go env GOARM`)),
+		GoVersion: runtime.Version(),
 
 		GitRev:     GitHeadRev(),
 		GitHash:    GitHash(),

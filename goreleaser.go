@@ -2,6 +2,8 @@ package mage
 
 import (
 	"context"
+	"os"
+	"runtime"
 
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
@@ -18,6 +20,8 @@ func (Goreleaser) installGoreleaser(_ context.Context) error {
 // Build Goreleaser config.
 func (Goreleaser) Build(ctx context.Context) error {
 	mg.CtxDeps(ctx, Goreleaser.installGoreleaser)
+
+	os.Setenv("GOVERSION_NR", runtime.Version())
 
 	args := helper.GetEnv("GORELEASER_ARGS", "")
 
