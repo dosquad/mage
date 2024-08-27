@@ -29,3 +29,10 @@ func PrintDebug(format string, v ...any) {
 		fmt.Printf("%s %s\n", color.BlueString(">"), color.New(color.Bold).Sprintf(format, v...))
 	}
 }
+
+// PrintFileUpdate prints the passed message to stdout in white text with magenta chevron.
+//
+//nolint:forbidigo // printing output
+func PrintFileUpdate(format string, v ...any) {
+	fmt.Printf("%s %s\n", color.HiBlueString(">"), color.New(color.Bold).Sprintf(format, v...))
+}

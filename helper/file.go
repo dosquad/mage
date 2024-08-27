@@ -2,6 +2,8 @@ package helper
 
 import (
 	"bufio"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -191,7 +193,7 @@ var (
 	ErrFileExists = errors.New("file exists")
 )
 
-func FileCopy(src string, dst string) error {
+func FileCopy(src string, dst string, overwrite bool) error {
 	{
 		sourceFileStat, err := os.Stat(src)
 		if err != nil {
@@ -213,8 +215,10 @@ func FileCopy(src string, dst string) error {
 		defer source.Close()
 	}
 
-	if _, err := os.Stat(dst); err == nil {
-		return fmt.Errorf("%w: %s", ErrFileExists, dst)
+	if !overwrite {
+		if _, err := os.Stat(dst); err == nil {
+			return fmt.Errorf("%w: %s", ErrFileExists, dst)
+		}
 	}
 
 	var destination *os.File
@@ -247,4 +251,46 @@ func FileCopy(src string, dst string) error {
 	}
 
 	return nil
+}
+
+func FileHash(filename string) (string, error) {
+	h := sha256.New()
+	defer PrintDebug("FileHash(%s): %s", filename, hex.EncodeToString(h.Sum(nil)))
+	var f *os.File
+	{
+		var err error
+		f, err = os.Open(filename)
+		if err != nil {
+			return "", err
+		}
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(h.Sum(nil)), nil
+}
+
+func FileChanged(left, right string) bool {
+	var leftHash string
+	{
+		var err error
+		leftHash, err = FileHash(left)
+		if err != nil {
+			return true
+		}
+	}
+
+	var rightHash string
+	{
+		var err error
+		rightHash, err = FileHash(right)
+		if err != nil {
+			return true
+		}
+	}
+
+	return strings.Compare(leftHash, rightHash) != 0
 }

@@ -234,6 +234,7 @@ func (CFSSL) Generate(ctx context.Context) error {
 	if err := helper.FileCopy(
 		"testdata/ca-config.json",
 		"artifacts/certs/ca-config.json",
+		false,
 	); err != nil && !errors.Is(err, helper.ErrFileExists) {
 		return fmt.Errorf("unable to copy testdata/ca-config.json to artifacts/certs/ca-config.json: %w", err)
 	}
@@ -262,6 +263,7 @@ func (CFSSL) Generate(ctx context.Context) error {
 			if err := helper.FileCopy(
 				mustCertDir("cert-key.pem"),
 				mustCertDir("key.pem"),
+				false,
 			); err != nil {
 				return err
 			}

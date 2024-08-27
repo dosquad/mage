@@ -7,8 +7,8 @@ import (
 	"sync"
 
 	"github.com/dosquad/mage/helper"
-	"github.com/fatih/color"
 	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
 	"github.com/na4ma4/go-permbits"
 	"github.com/princjef/mageutil/shellcmd"
 )
@@ -43,12 +43,22 @@ func (Update) GolangciLint() error {
 
 	if !helper.FileExists(golangciLocalFile) {
 		helper.PrintDebug("Downloading file directly")
-		return helper.HTTPWriteFile(
+		if err := helper.HTTPWriteFile(
 			golangciLintConfigURL,
-			golangciLintFile,
-			etag.GetItem(".golangci.yml"),
+			golangciRemoteFile,
+			nil,
 			0,
-		)
+		); err != nil {
+			return fmt.Errorf("unable to retrieve HTTP source file: %w", err)
+		}
+		if helper.FileChanged(golangciLintFile, golangciRemoteFile) {
+			helper.PrintFileUpdate("Updating .golangci.yml from remote")
+		}
+		if err := helper.FileCopy(golangciRemoteFile, golangciLintFile, true); err != nil {
+			return fmt.Errorf("unable to copy file: %w", err)
+		}
+
+		return sh.Rm(golangciRemoteFile)
 	}
 
 	helper.PrintDebug("Downloading remote config to .golangci.remote.yml")
@@ -90,7 +100,9 @@ func (Update) GitIgnore() error {
 	once := sync.Once{}
 
 	for _, path := range []string{
+		"/.makefiles",
 		"/artifacts",
+		"/dist",
 	} {
 		if !helper.FileLineExists(gitignoreFile, path) {
 			once.Do(func() {
@@ -98,7 +110,7 @@ func (Update) GitIgnore() error {
 					_ = helper.FileAppendLine(gitignoreFile, 0, "")
 				}
 			})
-			color.Blue("Adding path to .gitignore: %s", path)
+			helper.PrintFileUpdate("Adding path to .gitignore: %s", path)
 			if err := helper.FileAppendLine(gitignoreFile, 0, path); err != nil {
 				return err
 			}
@@ -128,7 +140,7 @@ func (Update) DockerIgnore() error {
 					_ = helper.FileAppendLine(dockerignoreFile, 0, "")
 				}
 			})
-			color.Blue("Adding path to .dockerignore: %s", line)
+			helper.PrintFileUpdate("Adding path to .dockerignore: %s", line)
 			if err := helper.FileAppendLine(dockerignoreFile, 0, line); err != nil {
 				return err
 			}
