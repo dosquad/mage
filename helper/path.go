@@ -113,6 +113,7 @@ func FilesMatch(baseDir, pattern string) []string {
 	return matches
 }
 
+//nolint:nestif // handling ./cmd/main.go as well as ./cmd/foo/main.go
 func MustCommandPaths() []string {
 	if FileExists(MustGetGitTopLevel("cmd")) {
 		out := []string{}
@@ -126,7 +127,7 @@ func MustCommandPaths() []string {
 			if !d.IsDir() {
 				localPath, err := filepath.Rel(wd, path)
 				if err != nil {
-					return nil
+					return nil //nolint:nilerr // continue processing
 				}
 				localPath = "./cmd/" + filepath.Dir(localPath)
 				fallback = append(fallback, localPath)
