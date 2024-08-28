@@ -117,12 +117,19 @@ func MustCommandPaths() []string {
 	if FileExists(MustGetGitTopLevel("cmd")) {
 		out := []string{}
 		wd := MustGetGitTopLevel("cmd")
+		fallback := []string{}
 		_ = filepath.WalkDir(wd, func(path string, d fs.DirEntry, walkErr error) error {
 			if walkErr != nil {
 				return walkErr
 			}
 
 			if !d.IsDir() {
+				localPath, err := filepath.Rel(wd, path)
+				if err != nil {
+					return nil
+				}
+				localPath = "./cmd/" + filepath.Dir(localPath)
+				fallback = append(fallback, localPath)
 				return nil
 			}
 
@@ -134,6 +141,14 @@ func MustCommandPaths() []string {
 
 			return nil
 		})
+
+		if len(out) == 0 {
+			if len(fallback) > 0 {
+				return []string{
+					fallback[0],
+				}
+			}
+		}
 
 		return out
 	}

@@ -64,6 +64,10 @@ func NewCommandTemplate(debug bool, commandDir string) *CommandTemplate {
 }
 
 func (t *CommandTemplate) apply() {
+	if t.CommandName == "." {
+		t.CommandName = "main"
+	}
+
 	if t.Debug {
 		t.OutputArtifact = "artifacts/build/debug/" + t.GoOS + "/" + t.GoArch + "/" + t.CommandName
 	} else {
