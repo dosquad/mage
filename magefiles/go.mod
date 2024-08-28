@@ -12,7 +12,7 @@ require (
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.5 // indirect
-	github.com/dosquad/go-cliversion v0.1.4 // indirect
+	github.com/dosquad/go-cliversion v0.1.6 // indirect
 	github.com/dosquad/go-giturl v0.1.1 // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/go-resty/resty/v2 v2.14.0 // indirect
