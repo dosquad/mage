@@ -14,12 +14,14 @@ import (
 func Clean(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Clean)
 
-	if err := helper.BinGolangCILint().Ensure(); err != nil {
-		return err
-	}
+	if helper.BinGolangCILint().IsInstalled() {
+		if err := helper.BinGolangCILint().Ensure(); err != nil {
+			return err
+		}
 
-	if err := helper.BinGolangCILint().Command("cache clean").Run(); err != nil {
-		return err
+		if err := helper.BinGolangCILint().Command("cache clean").Run(); err != nil {
+			return err
+		}
 	}
 
 	rmFunc := func(path string) error {
