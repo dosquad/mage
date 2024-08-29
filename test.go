@@ -3,12 +3,15 @@ package mage
 import (
 	"context"
 
+	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
 )
 
 // Test runs all tests depending on presence of files (go.mod=golang:test, etc).
 func Test(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Test)
+
 	if helper.FileExistsInPath("*.proto", helper.MustGetGitTopLevel()) {
 		mg.SerialCtxDeps(ctx, Protobuf.installProtoc)
 		mg.SerialCtxDeps(ctx, Protobuf.installProtocGenGo)

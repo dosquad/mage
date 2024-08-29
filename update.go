@@ -6,7 +6,9 @@ import (
 	"os"
 	"sync"
 
+	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/loga"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 	"github.com/na4ma4/go-permbits"
@@ -21,7 +23,9 @@ const (
 type Update mg.Namespace
 
 // GoWorkspace create the go.work file if it is missing.
-func (Update) GoWorkspace() error {
+func (Update) GoWorkspace(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Update)
+
 	goworkspaceFile := helper.MustGetGitTopLevel("go.work")
 
 	if _, err := os.Stat(goworkspaceFile); os.IsNotExist(err) {
@@ -35,14 +39,16 @@ func (Update) GoWorkspace() error {
 }
 
 // GolangciLint updates the .golangci.yml from the gist.
-func (Update) GolangciLint() error {
+func (Update) GolangciLint(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Update)
+
 	golangciLintFile := helper.MustGetGitTopLevel(".golangci.yml")
 	golangciLocalFile := helper.MustGetGitTopLevel(".golangci.local.yml")
 	golangciRemoteFile := helper.MustGetGitTopLevel(".golangci.remote.yml")
 	etag := helper.Must[helper.ETag](helper.ETagLoadConfig())
 
 	if !helper.FileExists(golangciLocalFile) {
-		helper.PrintDebug("Downloading file directly")
+		loga.PrintDebug("Downloading file directly")
 		if err := helper.HTTPWriteFile(
 			golangciLintConfigURL,
 			golangciRemoteFile,
@@ -52,7 +58,7 @@ func (Update) GolangciLint() error {
 			return fmt.Errorf("unable to retrieve HTTP source file: %w", err)
 		}
 		if helper.FileChanged(golangciLintFile, golangciRemoteFile) {
-			helper.PrintFileUpdate("Updating .golangci.yml from remote")
+			loga.PrintFileUpdate("Updating .golangci.yml from remote")
 		}
 		if err := helper.FileCopy(golangciRemoteFile, golangciLintFile, true); err != nil {
 			return fmt.Errorf("unable to copy file: %w", err)
@@ -61,7 +67,7 @@ func (Update) GolangciLint() error {
 		return sh.Rm(golangciRemoteFile)
 	}
 
-	helper.PrintDebug("Downloading remote config to .golangci.remote.yml")
+	loga.PrintDebug("Downloading remote config to .golangci.remote.yml")
 	if err := helper.HTTPWriteFile(
 		golangciLintConfigURL,
 		golangciRemoteFile,
@@ -71,21 +77,21 @@ func (Update) GolangciLint() error {
 		return fmt.Errorf("unable to retrieve HTTP source file: %w", err)
 	}
 	defer func() {
-		helper.PrintDebug("Removing remote config cache .golangci.remote.yml")
+		loga.PrintDebug("Removing remote config cache .golangci.remote.yml")
 		_ = os.Remove(golangciRemoteFile)
 	}()
 
 	var yamlData []byte
 	{
 		var err error
-		helper.PrintDebug("Merging .golangci.remote.yml and .golangci.local.yml")
+		loga.PrintDebug("Merging .golangci.remote.yml and .golangci.local.yml")
 		yamlData, err = helper.MergeYaml(golangciRemoteFile, golangciLocalFile)
 		if err != nil {
 			return fmt.Errorf("unable to merge remote and local config: %w", err)
 		}
 	}
 
-	helper.PrintDebug("Writing merged config to .golangci.yml")
+	loga.PrintDebug("Writing merged config to .golangci.yml")
 	if err := os.WriteFile(golangciLintFile, yamlData, permbits.MustString("ug=rw,o=r")); err != nil {
 		return fmt.Errorf("unable to write golangci ling config: %w", err)
 	}
@@ -94,7 +100,9 @@ func (Update) GolangciLint() error {
 }
 
 // GitIgnore updates the .gitignore from a set list.
-func (Update) GitIgnore() error {
+func (Update) GitIgnore(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Update)
+
 	gitignoreFile := helper.MustGetGitTopLevel(".gitignore")
 
 	once := sync.Once{}
@@ -110,7 +118,7 @@ func (Update) GitIgnore() error {
 					_ = helper.FileAppendLine(gitignoreFile, 0, "")
 				}
 			})
-			helper.PrintFileUpdate("Adding path to .gitignore: %s", path)
+			loga.PrintFileUpdate("Adding path to .gitignore: %s", path)
 			if err := helper.FileAppendLine(gitignoreFile, 0, path); err != nil {
 				return err
 			}
@@ -121,7 +129,9 @@ func (Update) GitIgnore() error {
 }
 
 // DockerIgnore writes the .dockerignore file if it does not exist.
-func (Update) DockerIgnore() error {
+func (Update) DockerIgnore(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Update)
+
 	var dcfg *helper.DockerConfig
 	{
 		var err error
@@ -140,7 +150,7 @@ func (Update) DockerIgnore() error {
 					_ = helper.FileAppendLine(dockerignoreFile, 0, "")
 				}
 			})
-			helper.PrintFileUpdate("Adding path to .dockerignore: %s", line)
+			loga.PrintFileUpdate("Adding path to .dockerignore: %s", line)
 			if err := helper.FileAppendLine(dockerignoreFile, 0, line); err != nil {
 				return err
 			}
@@ -151,6 +161,8 @@ func (Update) DockerIgnore() error {
 }
 
 func UpdateE(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Update)
+
 	mg.CtxDeps(ctx, Update.GolangciLint)
 	mg.CtxDeps(ctx, Update.GitIgnore)
 	if helper.FileExists("Dockerfile") {

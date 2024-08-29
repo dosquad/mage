@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dosquad/mage/loga"
 	"github.com/na4ma4/go-permbits"
 )
 
@@ -255,7 +256,7 @@ func FileCopy(src string, dst string, overwrite bool) error {
 
 func FileHash(filename string) (string, error) {
 	h := sha256.New()
-	defer PrintDebug("FileHash(%s): %s", filename, hex.EncodeToString(h.Sum(nil)))
+	defer loga.PrintDebug("FileHash(%s): %s", filename, hex.EncodeToString(h.Sum(nil)))
 	var f *os.File
 	{
 		var err error

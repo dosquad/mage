@@ -6,7 +6,9 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/loga"
 	"github.com/magefile/mage/mg"
 	"github.com/princjef/mageutil/shellcmd"
 	"go.uber.org/multierr"
@@ -26,7 +28,7 @@ func dockerCommand(
 // Docker namespace is defined to group Docker functions.
 type Docker mg.Namespace
 
-func dockerBuildArtifacts(cfg *helper.DockerConfig) error {
+func dockerBuildArtifacts(ctx context.Context, cfg *helper.DockerConfig) error {
 	paths := helper.MustCommandPaths()
 
 	for _, cmdPath := range paths {
@@ -34,7 +36,7 @@ func dockerBuildArtifacts(cfg *helper.DockerConfig) error {
 		for _, platform := range cfg.OSArch() {
 			ct.GoOS = platform.OS
 			ct.GoArch = platform.Arch
-			if err := buildArtifact(ct); err != nil {
+			if err := buildArtifact(ctx, ct); err != nil {
 				return err
 			}
 		}
@@ -58,7 +60,7 @@ func dockerBuildCommand(ctx context.Context, args []string) error {
 	for _, tag := range tags {
 		tagArg, err := cfg.ArgsTag(tag)
 		if err != nil {
-			helper.PrintWarning("Unable to build Docker Image: %s", err)
+			loga.PrintWarning("Unable to build Docker Image: %s", err)
 			continue
 		}
 
@@ -66,14 +68,14 @@ func dockerBuildCommand(ctx context.Context, args []string) error {
 			var outErr error
 			once.Do(func() {
 				mg.CtxDeps(ctx, Update.DockerIgnore)
-				outErr = dockerBuildArtifacts(cfg)
+				outErr = dockerBuildArtifacts(ctx, cfg)
 			})
 			if outErr != nil {
 				return outErr
 			}
 		}
 
-		helper.PrintInfo("Building Docker Image[%s]: %s:%s", strings.Join(cfg.Platforms, ","), cfg.GetImage(), tag)
+		loga.PrintInfo("Building Docker Image[%s]: %s:%s", strings.Join(cfg.Platforms, ","), cfg.GetImage(), tag)
 
 		// return nil
 		dockerErr = multierr.Append(dockerErr, dockerCommand(
@@ -91,6 +93,8 @@ func dockerBuildCommand(ctx context.Context, args []string) error {
 // image into the local Docker server.
 func (Docker) Build(ctx context.Context) error {
 	ctx = context.WithValue(ctx, helper.DockerLocalPlatform, true)
+	dyndep.CtxDeps(ctx, dyndep.Build)
+	dyndep.CtxDeps(ctx, dyndep.Docker)
 	return dockerBuildCommand(ctx,
 		[]string{
 			"--pull",
@@ -103,6 +107,8 @@ func (Docker) Build(ctx context.Context) error {
 // Test Builds docker images for each target platform then
 // discards the result.
 func (Docker) Test(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Docker)
+	dyndep.CtxDeps(ctx, dyndep.Test)
 	return dockerBuildCommand(ctx,
 		[]string{
 			"--pull",

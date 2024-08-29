@@ -3,16 +3,20 @@ package mage
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 
+	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
 	"github.com/fatih/color"
 	"github.com/princjef/mageutil/shellcmd"
 )
 
 // ModTidy run go mod tidy on all workspaces.
-func ModTidy() error {
+func ModTidy(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Golang)
+
 	var listout []byte
 	{
 		var err error

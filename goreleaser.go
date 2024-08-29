@@ -5,6 +5,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
 )
@@ -19,6 +20,9 @@ func (Goreleaser) installGoreleaser(_ context.Context) error {
 
 // Build Goreleaser config.
 func (Goreleaser) Build(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Build)
+	dyndep.CtxDeps(ctx, dyndep.Goreleaser)
+
 	mg.CtxDeps(ctx, Goreleaser.installGoreleaser)
 
 	os.Setenv("GOVERSION_NR", runtime.Version())
@@ -30,6 +34,9 @@ func (Goreleaser) Build(ctx context.Context) error {
 
 // Lint Goreleaser config.
 func (Goreleaser) Lint(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Lint)
+	dyndep.CtxDeps(ctx, dyndep.Goreleaser)
+
 	mg.CtxDeps(ctx, Goreleaser.installGoreleaser)
 
 	args := helper.GetEnv("GORELEASER_ARGS", "")
@@ -39,6 +46,8 @@ func (Goreleaser) Lint(ctx context.Context) error {
 
 // Healthcheck Goreleaser config.
 func (Goreleaser) Healthcheck(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Goreleaser)
+
 	mg.CtxDeps(ctx, Goreleaser.installGoreleaser)
 
 	args := helper.GetEnv("GORELEASER_ARGS", "")

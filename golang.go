@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
 	"github.com/princjef/mageutil/shellcmd"
@@ -26,7 +27,10 @@ func (Golang) Vulncheck(ctx context.Context) error {
 }
 
 // Test run test suite and save coverage report.
-func (Golang) Test() error {
+func (Golang) Test(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Golang)
+	dyndep.CtxDeps(ctx, dyndep.Test)
+
 	coverPath := helper.MustGetArtifactPath("coverage")
 
 	helper.MustMakeDir(coverPath, 0)
@@ -53,7 +57,10 @@ func (Golang) Test() error {
 }
 
 // Lint run golangci-lint.
-func (Golang) Lint() error {
+func (Golang) Lint(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Golang)
+	dyndep.CtxDeps(ctx, dyndep.Lint)
+
 	if err := helper.BinGolangCILint().Ensure(); err != nil {
 		return err
 	}

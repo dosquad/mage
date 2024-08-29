@@ -3,6 +3,7 @@ package mage
 import (
 	"context"
 
+	"github.com/dosquad/mage/dyndep"
 	"github.com/magefile/mage/mg"
 )
 
@@ -16,5 +17,8 @@ type Lint mg.Namespace
 
 // Golangci Golang linters.
 func (Lint) Golang(ctx context.Context) {
+	dyndep.CtxDeps(ctx, dyndep.Lint)
+	dyndep.CtxDeps(ctx, dyndep.Golang)
+
 	mg.CtxDeps(ctx, Golang.Lint)
 }

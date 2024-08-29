@@ -1,11 +1,13 @@
 package mage
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 
+	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
 	"github.com/na4ma4/go-permbits"
@@ -38,26 +40,27 @@ type Build mg.Namespace
 // }
 
 // Debug creates the debug artifacts.
-func (Build) Debug() error {
-	return buildCommand(true, "")
+func (Build) Debug(ctx context.Context) error {
+	return buildCommand(ctx, true, "")
 }
 
 // Release creates the release artifacts.
-func (Build) Release() error {
-	return buildCommand(false, "")
+func (Build) Release(ctx context.Context) error {
+	return buildCommand(ctx, false, "")
 }
 
 // DebugCommand creates a debug artifact for the specified command.
-func (Build) DebugCommand(cmd string) error {
-	return buildCommand(true, cmd)
+func (Build) DebugCommand(ctx context.Context, cmd string) error {
+	return buildCommand(ctx, true, cmd)
 }
 
 // ReleaseCommand creates a release artifact for the specified command.
-func (Build) ReleaseCommand(cmd string) error {
-	return buildCommand(false, cmd)
+func (Build) ReleaseCommand(ctx context.Context, cmd string) error {
+	return buildCommand(ctx, false, cmd)
 }
 
-func buildCommand(debug bool, cmd string) error {
+func buildCommand(ctx context.Context, debug bool, cmd string) error {
+	dyndep.CtxDeps(ctx, dyndep.Build)
 	paths := helper.MustCommandPaths()
 
 	for _, cmdPath := range paths {
@@ -66,7 +69,7 @@ func buildCommand(debug bool, cmd string) error {
 		}
 
 		ct := helper.NewCommandTemplate(debug, cmdPath)
-		if err := buildPlatformIterator(ct, buildArtifact); err != nil {
+		if err := buildPlatformIterator(ctx, ct, buildArtifact); err != nil {
 			return err
 		}
 	}
@@ -74,7 +77,11 @@ func buildCommand(debug bool, cmd string) error {
 	return nil
 }
 
-func buildPlatformIterator(ct *helper.CommandTemplate, f func(*helper.CommandTemplate) error) error {
+func buildPlatformIterator(
+	ctx context.Context,
+	ct *helper.CommandTemplate,
+	f func(context.Context, *helper.CommandTemplate) error,
+) error {
 	var err error
 	platforms := strings.Split(helper.GetEnv("PLATFORMS", runtime.GOOS+"/"+runtime.GOARCH), ",")
 
@@ -86,13 +93,13 @@ func buildPlatformIterator(ct *helper.CommandTemplate, f func(*helper.CommandTem
 		}
 		ctp.GoOS = sp[0]
 		ctp.GoArch = sp[1]
-		err = multierr.Append(err, f(ctp))
+		err = multierr.Append(err, f(ctx, ctp))
 	}
 
 	return err
 }
 
-func buildArtifact(ct *helper.CommandTemplate) error {
+func buildArtifact(_ context.Context, ct *helper.CommandTemplate) error {
 	var out string
 	{
 		var err error

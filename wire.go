@@ -3,6 +3,7 @@ package mage
 import (
 	"context"
 
+	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
 )
@@ -17,6 +18,8 @@ func (Wire) installWireBinary(_ context.Context) error {
 
 // Generate install and generate golang wire dependency files.
 func (Wire) Generate(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Wire)
+
 	mg.CtxDeps(ctx, Wire.installWireBinary)
 
 	return helper.BinWire().Command("gen ./...").Run()
@@ -24,6 +27,9 @@ func (Wire) Generate(ctx context.Context) error {
 
 // Generate install and generate golang wire dependency files.
 func (Wire) Lint(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Lint)
+	dyndep.CtxDeps(ctx, dyndep.Wire)
+
 	mg.CtxDeps(ctx, Wire.installWireBinary)
 
 	return helper.BinWire().Command("check ./...").Run()

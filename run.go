@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
 	"github.com/princjef/mageutil/shellcmd"
@@ -15,6 +16,8 @@ type Run mg.Namespace
 
 // Debug builds and executes the specified command and arguments with debug build flags.
 func (Run) Debug(ctx context.Context, cmd string, args string) error {
+	dyndep.CtxDeps(ctx, dyndep.Run)
+
 	mg.CtxDeps(ctx, Build.Debug)
 	ct := helper.NewCommandTemplate(true, "./cmd/"+cmd)
 
@@ -23,6 +26,8 @@ func (Run) Debug(ctx context.Context, cmd string, args string) error {
 
 // Release builds and executes the specified command and arguments with release build flags.
 func (Run) Release(ctx context.Context, cmd string, args string) error {
+	dyndep.CtxDeps(ctx, dyndep.Run)
+
 	mg.CtxDeps(ctx, Build.Release)
 	ct := helper.NewCommandTemplate(false, "./cmd/"+cmd)
 
@@ -31,6 +36,9 @@ func (Run) Release(ctx context.Context, cmd string, args string) error {
 
 // Mirrord start service with Mirrord intercepts.
 func (Run) Mirrord(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Run)
+	dyndep.CtxDeps(ctx, dyndep.Mirrord)
+
 	cfg := helper.Must[*helper.DockerConfig](helper.DockerLoadConfig())
 	cfgFile := helper.MustGetGitTopLevel("mirrord.yaml")
 
@@ -76,11 +84,13 @@ func (Run) Mirrord(ctx context.Context) error {
 
 // RunE builds with debug tags and the supplied arguments the command specified by RUN_CMD
 // or the first found command if the environment is not specified.
-func RunE(_ context.Context, args string) error {
+func RunE(ctx context.Context, args string) error {
+	dyndep.CtxDeps(ctx, dyndep.Run)
+
 	cmdName := helper.GetEnv("RUN_CMD", helper.Must[string](helper.FirstCommandName()))
 	ct := helper.NewCommandTemplate(true, "./cmd/"+cmdName)
 
-	if err := buildArtifact(ct); err != nil {
+	if err := buildArtifact(ctx, ct); err != nil {
 		return err
 	}
 

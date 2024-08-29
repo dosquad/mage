@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
 	"github.com/magefile/mage/mg"
 	"github.com/princjef/mageutil/bintool"
@@ -35,6 +36,8 @@ func (Protobuf) installProtocGenGoTwirp(_ context.Context) error {
 
 // Generate install and generate golang Protocol Buffer files.
 func (Protobuf) Generate(ctx context.Context) {
+	dyndep.CtxDeps(ctx, dyndep.Protobuf)
+
 	mg.CtxDeps(ctx, Protobuf.installProtoc)
 	mg.CtxDeps(ctx, Protobuf.installProtocGenGo)
 	mg.CtxDeps(ctx, Protobuf.installProtocGenGoGRPC)
@@ -44,6 +47,8 @@ func (Protobuf) Generate(ctx context.Context) {
 
 // GenerateWithTwirp install and generate golang Protocol Buffer files (including Twirp).
 func (Protobuf) GenerateWithTwirp(ctx context.Context) {
+	dyndep.CtxDeps(ctx, dyndep.Protobuf)
+
 	mg.CtxDeps(ctx, Protobuf.installProtoc)
 	mg.CtxDeps(ctx, Protobuf.installProtocGenGo)
 	mg.CtxDeps(ctx, Protobuf.installProtocGenGoGRPC)
@@ -64,6 +69,8 @@ func runProtoCommand(cmd *bintool.BinTool, args []string) error {
 
 // ProtobufGenGo run protoc-gen-go to generate code.
 func (Protobuf) GenGo(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Protobuf)
+
 	mg.CtxDeps(ctx, Protobuf.installProtoc)
 	mg.CtxDeps(ctx, Protobuf.installProtocGenGo)
 
@@ -76,6 +83,8 @@ func (Protobuf) GenGo(ctx context.Context) error {
 
 // GenGoGRPC run protoc-gen-go-grpc to generate code.
 func (Protobuf) GenGoGRPC(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Protobuf)
+
 	mg.CtxDeps(ctx, Protobuf.installProtoc)
 	mg.CtxDeps(ctx, Protobuf.installProtocGenGoGRPC)
 
@@ -89,6 +98,8 @@ func (Protobuf) GenGoGRPC(ctx context.Context) error {
 
 // GenGoTwirp run protoc-gen-go-twirp to generate code.
 func (Protobuf) GenGoTwirp(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Protobuf)
+
 	mg.CtxDeps(ctx, Protobuf.installProtoc)
 	mg.CtxDeps(ctx, Protobuf.installProtocGenGo)
 	mg.CtxDeps(ctx, Protobuf.installProtocGenGoTwirp)
