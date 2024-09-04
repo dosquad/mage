@@ -28,7 +28,7 @@ func (Build) Archive(ctx context.Context) error {
 	for _, cmdPath := range paths {
 		ct := helper.NewCommandTemplate(false, cmdPath)
 
-		if err := buildPlatformIterator(ctx, ct, func(ctx context.Context, ct *helper.CommandTemplate) error {
+		if err := buildPlatformIterator(ctx, ct, func(_ context.Context, ct *helper.CommandTemplate) error {
 			// buildArtifact(ctx, ct)
 			loga.PrintInfo("Create Archive for %s/%s (%s)",
 				ct.GoOS, ct.GoArch,

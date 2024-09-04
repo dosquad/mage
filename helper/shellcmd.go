@@ -12,9 +12,8 @@ func CommandString(cmd string) (string, error) {
 	return strings.TrimSpace(string(out)), err
 }
 
-//nolint:forbidigo // print output.
 func Command(cmd string) ([]byte, error) {
-	loga.PrintCommand(cmd)
+	loga.PrintCommand("%s", cmd)
 	out, err := shellcmd.Command(cmd).Output()
 	return out, err
 }
