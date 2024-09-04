@@ -63,6 +63,14 @@ func NewCommandTemplate(debug bool, commandDir string) *CommandTemplate {
 	return o
 }
 
+func (t *CommandTemplate) SetPlatform(os, arch, arm string) {
+	t.GoOS = os
+	t.GoArch = arch
+	t.GoArm = arm
+
+	t.apply()
+}
+
 func (t *CommandTemplate) apply() {
 	if t.CommandName == "." {
 		t.CommandName = "main"

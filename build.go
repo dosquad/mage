@@ -91,8 +91,7 @@ func buildPlatformIterator(
 		if len(sp) != 2 { //nolint:mnd // "os/arch"
 			continue
 		}
-		ctp.GoOS = sp[0]
-		ctp.GoArch = sp[1]
+		ctp.SetPlatform(sp[0], sp[1], "")
 		err = multierr.Append(err, f(ctx, ctp))
 	}
 

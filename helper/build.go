@@ -28,7 +28,6 @@ func LDFlags(debug bool) []string {
 		makever.BuildDate(GitCommitTime().Format(time.RFC3339)),
 		makever.BuildDebug(boolToString(debug)),
 		makever.BuildMethod("magefiles"),
-		makever.BuildVersion(headTag+"+debug"),
 		makever.BuildGoVersion(runtime.Version()),
 		makever.GitCommit(GitHash()),
 		makever.GitRepo(GitURL()),
@@ -48,11 +47,13 @@ func LDFlags(debug bool) []string {
 	if debug {
 		return append(commonFlags,
 			"-X main.version="+headTag+"+debug",
+			makever.BuildVersion(headTag+"+debug")(),
 		)
 	}
 
 	return append(commonFlags,
 		"-X main.version="+headTag,
+		makever.BuildVersion(headTag)(),
 		"-s",
 		"-w",
 	)
