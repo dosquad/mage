@@ -56,6 +56,13 @@ func (Golang) Test(ctx context.Context) error {
 	return helper.FilterCoverageOutput(filepath.Join(coverPath, "cover.out"))
 }
 
+// Generate runs go generate.
+func (Golang) Generate(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Golang)
+
+	return shellcmd.Command(`go generate ./...`).Run()
+}
+
 // Lint run golangci-lint.
 func (Golang) Lint(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Golang)
