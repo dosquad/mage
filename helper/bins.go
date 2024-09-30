@@ -353,12 +353,14 @@ var cfsslCmd *bintool.BinTool
 // BinCfssl returns a singleton for cfssl.
 func BinCfssl() *bintool.BinTool {
 	if cfsslCmd == nil {
+		_ = BinVerdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(CFSSLVersion)
 		loga.PrintInfo("cfssl Version: %s", ver)
 		cfsslCmd = bintool.Must(bintool.NewGo(
 			"github.com/cloudflare/cfssl/cmd/cfssl",
 			ver,
 			bintool.WithFolder(MustGetGoBin()),
+			bintool.WithVersionCmd(MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
 		))
 	}
 
@@ -371,12 +373,14 @@ var cfsslJSONCmd *bintool.BinTool
 // BinCfsslJSON returns a singleton for cfssl.
 func BinCfsslJSON() *bintool.BinTool {
 	if cfsslJSONCmd == nil {
+		_ = BinVerdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(CFSSLVersion)
 		loga.PrintInfo("cfssl Version: %s", ver)
 		cfsslJSONCmd = bintool.Must(bintool.NewGo(
 			"github.com/cloudflare/cfssl/cmd/cfssljson",
 			ver,
 			bintool.WithFolder(MustGetGoBin()),
+			bintool.WithVersionCmd(MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
 		))
 	}
 
