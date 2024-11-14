@@ -64,21 +64,21 @@ func (e *ETag) Set(key, value string) {
 	})
 }
 
-func (e ETag) GetItem(key string) *ETagItem {
-	for _, v := range e {
+func (e *ETag) GetItem(key string) *ETagItem {
+	for _, v := range *e {
 		if v.Key == key {
-			v.parent = &e
+			v.parent = e
 			return &v
 		}
 	}
 
 	return &ETagItem{
-		parent: &e,
+		parent: e,
 		Key:    key,
 	}
 }
 
-func (e ETag) GetRelative(path string) string {
+func (e *ETag) GetRelative(path string) string {
 	after, ok := GetRelativePath(path)
 	if ok {
 		return e.Get(after)
@@ -87,8 +87,8 @@ func (e ETag) GetRelative(path string) string {
 	return path
 }
 
-func (e ETag) Get(key string) string {
-	for _, v := range e {
+func (e *ETag) Get(key string) string {
+	for _, v := range *e {
 		if v.Key == key {
 			return v.Value
 		}
@@ -97,7 +97,7 @@ func (e ETag) Get(key string) string {
 	return ""
 }
 
-func (e ETag) Save() error {
+func (e *ETag) Save() error {
 	MustMakeDir(MustGetArtifactPath(), permbits.MustString("ug=rwx,o=rx"))
 
 	var f *os.File
