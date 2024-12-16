@@ -91,7 +91,11 @@ func buildPlatformIterator(
 		if len(sp) != 2 { //nolint:mnd // "os/arch"
 			continue
 		}
-		ctp.SetPlatform(sp[0], sp[1], "")
+		if after, ok := strings.CutPrefix(sp[1], "armv"); ok {
+			ctp.SetPlatform(sp[0], "arm", after)
+		} else {
+			ctp.SetPlatform(sp[0], sp[1], "")
+		}
 		err = multierr.Append(err, f(ctx, ctp))
 	}
 

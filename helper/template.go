@@ -76,11 +76,18 @@ func (t *CommandTemplate) apply() {
 		t.CommandName = "main"
 	}
 
+	releaseType := "release"
+
 	if t.Debug {
-		t.OutputArtifact = "artifacts/build/debug/" + t.GoOS + "/" + t.GoArch + "/" + t.CommandName
-	} else {
-		t.OutputArtifact = "artifacts/build/release/" + t.GoOS + "/" + t.GoArch + "/" + t.CommandName
+		releaseType = "debug"
 	}
+
+	arch := t.GoArch
+	if t.GoArm != "" {
+		arch += "v" + t.GoArm
+	}
+
+	t.OutputArtifact = "artifacts/build/" + releaseType + "/" + t.GoOS + "/" + arch + "/" + t.CommandName
 
 	if t.GitHeadTag == "" {
 		t.GitHeadTag = "0.0.0"
