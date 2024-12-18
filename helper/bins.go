@@ -206,6 +206,26 @@ func BinProtocGenGoTwirp() *bintool.BinTool {
 }
 
 //nolint:gochecknoglobals // ignore globals
+var protocGenGoConnect *bintool.BinTool
+
+// BinProtocGenGoConnect returns a singleton for protoc-gen-connect-go.
+func BinProtocGenGoConnect() *bintool.BinTool {
+	if protocGenGoConnect == nil {
+		// ver := GetEnv("PROTOCGENGOCONNECT_VERSION", protocGenGoConnectVersion)
+		ver := MustVersionLoadCache().GetVersion(ProtocGenGoConnectVersion)
+		loga.PrintInfo("Protocol Buffer Golang ConnectRPC Version: %s", ver)
+		protocGenGoConnect = bintool.Must(bintool.NewGo(
+			"connectrpc.com/connect/cmd/protoc-gen-connect-go",
+			ver,
+			bintool.WithFolder(MustGetProtobufPath()),
+			bintool.WithVersionCmd(MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
+		))
+	}
+
+	return protocGenGoConnect
+}
+
+//nolint:gochecknoglobals // ignore globals
 var yq *bintool.BinTool
 
 // BinYQ returns a singleton for yq.

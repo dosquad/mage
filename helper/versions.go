@@ -32,6 +32,7 @@ const (
 	ProtocVersion                VersionKey = "protoc"
 	ProtocGenGoVersion           VersionKey = "protoc-gen-go"
 	ProtocGenGoGRPCVersion       VersionKey = "protoc-gen-go-grpc"
+	ProtocGenGoConnectVersion    VersionKey = "protoc-gen-connect-go"
 	ProtocGenGoTwirpVersion      VersionKey = "protoc-gen-go-twirp"
 	YQVersion                    VersionKey = "yq"
 	BufVersion                   VersionKey = "buf"
@@ -70,6 +71,7 @@ func VersionLoadCache() (*VersionCache, error) {
 		ProtocGenGoVersion:           "",
 		ProtocGenGoGRPCVersion:       "",
 		ProtocGenGoTwirpVersion:      "",
+		ProtocGenGoConnectVersion:    "",
 		YQVersion:                    "",
 		GoreleaserVersion:            "",
 		WireVersion:                  "",
@@ -148,6 +150,8 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 		return vc.SetVersion(key, vc.getProtobufVersion())
 	case ProtocGenGoTwirpVersion:
 		return vc.SetVersion(key, vc.getGithubVersion("twitchtv/twirp"))
+	case ProtocGenGoConnectVersion:
+		return vc.SetVersion(key, vc.getGithubVersion("connectrpc/connect-go"))
 	case ProtocGenGoGRPCVersion:
 		v, err := HTTPGetLatestGitHubReleaseMatchingTag("grpc/grpc-go", regexp.MustCompile(`^cmd/protoc-gen-go-grpc/`))
 		if err != nil {

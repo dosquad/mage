@@ -34,6 +34,10 @@ func (Protobuf) installProtocGenGoTwirp(_ context.Context) error {
 	return helper.BinProtocGenGoTwirp().Ensure()
 }
 
+func (Protobuf) installProtocGenGoConnect(_ context.Context) error {
+	return helper.BinProtocGenGoConnect().Ensure()
+}
+
 // Generate install and generate golang Protocol Buffer files.
 func (Protobuf) Generate(ctx context.Context) {
 	dyndep.CtxDeps(ctx, dyndep.Protobuf)
@@ -58,11 +62,26 @@ func (Protobuf) GenerateWithTwirp(ctx context.Context) {
 	mg.CtxDeps(ctx, Protobuf.GenGoTwirp)
 }
 
+// GenerateWithConnect install and generate golang Protocol Buffer files (including ConnectRPC).
+func (Protobuf) GenerateWithConnect(ctx context.Context) {
+	dyndep.CtxDeps(ctx, dyndep.Protobuf)
+
+	mg.CtxDeps(ctx, Protobuf.installProtoc)
+	mg.CtxDeps(ctx, Protobuf.installProtocGenGo)
+	mg.CtxDeps(ctx, Protobuf.installProtocGenGoGRPC)
+	mg.CtxDeps(ctx, Protobuf.installProtocGenGoConnect)
+	mg.CtxDeps(ctx, Protobuf.GenGo)
+	mg.CtxDeps(ctx, Protobuf.GenGoGRPC)
+	mg.CtxDeps(ctx, Protobuf.GenGoConnect)
+}
+
 func runProtoCommand(cmd *bintool.BinTool, args []string) error {
 	origPath := os.Getenv("PATH")
 	defer func() { os.Setenv("PATH", origPath) }()
 
 	os.Setenv("PATH", helper.MustGetProtobufPath()+":"+origPath)
+
+	// loga.PrintInfo("runProtoCommand: PATH=%s", os.Getenv("PATH"))
 
 	return cmd.Command(strings.Join(args, " ")).Run()
 }
@@ -110,6 +129,23 @@ func (Protobuf) GenGoTwirp(ctx context.Context) error {
 		"--go_out=.",
 		"--twirp_opt=module=" + helper.Must[string](helper.GetModuleName()),
 		"--twirp_out=.",
+	})
+}
+
+// GenGoConnect run protoc-gen-connect-go to generate code.
+func (Protobuf) GenGoConnect(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Protobuf)
+
+	mg.CtxDeps(ctx, Protobuf.installProtoc)
+	mg.CtxDeps(ctx, Protobuf.installProtocGenGo)
+	mg.CtxDeps(ctx, Protobuf.installProtocGenGoConnect)
+
+	return protobufGen(ctx, []string{
+		"--proto_path=" + helper.MustGetArtifactPath("protobuf", "include"),
+		"--go_opt=module=" + helper.Must[string](helper.GetModuleName()),
+		"--go_out=.",
+		"--connect-go_opt=module=" + helper.Must[string](helper.GetModuleName()),
+		"--connect-go_out=.",
 	})
 }
 
