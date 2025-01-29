@@ -26,7 +26,10 @@ func (vk VersionKey) Key() string {
 }
 
 const (
-	latestTag                               = "latest"
+	latestTag = "latest"
+)
+
+const (
 	GolangciLintVersion          VersionKey = "golangci-lint"
 	GovulncheckVersion           VersionKey = "govulncheck"
 	ProtocVersion                VersionKey = "protoc"
@@ -39,9 +42,9 @@ const (
 	GoreleaserVersion            VersionKey = "goreleaser"
 	WireVersion                  VersionKey = "wire"
 	VerdumpVersion               VersionKey = "verdump"
-	KubeControllerGenVersion     VersionKey = "v0.14.0"
-	KustomizeVersion             VersionKey = "v5.3.0"
-	KubeControllerEnvTestVersion VersionKey = "latest"
+	KubeControllerGenVersion     VersionKey = "kubernetes-controller-gen"
+	KustomizeVersion             VersionKey = "kustomize"
+	KubeControllerEnvTestVersion VersionKey = "kubernetes-controller-env-test"
 	CFSSLVersion                 VersionKey = "cfssl"
 )
 
