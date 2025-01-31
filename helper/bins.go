@@ -406,3 +406,23 @@ func BinCfsslJSON() *bintool.BinTool {
 
 	return cfsslJSONCmd
 }
+
+//nolint:gochecknoglobals // ignore globals
+var vgtCmd *bintool.BinTool
+
+// BinVGT returns a singleton for vgt.
+func BinVGT() *bintool.BinTool {
+	if vgtCmd == nil {
+		_ = BinVerdump().Ensure()
+		ver := MustVersionLoadCache().GetVersion(VGTVersion)
+		loga.PrintInfo("vgt Version: %s", ver)
+		vgtCmd = bintool.Must(bintool.NewGo(
+			"github.com/roblaszczak/vgt",
+			ver,
+			bintool.WithFolder(MustGetGoBin()),
+			bintool.WithVersionCmd(MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
+		))
+	}
+
+	return vgtCmd
+}

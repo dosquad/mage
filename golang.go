@@ -7,7 +7,9 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/loga"
 	"github.com/magefile/mage/mg"
+	"github.com/na4ma4/go-permbits"
 	"github.com/princjef/mageutil/shellcmd"
 )
 
@@ -54,6 +56,55 @@ func (Golang) Test(ctx context.Context) error {
 	}
 
 	return helper.FilterCoverageOutput(filepath.Join(coverPath, "cover.out"))
+}
+
+// InstallVGT installs vgt.
+func (Golang) installVGT(_ context.Context) error {
+	return helper.BinVGT().Ensure()
+}
+
+// VisualTest runs the tests and then renders the result using vgt (https://github.com/roblaszczak/vgt).
+func (Golang) VisualTest(ctx context.Context) error {
+	dyndep.CtxDeps(ctx, dyndep.Golang)
+	dyndep.CtxDeps(ctx, dyndep.Test)
+
+	mg.CtxDeps(ctx, Golang.installVGT)
+
+	raceArg := ""
+	if v := helper.GoEnv("CGO_ENABLED", "0"); v == "1" {
+		raceArg = "-race"
+	}
+
+	cmd := fmt.Sprintf(""+
+		"go test -count=1 -json "+
+		"%s "+
+		"\"./...\"",
+		raceArg)
+
+	visualTestPath := helper.MustGetArtifactPath("tests")
+	helper.MustMakeDir(
+		visualTestPath,
+		permbits.MustString("u=rwx,go=rx"),
+	)
+	vgtFileName := filepath.Join(visualTestPath, "vgt-output.json")
+
+	var output []byte
+	{
+		var err error
+		loga.PrintCommandAlways("`%s` writing to %s", cmd, vgtFileName)
+		output, err = shellcmd.Command(cmd).Output()
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := helper.FileWrite(output, vgtFileName); err != nil {
+		return err
+	}
+
+	return helper.BinVGT().Command(
+		"-dont-pass-output -from-file " + vgtFileName,
+	).Run()
 }
 
 // Generate runs go generate.

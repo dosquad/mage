@@ -21,23 +21,20 @@ func PrintInfo(format string, v ...any) {
 	fmt.Printf("%s %s\n", color.GreenString(">"), color.New(color.Bold).Sprintf(format, v...))
 }
 
-// PrintCommand prints the passed command line to stdout in white text with magenta chevron.
-//
-//nolint:forbidigo // printing output
+// PrintCommand prints the passed command line to stdout in white text with magenta chevron
+// when Verbose or Debug is enabled.
 func PrintCommand(format string, v ...any) {
 	if mg.Verbose() || mg.Debug() {
-		fmt.Printf("%s %s\n", color.MagentaString(">"), color.New(color.Bold).Sprintf(format, v...))
+		PrintCommandAlways(format, v...)
 	}
 }
 
-// // PrintCommand prints the passed command line to stdout in white text with magenta chevron.
-// //
-// //nolint:forbidigo // printing output
-// func PrintCommandDebug(format string, v ...any) {
-// 	if mg.Verbose() || mg.Debug() {
-// 		PrintCommand(format, v...)
-// 	}
-// }
+// PrintCommandAlways prints the passed command line to stdout in white text with magenta chevron.
+//
+//nolint:forbidigo // printing output
+func PrintCommandAlways(format string, v ...any) {
+	fmt.Printf("%s %s\n", color.MagentaString(">"), color.New(color.Bold).Sprintf(format, v...))
+}
 
 // PrintDebug prints the passed debug message to stdout in white text with blue chevron.
 //
