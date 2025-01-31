@@ -63,7 +63,7 @@ func (Golang) installVGT(_ context.Context) error {
 	return helper.BinVGT().Ensure()
 }
 
-// VisualTest runs the tests and then renders the result using vgt (https://github.com/roblaszczak/vgt).
+// VisualTest runs the test suite and then renders the result using vgt (https://github.com/roblaszczak/vgt).
 func (Golang) VisualTest(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Golang)
 	dyndep.CtxDeps(ctx, dyndep.Test)
