@@ -247,16 +247,15 @@ func (CFSSL) Generate(ctx context.Context) error {
 		return err
 	}
 
-	if helper.FileExists(helper.MustGetWD("testdata", "server.json")) {
-		if err := cfsslCert(ctx, "server", "server"); err != nil {
-			return err
-		}
+	if err := cfsslIfFileExists(ctx, "server", "server", "testdata", "server.json"); err != nil {
+		return err
 	}
 
-	if helper.FileExists(helper.MustGetWD("testdata", "client.json")) {
-		if err := cfsslCert(ctx, "client", "client"); err != nil {
-			return err
-		}
+	if err := cfsslIfFileExists(ctx, "interca", "interca", "testdata", "interca.json"); err != nil {
+		return err
+	}
+	if err := cfsslIfFileExists(ctx, "client", "client", "testdata", "client.json"); err != nil {
+		return err
 	}
 
 	if helper.FileExists(helper.MustGetWD("testdata", "cert.json")) {
@@ -272,6 +271,14 @@ func (CFSSL) Generate(ctx context.Context) error {
 				return err
 			}
 		}
+	}
+
+	return nil
+}
+
+func cfsslIfFileExists(ctx context.Context, profile, name string, path ...string) error {
+	if helper.FileExists(helper.MustGetWD(path...)) {
+		return cfsslCert(ctx, profile, name)
 	}
 
 	return nil
