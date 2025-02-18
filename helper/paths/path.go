@@ -1,4 +1,4 @@
-package helper
+package paths
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/dosquad/mage/helper/envs"
+	"github.com/dosquad/mage/helper/must"
 	"github.com/na4ma4/go-permbits"
 	"github.com/princjef/mageutil/shellcmd"
 )
@@ -30,11 +32,11 @@ func GetRelativePath(path string) (string, bool) {
 //
 // if GOPATH is not set, use (pwd)/artifacts/bin .
 func MustGetGoBin(path ...string) string {
-	if goBin := GetEnv("GOBIN", ""); goBin != "" {
+	if goBin := envs.GetEnv("GOBIN", ""); goBin != "" {
 		return filepath.Join(append([]string{goBin}, path...)...)
 	}
 
-	if goPath := GetEnv("GOPATH", ""); goPath != "" {
+	if goPath := envs.GetEnv("GOPATH", ""); goPath != "" {
 		return filepath.Join(append([]string{goPath, "bin"}, path...)...)
 	}
 
@@ -54,13 +56,13 @@ func MustGetArtifactPath(path ...string) string {
 
 // MustGetWD get working directory or panic if unable to.
 func MustGetWD(path ...string) string {
-	wd := Must[string](os.Getwd())
+	wd := must.Must[string](os.Getwd())
 	return filepath.Join(append([]string{wd}, path...)...)
 }
 
 // MustGetHomeDir get user home directory or panic if unable to.
 func MustGetHomeDir(path ...string) string {
-	homeDir := Must[string](os.UserHomeDir())
+	homeDir := must.Must[string](os.UserHomeDir())
 	return filepath.Join(append([]string{homeDir}, path...)...)
 }
 
@@ -71,7 +73,7 @@ func MustMakeDir(path string, fileperm os.FileMode) {
 	if fileperm == 0 {
 		fileperm = os.ModePerm
 	}
-	PanicIfError(os.MkdirAll(path, fileperm), fmt.Sprintf("unable to make dir: [%s]", path))
+	must.PanicIfError(os.MkdirAll(path, fileperm), fmt.Sprintf("unable to make dir: [%s]", path))
 }
 
 // // mustGetCoverageOutPath get output directory for generated coverage report.
@@ -171,7 +173,7 @@ func MustGetVSCodePath(path ...string) string {
 }
 
 func MustGetGitTopLevel(path ...string) string {
-	return Must[string](GetGitTopLevel(path...))
+	return must.Must[string](GetGitTopLevel(path...))
 }
 
 //nolint:gochecknoglobals // caching output from git command.

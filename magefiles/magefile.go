@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/dosquad/mage/dyndep"
-	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/loga"
 	"github.com/magefile/mage/mg"
 	"github.com/na4ma4/go-permbits"
@@ -56,14 +56,14 @@ func DynamicDeps(ctx context.Context) error {
 		return nil
 	}
 
-	if helper.FileExists(dyndepFileName) {
+	if paths.FileExists(dyndepFileName) {
 		return fmt.Errorf("DynamicDeps: file exists when it should have been deleted: %s", dyndepFileName)
 	}
 
 	dyndep.Add(dyndep.Test, writeFile)
 	mg.CtxDeps(ctx, mage.Golang.Test)
 
-	if !helper.FileExists(dyndepFileName) {
+	if !paths.FileExists(dyndepFileName) {
 		return fmt.Errorf("DynamicDeps: file does not exist when it should have been created: %s", dyndepFileName)
 	}
 

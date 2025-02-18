@@ -1,9 +1,12 @@
-package helper
+package bins
 
 import (
 	"fmt"
 	"runtime"
 
+	"github.com/dosquad/mage/helper/must"
+	"github.com/dosquad/mage/helper/paths"
+	"github.com/dosquad/mage/helper/web"
 	"github.com/dosquad/mage/loga"
 	"github.com/princjef/mageutil/bintool"
 	"github.com/princjef/mageutil/shellcmd"
@@ -11,7 +14,7 @@ import (
 	"golang.org/x/text/language"
 )
 
-func BinInstall(in *bintool.BinTool) error {
+func Install(in *bintool.BinTool) error {
 	if err := in.Ensure(); err != nil {
 		return in.Install()
 	}
@@ -29,7 +32,7 @@ func Buf() *bintool.BinTool {
 		bufTool = bintool.Must(bintool.NewGo(
 			"github.com/bufbuild/buf/cmd/buf",
 			ver,
-			bintool.WithFolder(MustGetGoBin()),
+			bintool.WithFolder(paths.MustGetGoBin()),
 		))
 	}
 
@@ -39,8 +42,8 @@ func Buf() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var golangciLint *bintool.BinTool
 
-// BinGolangCILint returns a singleton for golangci-lint.
-func BinGolangCILint() *bintool.BinTool {
+// GolangCILint returns a singleton for golangci-lint.
+func GolangCILint() *bintool.BinTool {
 	if golangciLint == nil {
 		// ver := GetEnv("GOLANGCILINT_VERSION", golangciLintVersion)
 		ver := MustVersionLoadCache().GetVersion(GolangciLintVersion)
@@ -50,7 +53,7 @@ func BinGolangCILint() *bintool.BinTool {
 			ver,
 			"https://github.com/golangci/golangci-lint/releases/download/"+
 				"v{{.Version}}/golangci-lint-{{.Version}}-{{.GOOS}}-{{.GOARCH}}{{.ArchiveExt}}",
-			bintool.WithFolder(MustGetGoBin()),
+			bintool.WithFolder(paths.MustGetGoBin()),
 		))
 	}
 
@@ -60,8 +63,8 @@ func BinGolangCILint() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var govulncheck *bintool.BinTool
 
-// BinGovulncheck returns a singleton for govulncheck.
-func BinGovulncheck() *bintool.BinTool {
+// Govulncheck returns a singleton for govulncheck.
+func Govulncheck() *bintool.BinTool {
 	if govulncheck == nil {
 		// ver := GetEnv("GOVULNCHECK_VERSION", govulncheckVersion)
 		ver := MustVersionLoadCache().GetVersion(GovulncheckVersion)
@@ -69,7 +72,7 @@ func BinGovulncheck() *bintool.BinTool {
 		govulncheck = bintool.Must(bintool.NewGo(
 			"golang.org/x/vuln/cmd/govulncheck",
 			ver,
-			bintool.WithFolder(MustGetGoBin()),
+			bintool.WithFolder(paths.MustGetGoBin()),
 			bintool.WithVersionCmd("{{.FullCmd}} -version"),
 		))
 	}
@@ -80,8 +83,8 @@ func BinGovulncheck() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var goreleaser *bintool.BinTool
 
-// BinGoreleaser returns a singleton for goreleaser.
-func BinGoreleaser() *bintool.BinTool {
+// Goreleaser returns a singleton for goreleaser.
+func Goreleaser() *bintool.BinTool {
 	if goreleaser == nil {
 		ver := MustVersionLoadCache().GetVersion(GoreleaserVersion)
 		loga.PrintInfo("Goreleaser Version: %s", ver)
@@ -101,7 +104,7 @@ func BinGoreleaser() *bintool.BinTool {
 			"goreleaser{{.BinExt}}",
 			ver,
 			url,
-			bintool.WithFolder(MustGetGoBin()),
+			bintool.WithFolder(paths.MustGetGoBin()),
 		))
 	}
 
@@ -111,8 +114,8 @@ func BinGoreleaser() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var protoc *bintool.BinTool
 
-// BinProtoc returns a singleton for protoc, also downloads the includes.
-func BinProtoc() *bintool.BinTool {
+// Protoc returns a singleton for protoc, also downloads the includes.
+func Protoc() *bintool.BinTool {
 	if protoc == nil {
 		goOperatingSystem, goArch := runtime.GOOS, runtime.GOARCH
 		if runtime.GOOS == "darwin" {
@@ -129,10 +132,10 @@ func BinProtoc() *bintool.BinTool {
 		protocVer := MustVersionLoadCache().GetVersion(ProtocVersion)
 
 		loga.PrintInfo("Protocol Buffer Version: %s", protocVer)
-		PanicIfError(ExtractArchive(
+		must.PanicIfError(web.ExtractArchive(
 			"https://github.com/protocolbuffers/protobuf/releases/download/v"+protocVer+"/"+
 				"protoc-"+protocVer+"-"+goOperatingSystem+"-"+goArch+".zip",
-			MustGetArtifactPath("protobuf"),
+			paths.MustGetArtifactPath("protobuf"),
 		), "Extract Archive")
 
 		protoc = bintool.Must(bintool.New(
@@ -140,7 +143,7 @@ func BinProtoc() *bintool.BinTool {
 			protocVer,
 			"https://github.com/protocolbuffers/protobuf/releases/download/v"+protocVer+"/"+
 				"protoc-"+protocVer+"-"+goOperatingSystem+"-"+goArch+".zip",
-			bintool.WithFolder(MustGetArtifactPath("protobuf", "bin")),
+			bintool.WithFolder(paths.MustGetArtifactPath("protobuf", "bin")),
 		))
 	}
 
@@ -150,8 +153,8 @@ func BinProtoc() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var protocGenGo *bintool.BinTool
 
-// BinProtocGenGo returns a singleton for protoc-gen-go.
-func BinProtocGenGo() *bintool.BinTool {
+// ProtocGenGo returns a singleton for protoc-gen-go.
+func ProtocGenGo() *bintool.BinTool {
 	if protocGenGo == nil {
 		// ver := GetEnv("PROTOCGENGO_VERSION", GetProtobufVersion())
 		ver := MustVersionLoadCache().GetVersion(ProtocGenGoVersion)
@@ -159,7 +162,7 @@ func BinProtocGenGo() *bintool.BinTool {
 		protocGenGo = bintool.Must(bintool.NewGo(
 			"google.golang.org/protobuf/cmd/protoc-gen-go",
 			ver,
-			bintool.WithFolder(MustGetProtobufPath()),
+			bintool.WithFolder(paths.MustGetProtobufPath()),
 		))
 	}
 
@@ -169,17 +172,17 @@ func BinProtocGenGo() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var protocGenGoGRPC *bintool.BinTool
 
-// BinProtocGenGoGRPC returns a singleton for protoc-gen-go-grpc.
-func BinProtocGenGoGRPC() *bintool.BinTool {
+// ProtocGenGoGRPC returns a singleton for protoc-gen-go-grpc.
+func ProtocGenGoGRPC() *bintool.BinTool {
 	if protocGenGoGRPC == nil {
-		_ = BinVerdump().Ensure()
+		_ = Verdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(ProtocGenGoGRPCVersion)
 		loga.PrintInfo("Protocol Buffer Golang gRPC Version: %s", ver)
 		protocGenGoGRPC = bintool.Must(bintool.NewGo(
 			"google.golang.org/grpc/cmd/protoc-gen-go-grpc",
 			ver,
-			bintool.WithFolder(MustGetProtobufPath()),
-			bintool.WithVersionCmd(MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
+			bintool.WithFolder(paths.MustGetProtobufPath()),
+			bintool.WithVersionCmd(paths.MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
 		))
 	}
 
@@ -189,8 +192,8 @@ func BinProtocGenGoGRPC() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var protocGenGoTwirp *bintool.BinTool
 
-// BinProtocGenGoTwirp returns a singleton for protoc-gen-twirp.
-func BinProtocGenGoTwirp() *bintool.BinTool {
+// ProtocGenGoTwirp returns a singleton for protoc-gen-twirp.
+func ProtocGenGoTwirp() *bintool.BinTool {
 	if protocGenGoTwirp == nil {
 		// ver := GetEnv("PROTOCGENGOTWIRP_VERSION", protocGenGoTwirpVersion)
 		ver := MustVersionLoadCache().GetVersion(ProtocGenGoTwirpVersion)
@@ -198,7 +201,7 @@ func BinProtocGenGoTwirp() *bintool.BinTool {
 		protocGenGoTwirp = bintool.Must(bintool.NewGo(
 			"github.com/twitchtv/twirp/protoc-gen-twirp",
 			ver,
-			bintool.WithFolder(MustGetProtobufPath()),
+			bintool.WithFolder(paths.MustGetProtobufPath()),
 		))
 	}
 
@@ -208,8 +211,8 @@ func BinProtocGenGoTwirp() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var protocGenGoConnect *bintool.BinTool
 
-// BinProtocGenGoConnect returns a singleton for protoc-gen-connect-go.
-func BinProtocGenGoConnect() *bintool.BinTool {
+// ProtocGenGoConnect returns a singleton for protoc-gen-connect-go.
+func ProtocGenGoConnect() *bintool.BinTool {
 	if protocGenGoConnect == nil {
 		// ver := GetEnv("PROTOCGENGOCONNECT_VERSION", protocGenGoConnectVersion)
 		ver := MustVersionLoadCache().GetVersion(ProtocGenGoConnectVersion)
@@ -217,8 +220,8 @@ func BinProtocGenGoConnect() *bintool.BinTool {
 		protocGenGoConnect = bintool.Must(bintool.NewGo(
 			"connectrpc.com/connect/cmd/protoc-gen-connect-go",
 			ver,
-			bintool.WithFolder(MustGetProtobufPath()),
-			bintool.WithVersionCmd(MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
+			bintool.WithFolder(paths.MustGetProtobufPath()),
+			bintool.WithVersionCmd(paths.MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
 		))
 	}
 
@@ -228,15 +231,15 @@ func BinProtocGenGoConnect() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var yq *bintool.BinTool
 
-// BinYQ returns a singleton for yq.
-func BinYQ() *bintool.BinTool {
+// YQ returns a singleton for yq.
+func YQ() *bintool.BinTool {
 	if yq == nil {
 		ver := MustVersionLoadCache().GetVersion(YQVersion)
 		loga.PrintInfo("YQ Version: %s", ver)
 		yq = bintool.Must(bintool.NewGo(
 			"github.com/mikefarah/yq/v4",
 			ver,
-			bintool.WithFolder(MustGetGoBin()),
+			bintool.WithFolder(paths.MustGetGoBin()),
 		))
 	}
 
@@ -246,17 +249,17 @@ func BinYQ() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var wirebin *bintool.BinTool
 
-// BinWire returns a singleton for wirebin.
-func BinWire() *bintool.BinTool {
+// Wire returns a singleton for wirebin.
+func Wire() *bintool.BinTool {
 	if wirebin == nil {
-		_ = BinVerdump().Ensure()
+		_ = Verdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(WireVersion)
 		loga.PrintInfo("Wire Version: %s", ver)
 		wirebin = bintool.Must(bintool.NewGo(
 			"github.com/google/wire/cmd/wire",
 			ver,
-			bintool.WithFolder(MustGetGoBin()),
-			bintool.WithVersionCmd(MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
+			bintool.WithFolder(paths.MustGetGoBin()),
+			bintool.WithVersionCmd(paths.MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
 		))
 	}
 
@@ -266,15 +269,15 @@ func BinWire() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var verdump *bintool.BinTool
 
-// BinVerdump returns a singleton for verdump.
-func BinVerdump() *bintool.BinTool {
+// Verdump returns a singleton for verdump.
+func Verdump() *bintool.BinTool {
 	if verdump == nil {
 		ver := MustVersionLoadCache().GetVersion(VerdumpVersion)
 		loga.PrintInfo("Verdump Version: %s", ver)
 		verdump = bintool.Must(bintool.NewGo(
 			"github.com/dosquad/mage/cmd/verdump",
 			ver,
-			bintool.WithFolder(MustGetGoBin()),
+			bintool.WithFolder(paths.MustGetGoBin()),
 		))
 	}
 
@@ -288,7 +291,7 @@ func installKustomize() error {
 	var instScript string
 	{
 		var err error
-		instScript, err = DownloadToCache(
+		instScript, err = web.DownloadToCache(
 			"https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh",
 		)
 		if err != nil {
@@ -303,7 +306,7 @@ func installKustomize() error {
 			`bash "%s" "%s" "%s"`,
 			instScript,
 			ver,
-			MustGetArtifactPath("bin"),
+			paths.MustGetArtifactPath("bin"),
 		),
 	)
 	if err := instCmd.Run(); err != nil {
@@ -315,15 +318,15 @@ func installKustomize() error {
 	return nil
 }
 
-// BinKustomize returns a singleton for kustomize.
-func BinKustomize() *bintool.BinTool {
+// Kustomize returns a singleton for kustomize.
+func Kustomize() *bintool.BinTool {
 	if kustomize == nil {
-		if !FileExists(MustGetArtifactPath("bin", "kustomize")) {
-			PanicIfError(installKustomize(), "unable to install kustomize")
+		if !paths.FileExists(paths.MustGetArtifactPath("bin", "kustomize")) {
+			must.PanicIfError(installKustomize(), "unable to install kustomize")
 		}
 
 		kustomize = bintool.Must(bintool.New("kustomize", "", "",
-			bintool.WithFolder(MustGetArtifactPath("bin")),
+			bintool.WithFolder(paths.MustGetArtifactPath("bin")),
 			bintool.WithVersionCmd(`{{.FullCmd}} version`),
 		))
 	}
@@ -334,15 +337,15 @@ func BinKustomize() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var kubeControllerGen *bintool.BinTool
 
-// BinKubeControllerGen returns a singleton for kubeControllerGen.
-func BinKubeControllerGen() *bintool.BinTool {
+// KubeControllerGen returns a singleton for kubeControllerGen.
+func KubeControllerGen() *bintool.BinTool {
 	if kubeControllerGen == nil {
 		ver := MustVersionLoadCache().GetVersion(KubeControllerGenVersion)
 		loga.PrintInfo("sigs.k8s.io Controller Gen Version: %s", ver)
 		kubeControllerGen = bintool.Must(bintool.NewGo(
 			"sigs.k8s.io/controller-tools/cmd/controller-gen",
 			ver,
-			bintool.WithFolder(MustGetGoBin()),
+			bintool.WithFolder(paths.MustGetGoBin()),
 		))
 	}
 
@@ -352,15 +355,15 @@ func BinKubeControllerGen() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var kubeControllerEnvTest *bintool.BinTool
 
-// BinKubeControllerEnvTest returns a singleton for kubeControllerEnvTest.
-func BinKubeControllerEnvTest() *bintool.BinTool {
+// KubeControllerEnvTest returns a singleton for kubeControllerEnvTest.
+func KubeControllerEnvTest() *bintool.BinTool {
 	if kubeControllerEnvTest == nil {
 		ver := MustVersionLoadCache().GetVersion(KubeControllerEnvTestVersion)
 		loga.PrintInfo("sigs.k8s.io Controller Runtime Version: %s", ver)
 		kubeControllerEnvTest = bintool.Must(bintool.NewGo(
 			"sigs.k8s.io/controller-runtime/tools/setup-envtest",
 			ver,
-			bintool.WithFolder(MustGetGoBin()),
+			bintool.WithFolder(paths.MustGetGoBin()),
 		))
 	}
 
@@ -370,17 +373,17 @@ func BinKubeControllerEnvTest() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var cfsslCmd *bintool.BinTool
 
-// BinCfssl returns a singleton for cfssl.
-func BinCfssl() *bintool.BinTool {
+// Cfssl returns a singleton for cfssl.
+func Cfssl() *bintool.BinTool {
 	if cfsslCmd == nil {
-		_ = BinVerdump().Ensure()
+		_ = Verdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(CFSSLVersion)
 		loga.PrintInfo("cfssl Version: %s", ver)
 		cfsslCmd = bintool.Must(bintool.NewGo(
 			"github.com/cloudflare/cfssl/cmd/cfssl",
 			ver,
-			bintool.WithFolder(MustGetGoBin()),
-			bintool.WithVersionCmd(MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
+			bintool.WithFolder(paths.MustGetGoBin()),
+			bintool.WithVersionCmd(paths.MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
 		))
 	}
 
@@ -390,17 +393,17 @@ func BinCfssl() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var cfsslJSONCmd *bintool.BinTool
 
-// BinCfsslJSON returns a singleton for cfssl.
-func BinCfsslJSON() *bintool.BinTool {
+// CfsslJSON returns a singleton for cfssl.
+func CfsslJSON() *bintool.BinTool {
 	if cfsslJSONCmd == nil {
-		_ = BinVerdump().Ensure()
+		_ = Verdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(CFSSLVersion)
 		loga.PrintInfo("cfssl Version: %s", ver)
 		cfsslJSONCmd = bintool.Must(bintool.NewGo(
 			"github.com/cloudflare/cfssl/cmd/cfssljson",
 			ver,
-			bintool.WithFolder(MustGetGoBin()),
-			bintool.WithVersionCmd(MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
+			bintool.WithFolder(paths.MustGetGoBin()),
+			bintool.WithVersionCmd(paths.MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
 		))
 	}
 
@@ -410,17 +413,17 @@ func BinCfsslJSON() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var vgtCmd *bintool.BinTool
 
-// BinVGT returns a singleton for vgt.
-func BinVGT() *bintool.BinTool {
+// VGT returns a singleton for vgt.
+func VGT() *bintool.BinTool {
 	if vgtCmd == nil {
-		_ = BinVerdump().Ensure()
+		_ = Verdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(VGTVersion)
 		loga.PrintInfo("vgt Version: %s", ver)
 		vgtCmd = bintool.Must(bintool.NewGo(
 			"github.com/roblaszczak/vgt",
 			ver,
-			bintool.WithFolder(MustGetGoBin()),
-			bintool.WithVersionCmd(MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
+			bintool.WithFolder(paths.MustGetGoBin()),
+			bintool.WithVersionCmd(paths.MustGetGoBin("verdump")+" mod {{.FullCmd}}"),
 		))
 	}
 

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/dosquad/mage/dyndep"
-	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/magefile/mage/mg"
 )
 
@@ -12,7 +12,7 @@ import (
 func Test(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Test)
 
-	if helper.FileExistsInPath("*.proto", helper.MustGetGitTopLevel()) {
+	if paths.FileExistsInPath("*.proto", paths.MustGetGitTopLevel()) {
 		mg.SerialCtxDeps(ctx, Protobuf.installProtoc)
 		mg.SerialCtxDeps(ctx, Protobuf.installProtocGenGo)
 		mg.SerialCtxDeps(ctx, Protobuf.installProtocGenGoGRPC)
@@ -20,36 +20,36 @@ func Test(ctx context.Context) error {
 		mg.SerialCtxDeps(ctx, Protobuf.GenGoGRPC)
 	}
 
-	if helper.FileExists(
-		helper.MustGetWD("testdata", "ca-config.json"),
+	if paths.FileExists(
+		paths.MustGetWD("testdata", "ca-config.json"),
 	) {
 		mg.SerialCtxDeps(ctx, CFSSL.Generate)
 	}
 
-	if helper.FileExists(
-		helper.MustGetGitTopLevel(".golangci.yml"),
-		helper.MustGetGitTopLevel(".golangci.yaml"),
-		helper.MustGetGitTopLevel(".golangci.toml"),
-		helper.MustGetGitTopLevel(".golangci.json"),
+	if paths.FileExists(
+		paths.MustGetGitTopLevel(".golangci.yml"),
+		paths.MustGetGitTopLevel(".golangci.yaml"),
+		paths.MustGetGitTopLevel(".golangci.toml"),
+		paths.MustGetGitTopLevel(".golangci.json"),
 	) {
 		mg.SerialCtxDeps(ctx, Golang.Lint)
 	}
 
-	if helper.FileExists(
-		helper.MustGetGitTopLevel("go.mod"),
+	if paths.FileExists(
+		paths.MustGetGitTopLevel("go.mod"),
 	) {
 		mg.SerialCtxDeps(ctx, Golang.Test)
 	}
 
-	if helper.FileExists(
-		helper.MustGetGitTopLevel(".goreleaser.yml"),
+	if paths.FileExists(
+		paths.MustGetGitTopLevel(".goreleaser.yml"),
 	) {
 		mg.SerialCtxDeps(ctx, Goreleaser.Healthcheck)
 		mg.SerialCtxDeps(ctx, Goreleaser.Lint)
 	}
 
-	if helper.FileExists(
-		helper.MustGetGitTopLevel("Dockerfile"),
+	if paths.FileExists(
+		paths.MustGetGitTopLevel("Dockerfile"),
 	) {
 		mg.SerialCtxDeps(ctx, Docker.Test)
 	}

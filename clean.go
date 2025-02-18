@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/dosquad/mage/dyndep"
-	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/bins"
 	"github.com/dosquad/mage/loga"
 	"github.com/magefile/mage/sh"
 	"go.uber.org/multierr"
@@ -14,12 +14,12 @@ import (
 func Clean(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Clean)
 
-	if helper.BinGolangCILint().IsInstalled() {
-		if err := helper.BinGolangCILint().Ensure(); err != nil {
+	if bins.GolangCILint().IsInstalled() {
+		if err := bins.GolangCILint().Ensure(); err != nil {
 			return err
 		}
 
-		if err := helper.BinGolangCILint().Command("cache clean").Run(); err != nil {
+		if err := bins.GolangCILint().Command("cache clean").Run(); err != nil {
 			return err
 		}
 	}
@@ -39,11 +39,11 @@ func Clean(ctx context.Context) error {
 func CleanLight(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Clean)
 
-	if err := helper.BinGolangCILint().Ensure(); err != nil {
+	if err := bins.GolangCILint().Ensure(); err != nil {
 		return err
 	}
 
-	if err := helper.BinGolangCILint().Command("cache clean").Run(); err != nil {
+	if err := bins.GolangCILint().Command("cache clean").Run(); err != nil {
 		return err
 	}
 

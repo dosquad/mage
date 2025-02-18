@@ -1,11 +1,14 @@
-package helper
+package build
 
 import (
 	"strings"
+
+	"github.com/dosquad/mage/helper/bins"
+	"github.com/dosquad/mage/helper/must"
 )
 
 func GetModuleName() (string, error) {
-	module, err := CommandString(`go list -m`)
+	module, err := bins.CommandString(`go list -m`)
 	if err != nil {
 		return "", err
 	}
@@ -16,7 +19,7 @@ func GetModuleName() (string, error) {
 }
 
 func GolangVersion() string {
-	return Must[string](CommandString("go env GOVERSION"))
+	return must.Must[string](bins.CommandString("go env GOVERSION"))
 }
 
 func GolangVersionRaw() string {

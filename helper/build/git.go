@@ -1,4 +1,4 @@
-package helper
+package build
 
 import (
 	"strconv"
@@ -6,11 +6,13 @@ import (
 	"time"
 
 	"github.com/dosquad/go-giturl"
+	"github.com/dosquad/mage/helper/bins"
+	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/semver"
 )
 
 func GitHash() string {
-	out, err := Command("git show -s --format=%h")
+	out, err := bins.Command("git show -s --format=%h")
 	if err != nil {
 		return ""
 	}
@@ -21,7 +23,7 @@ func GitCommitTime() time.Time {
 	var out string
 	{
 		var err error
-		out, err = CommandString(`git log -1 --format="%at"`)
+		out, err = bins.CommandString(`git log -1 --format="%at"`)
 		if err != nil {
 			return time.Time{}
 		}
@@ -35,7 +37,7 @@ func GitCommitTime() time.Time {
 }
 
 func GitHeadTag() string {
-	out, err := Command("git describe --tags --exact-match HEAD 2>/dev/null")
+	out, err := bins.Command("git describe --tags --exact-match HEAD 2>/dev/null")
 	if err != nil {
 		return ""
 	}
@@ -43,7 +45,7 @@ func GitHeadTag() string {
 }
 
 func GitSlug() string {
-	out, err := Command("git config --get remote.origin.url")
+	out, err := bins.Command("git config --get remote.origin.url")
 	if err != nil {
 		return ""
 	}
@@ -59,7 +61,7 @@ func GitSlug() string {
 }
 
 func GitURL() string {
-	out, err := Command("git config --get remote.origin.url")
+	out, err := bins.Command("git config --get remote.origin.url")
 	if err != nil {
 		return ""
 	}
@@ -82,11 +84,11 @@ func GitURL() string {
 }
 
 func GitHeadRev() string {
-	return Must[string](CommandString(`git rev-parse --short HEAD`))
+	return must.Must[string](bins.CommandString(`git rev-parse --short HEAD`))
 }
 
 func GitHeadTagDescribe() string {
-	out, err := Command("git describe --tags HEAD")
+	out, err := bins.Command("git describe --tags HEAD")
 	if err != nil {
 		return "v0.0.0"
 	}
@@ -95,7 +97,7 @@ func GitHeadTagDescribe() string {
 }
 
 func GitSemver() string {
-	out, err := Command("git describe --tags HEAD")
+	out, err := bins.Command("git describe --tags HEAD")
 	if err != nil {
 		return "v0.0.0"
 	}

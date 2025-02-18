@@ -8,7 +8,10 @@ import (
 	"os"
 
 	"github.com/dosquad/mage/dyndep"
-	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/bins"
+	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/must"
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/fatih/color"
 	"github.com/princjef/mageutil/shellcmd"
 )
@@ -20,11 +23,11 @@ func ModTidy(ctx context.Context) error {
 	var listout []byte
 	{
 		var err error
-		listout, err = helper.Command("go list -m -f '{{.Dir}}'")
-		helper.PanicIfError(err, "unable to get go list output")
+		listout, err = bins.Command("go list -m -f '{{.Dir}}'")
+		must.PanicIfError(err, "unable to get go list output")
 	}
 
-	wd := helper.MustGetGitTopLevel()
+	wd := paths.MustGetGitTopLevel()
 	defer func() { _ = os.Chdir(wd) }()
 
 	scanner := bufio.NewScanner(bytes.NewReader(listout))
@@ -36,7 +39,7 @@ func ModTidy(ctx context.Context) error {
 				return err
 			}
 
-			if err := shellcmd.Command("go mod tidy -go=" + helper.GolangVersionRaw()).Run(); err != nil {
+			if err := shellcmd.Command("go mod tidy -go=" + build.GolangVersionRaw()).Run(); err != nil {
 				return err
 			}
 		}

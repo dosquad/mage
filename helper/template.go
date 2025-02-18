@@ -6,6 +6,12 @@ import (
 	"runtime"
 	"strings"
 	"text/template"
+
+	"github.com/dosquad/mage/helper/bins"
+	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/envs"
+	"github.com/dosquad/mage/helper/must"
+	"github.com/dosquad/mage/helper/paths"
 )
 
 type CommandTemplate struct {
@@ -37,25 +43,25 @@ func NewCommandTemplate(debug bool, commandDir string) *CommandTemplate {
 	o := &CommandTemplate{
 		Debug: debug,
 
-		CGO:       GetEnv("CGO_ENABLED", "0"),
+		CGO:       envs.GetEnv("CGO_ENABLED", "0"),
 		GoOS:      runtime.GOOS,
 		GoArch:    runtime.GOARCH,
-		GoArm:     Must[string](CommandString(`go env GOARM`)),
+		GoArm:     must.Must[string](bins.CommandString(`go env GOARM`)),
 		GoVersion: runtime.Version(),
 
-		GitRev:     GitHeadRev(),
-		GitHash:    GitHash(),
-		GitHeadTag: GitHeadTag(),
-		GitSlug:    GitSlug(),
+		GitRev:     build.GitHeadRev(),
+		GitHash:    build.GitHash(),
+		GitHeadTag: build.GitHeadTag(),
+		GitSlug:    build.GitSlug(),
 
-		LDFlags: strings.Join(LDFlags(debug), " "),
+		LDFlags: strings.Join(build.LDFlags(debug), " "),
 
-		CWD: MustGetGitTopLevel(),
+		CWD: paths.MustGetGitTopLevel(),
 		// BaseDir: baseDir,
 
 		CommandDir:  commandDir,
 		CommandName: filepath.Base(commandDir),
-		HomeDir:     MustGetHomeDir(),
+		HomeDir:     paths.MustGetHomeDir(),
 	}
 
 	o.apply()

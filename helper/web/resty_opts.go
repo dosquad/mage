@@ -1,4 +1,4 @@
-package helper
+package web
 
 import (
 	"github.com/go-resty/resty/v2"

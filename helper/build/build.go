@@ -1,4 +1,4 @@
-package helper
+package build
 
 import (
 	"errors"
@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/dosquad/go-cliversion/makever"
+	"github.com/dosquad/mage/helper/paths"
 )
 
 func boolToString(in bool) string {
@@ -60,10 +61,10 @@ func LDFlags(debug bool) []string {
 }
 
 func FirstCommandName() (string, error) {
-	paths := MustCommandPaths()
-	if len(paths) < 1 {
+	path := paths.MustCommandPaths()
+	if len(path) < 1 {
 		return "", errors.New("command not found")
 	}
 
-	return filepath.Base(paths[0]), nil
+	return filepath.Base(path[0]), nil
 }

@@ -6,7 +6,11 @@ import (
 	"strings"
 
 	"github.com/dosquad/mage/dyndep"
-	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/bins"
+	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/must"
+	"github.com/dosquad/mage/helper/paths"
+	"github.com/dosquad/mage/helper/pbuf"
 	"github.com/magefile/mage/mg"
 	"github.com/princjef/mageutil/bintool"
 )
@@ -16,26 +20,26 @@ type Protobuf mg.Namespace
 
 // installProtoc install protoc command.
 func (Protobuf) installProtoc(_ context.Context) error {
-	return helper.BinProtoc().Ensure()
+	return bins.Protoc().Ensure()
 }
 
 // installProtocGenGo install protoc-gen-go command.
 func (Protobuf) installProtocGenGo(_ context.Context) error {
-	return helper.BinProtocGenGo().Ensure()
+	return bins.ProtocGenGo().Ensure()
 }
 
 // installProtocGenGoGRPC install protoc-gen-go-grpc command.
 func (Protobuf) installProtocGenGoGRPC(_ context.Context) error {
-	return helper.BinProtocGenGoGRPC().Ensure()
+	return bins.ProtocGenGoGRPC().Ensure()
 }
 
 // installProtocGenGoTwirp install protoc-gen-go-twirp command.
 func (Protobuf) installProtocGenGoTwirp(_ context.Context) error {
-	return helper.BinProtocGenGoTwirp().Ensure()
+	return bins.ProtocGenGoTwirp().Ensure()
 }
 
 func (Protobuf) installProtocGenGoConnect(_ context.Context) error {
-	return helper.BinProtocGenGoConnect().Ensure()
+	return bins.ProtocGenGoConnect().Ensure()
 }
 
 // Generate install and generate golang Protocol Buffer files.
@@ -79,7 +83,7 @@ func runProtoCommand(cmd *bintool.BinTool, args []string) error {
 	origPath := os.Getenv("PATH")
 	defer func() { os.Setenv("PATH", origPath) }()
 
-	os.Setenv("PATH", helper.MustGetProtobufPath()+":"+origPath)
+	os.Setenv("PATH", paths.MustGetProtobufPath()+":"+origPath)
 
 	// loga.PrintInfo("runProtoCommand: PATH=%s", os.Getenv("PATH"))
 
@@ -94,8 +98,8 @@ func (Protobuf) GenGo(ctx context.Context) error {
 	mg.CtxDeps(ctx, Protobuf.installProtocGenGo)
 
 	return protobufGen(ctx, []string{
-		"--proto_path=" + helper.MustGetArtifactPath("protobuf", "include"),
-		"--go_opt=module=" + helper.Must[string](helper.GetModuleName()),
+		"--proto_path=" + paths.MustGetArtifactPath("protobuf", "include"),
+		"--go_opt=module=" + must.Must[string](build.GetModuleName()),
 		"--go_out=.",
 	})
 }
@@ -108,8 +112,8 @@ func (Protobuf) GenGoGRPC(ctx context.Context) error {
 	mg.CtxDeps(ctx, Protobuf.installProtocGenGoGRPC)
 
 	return protobufGen(ctx, []string{
-		"--proto_path=" + helper.MustGetArtifactPath("protobuf", "include"),
-		"--go-grpc_opt=module=" + helper.Must[string](helper.GetModuleName()),
+		"--proto_path=" + paths.MustGetArtifactPath("protobuf", "include"),
+		"--go-grpc_opt=module=" + must.Must[string](build.GetModuleName()),
 		"--go-grpc_out=.",
 		"--go-grpc_opt=require_unimplemented_servers=false",
 	})
@@ -124,10 +128,10 @@ func (Protobuf) GenGoTwirp(ctx context.Context) error {
 	mg.CtxDeps(ctx, Protobuf.installProtocGenGoTwirp)
 
 	return protobufGen(ctx, []string{
-		"--proto_path=" + helper.MustGetArtifactPath("protobuf", "include"),
-		"--go_opt=module=" + helper.Must[string](helper.GetModuleName()),
+		"--proto_path=" + paths.MustGetArtifactPath("protobuf", "include"),
+		"--go_opt=module=" + must.Must[string](build.GetModuleName()),
 		"--go_out=.",
-		"--twirp_opt=module=" + helper.Must[string](helper.GetModuleName()),
+		"--twirp_opt=module=" + must.Must[string](build.GetModuleName()),
 		"--twirp_out=.",
 	})
 }
@@ -141,10 +145,10 @@ func (Protobuf) GenGoConnect(ctx context.Context) error {
 	mg.CtxDeps(ctx, Protobuf.installProtocGenGoConnect)
 
 	return protobufGen(ctx, []string{
-		"--proto_path=" + helper.MustGetArtifactPath("protobuf", "include"),
-		"--go_opt=module=" + helper.Must[string](helper.GetModuleName()),
+		"--proto_path=" + paths.MustGetArtifactPath("protobuf", "include"),
+		"--go_opt=module=" + must.Must[string](build.GetModuleName()),
 		"--go_out=.",
-		"--connect-go_opt=module=" + helper.Must[string](helper.GetModuleName()),
+		"--connect-go_opt=module=" + must.Must[string](build.GetModuleName()),
 		"--connect-go_out=.",
 	})
 }
@@ -168,10 +172,10 @@ func protobufGen(_ context.Context, coreArgs []string) error {
 	// 	"--go-grpc_out=.",
 	// 	"--go-grpc_opt=require_unimplemented_servers=false",
 	// }
-	protobufPaths := helper.ProtobufIncludePaths()
+	protobufPaths := pbuf.ProtobufIncludePaths()
 
-	for _, protoPathFunc := range helper.ProtobufTargets() {
-		if err := runProtoCommand(helper.BinProtoc(),
+	for _, protoPathFunc := range pbuf.ProtobufTargets() {
+		if err := runProtoCommand(bins.Protoc(),
 			append(
 				append(coreArgs, protobufPaths...),
 				" "+strings.Join(protoPathFunc(), " "),

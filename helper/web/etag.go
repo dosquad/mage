@@ -1,10 +1,11 @@
-package helper
+package web
 
 import (
 	"errors"
 	"io"
 	"os"
 
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/na4ma4/go-permbits"
 	"gopkg.in/yaml.v3"
 )
@@ -28,7 +29,7 @@ func ETagLoadConfig() (ETag, error) {
 	var f *os.File
 	{
 		var err error
-		f, err = os.Open(MustGetArtifactPath(".etag.yml"))
+		f, err = os.Open(paths.MustGetArtifactPath(".etag.yml"))
 		if errors.Is(err, os.ErrNotExist) {
 			return etag, nil
 		} else if err != nil {
@@ -79,7 +80,7 @@ func (e *ETag) GetItem(key string) *ETagItem {
 }
 
 func (e *ETag) GetRelative(path string) string {
-	after, ok := GetRelativePath(path)
+	after, ok := paths.GetRelativePath(path)
 	if ok {
 		return e.Get(after)
 	}
@@ -98,12 +99,12 @@ func (e *ETag) Get(key string) string {
 }
 
 func (e *ETag) Save() error {
-	MustMakeDir(MustGetArtifactPath(), permbits.MustString("ug=rwx,o=rx"))
+	paths.MustMakeDir(paths.MustGetArtifactPath(), permbits.MustString("ug=rwx,o=rx"))
 
 	var f *os.File
 	{
 		var err error
-		f, err = os.Create(MustGetArtifactPath(".etag.yml"))
+		f, err = os.Create(paths.MustGetArtifactPath(".etag.yml"))
 		if err != nil {
 			return err
 		}

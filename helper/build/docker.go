@@ -1,4 +1,4 @@
-package helper
+package build
 
 import (
 	"context"
@@ -7,6 +7,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/dosquad/mage/helper/ctxval"
+	"github.com/dosquad/mage/helper/envs"
+	"github.com/dosquad/mage/helper/paths"
 	"gopkg.in/yaml.v3"
 )
 
@@ -30,16 +33,16 @@ type DockerConfigKubernetes struct {
 	PodSelector string `yaml:"pod-selector,omitempty"`
 }
 
-type BuildPlatform struct {
+type Platform struct {
 	OS   string
 	Arch string
 }
 
 func (d DockerConfig) GetTags() []string {
-	if v := GetEnv("DOCKER_TAGS", ""); v != "" {
+	if v := envs.GetEnv("DOCKER_TAGS", ""); v != "" {
 		return strings.Split(v, " ")
 	}
-	if v := GetEnv("DOCKER_TAG", ""); v != "" {
+	if v := envs.GetEnv("DOCKER_TAG", ""); v != "" {
 		return []string{v}
 	}
 
@@ -62,11 +65,11 @@ func (d DockerConfig) GetTags() []string {
 }
 
 func (d DockerConfig) GetImage() string {
-	if v := GetEnv("DOCKER_REPO", ""); v != "" {
+	if v := envs.GetEnv("DOCKER_REPO", ""); v != "" {
 		return v
 	}
 
-	if v := GetEnv("DOCKER_IMAGE", ""); v != "" {
+	if v := envs.GetEnv("DOCKER_IMAGE", ""); v != "" {
 		return v
 	}
 
@@ -94,15 +97,15 @@ func (d DockerConfig) IsBlocked(in string) bool {
 	return false
 }
 
-func (d DockerConfig) OSArch() []BuildPlatform {
-	out := []BuildPlatform{}
+func (d DockerConfig) OSArch() []Platform {
+	out := []Platform{}
 	for _, platform := range d.Platforms {
 		sp := strings.SplitN(platform, "/", 2) //nolint:mnd // formatted string "os/arch".
 		if len(sp) != 2 {                      //nolint:mnd // formatted string "os/arch".
 			continue
 		}
 
-		out = append(out, BuildPlatform{
+		out = append(out, Platform{
 			OS:   sp[0],
 			Arch: sp[1],
 		})
@@ -126,7 +129,7 @@ func (d DockerConfig) ArgsTag(tag string) (string, error) {
 func (d DockerConfig) Args(ctx context.Context) []string {
 	out := []string{}
 
-	if !ContextDefaultValue[bool](ctx, DockerLocalPlatform, false) {
+	if !ctxval.ContextDefaultValue[bool](ctx, ctxval.DockerLocalPlatform, false) {
 		if len(d.Platforms) > 0 {
 			out = append(out, "--platform "+strings.Join(d.Platforms, ","))
 		}
@@ -159,7 +162,7 @@ func DockerLoadConfig() (*DockerConfig, error) {
 	var f *os.File
 	{
 		var err error
-		f, err = os.Open(MustGetGitTopLevel(".docker.yml"))
+		f, err = os.Open(paths.MustGetGitTopLevel(".docker.yml"))
 		if err != nil {
 			return cfg, err
 		}

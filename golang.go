@@ -7,6 +7,9 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/bins"
+	"github.com/dosquad/mage/helper/envs"
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/loga"
 	"github.com/magefile/mage/mg"
 	"github.com/na4ma4/go-permbits"
@@ -18,14 +21,14 @@ type Golang mg.Namespace
 
 // InstallGovulncheck installs govulncheck.
 func (Golang) installGovulncheck(_ context.Context) error {
-	return helper.BinGovulncheck().Ensure()
+	return bins.Govulncheck().Ensure()
 }
 
 // Vulncheck runs govulncheck.
 func (Golang) Vulncheck(ctx context.Context) error {
 	mg.CtxDeps(ctx, Golang.installGovulncheck)
 
-	return helper.BinGovulncheck().Command("./...").Run()
+	return bins.Govulncheck().Command("./...").Run()
 }
 
 // Test run test suite and save coverage report.
@@ -33,12 +36,12 @@ func (Golang) Test(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Golang)
 	dyndep.CtxDeps(ctx, dyndep.Test)
 
-	coverPath := helper.MustGetArtifactPath("coverage")
+	coverPath := paths.MustGetArtifactPath("coverage")
 
-	helper.MustMakeDir(coverPath, 0)
+	paths.MustMakeDir(coverPath, 0)
 
 	raceArg := ""
-	if v := helper.GoEnv("CGO_ENABLED", "0"); v == "1" {
+	if v := envs.GoEnv("CGO_ENABLED", "0"); v == "1" {
 		raceArg = "-race"
 	}
 
@@ -60,7 +63,7 @@ func (Golang) Test(ctx context.Context) error {
 
 // InstallVGT installs vgt.
 func (Golang) installVGT(_ context.Context) error {
-	return helper.BinVGT().Ensure()
+	return bins.VGT().Ensure()
 }
 
 // VisualTest runs the test suite and then renders the result using vgt (https://github.com/roblaszczak/vgt).
@@ -71,7 +74,7 @@ func (Golang) VisualTest(ctx context.Context) error {
 	mg.CtxDeps(ctx, Golang.installVGT)
 
 	raceArg := ""
-	if v := helper.GoEnv("CGO_ENABLED", "0"); v == "1" {
+	if v := envs.GoEnv("CGO_ENABLED", "0"); v == "1" {
 		raceArg = "-race"
 	}
 
@@ -81,8 +84,8 @@ func (Golang) VisualTest(ctx context.Context) error {
 		"\"./...\"",
 		raceArg)
 
-	visualTestPath := helper.MustGetArtifactPath("tests")
-	helper.MustMakeDir(
+	visualTestPath := paths.MustGetArtifactPath("tests")
+	paths.MustMakeDir(
 		visualTestPath,
 		permbits.MustString("u=rwx,go=rx"),
 	)
@@ -98,11 +101,11 @@ func (Golang) VisualTest(ctx context.Context) error {
 		}
 	}
 
-	if err := helper.FileWrite(output, vgtFileName); err != nil {
+	if err := paths.FileWrite(output, vgtFileName); err != nil {
 		return err
 	}
 
-	return helper.BinVGT().Command(
+	return bins.VGT().Command(
 		"-dont-pass-output -from-file " + vgtFileName,
 	).Run()
 }
@@ -119,11 +122,11 @@ func (Golang) Lint(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Golang)
 	dyndep.CtxDeps(ctx, dyndep.Lint)
 
-	if err := helper.BinGolangCILint().Ensure(); err != nil {
+	if err := bins.GolangCILint().Ensure(); err != nil {
 		return err
 	}
 
-	return helper.BinGolangCILint().Command("run ./... --sort-results --max-same-issues 0 --max-issues-per-linter 0").Run()
+	return bins.GolangCILint().Command("run ./... --sort-results --max-same-issues 0 --max-issues-per-linter 0").Run()
 }
 
 // Fmt run go fmt.

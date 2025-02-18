@@ -6,7 +6,8 @@ import (
 	"runtime"
 
 	"github.com/dosquad/mage/dyndep"
-	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/bins"
+	"github.com/dosquad/mage/helper/envs"
 	"github.com/magefile/mage/mg"
 )
 
@@ -15,7 +16,7 @@ type Goreleaser mg.Namespace
 
 // installGoreleaser binary.
 func (Goreleaser) installGoreleaser(_ context.Context) error {
-	return helper.BinGoreleaser().Ensure()
+	return bins.Goreleaser().Ensure()
 }
 
 // Build Goreleaser config.
@@ -27,9 +28,9 @@ func (Goreleaser) Build(ctx context.Context) error {
 
 	os.Setenv("GOVERSION_NR", runtime.Version())
 
-	args := helper.GetEnv("GORELEASER_ARGS", "")
+	args := envs.GetEnv("GORELEASER_ARGS", "")
 
-	return helper.BinGoreleaser().Command("build " + args).Run()
+	return bins.Goreleaser().Command("build " + args).Run()
 }
 
 // Lint Goreleaser config.
@@ -39,9 +40,9 @@ func (Goreleaser) Lint(ctx context.Context) error {
 
 	mg.CtxDeps(ctx, Goreleaser.installGoreleaser)
 
-	args := helper.GetEnv("GORELEASER_ARGS", "")
+	args := envs.GetEnv("GORELEASER_ARGS", "")
 
-	return helper.BinGoreleaser().Command("check " + args).Run()
+	return bins.Goreleaser().Command("check " + args).Run()
 }
 
 // Healthcheck Goreleaser config.
@@ -50,7 +51,7 @@ func (Goreleaser) Healthcheck(ctx context.Context) error {
 
 	mg.CtxDeps(ctx, Goreleaser.installGoreleaser)
 
-	args := helper.GetEnv("GORELEASER_ARGS", "")
+	args := envs.GetEnv("GORELEASER_ARGS", "")
 
-	return helper.BinGoreleaser().Command("healthcheck " + args).Run()
+	return bins.Goreleaser().Command("healthcheck " + args).Run()
 }

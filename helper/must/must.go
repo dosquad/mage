@@ -1,4 +1,4 @@
-package helper
+package must
 
 // Must takes a function that returns T, error and if the error is not nil
 // panics, otherwise returns just T.

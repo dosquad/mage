@@ -1,4 +1,4 @@
-package helper
+package bins
 
 import (
 	"errors"
@@ -6,6 +6,10 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/dosquad/mage/helper/envs"
+	"github.com/dosquad/mage/helper/must"
+	"github.com/dosquad/mage/helper/paths"
+	"github.com/dosquad/mage/helper/web"
 	"github.com/dosquad/mage/loga"
 	"github.com/na4ma4/go-permbits"
 	"golang.org/x/text/cases"
@@ -61,7 +65,7 @@ type VersionCache map[VersionKey]string
 func MustVersionLoadCache() *VersionCache {
 	cache, err := VersionLoadCache()
 	if !errors.Is(err, os.ErrNotExist) {
-		PanicIfError(err, "unable to load mage version config")
+		must.PanicIfError(err, "unable to load mage version config")
 	}
 	return cache
 }
@@ -90,7 +94,7 @@ func VersionLoadCache() (*VersionCache, error) {
 	var f *os.File
 	{
 		var err error
-		f, err = os.Open(MustGetArtifactPath(".versioncache.yaml"))
+		f, err = os.Open(paths.MustGetArtifactPath(".versioncache.yaml"))
 		if err != nil {
 			return cache, err
 		}
@@ -107,8 +111,8 @@ func VersionLoadCache() (*VersionCache, error) {
 
 func (vc VersionCache) Save() error {
 	{
-		if !FileExists(MustGetArtifactPath()) {
-			if err := os.MkdirAll(MustGetArtifactPath(), permbits.MustString("ug=rwx,o=rx")); err != nil {
+		if !paths.FileExists(paths.MustGetArtifactPath()) {
+			if err := os.MkdirAll(paths.MustGetArtifactPath(), permbits.MustString("ug=rwx,o=rx")); err != nil {
 				loga.PrintWarning("unable to create artifact directory: %s", err)
 				return err
 			}
@@ -117,7 +121,7 @@ func (vc VersionCache) Save() error {
 	var f *os.File
 	{
 		var err error
-		f, err = os.Create(MustGetArtifactPath(".versioncache.yaml"))
+		f, err = os.Create(paths.MustGetArtifactPath(".versioncache.yaml"))
 		if err != nil {
 			loga.PrintWarning("unable to create version cache: %s", err)
 			return err
@@ -144,7 +148,7 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 		return v
 	}
 
-	if v := GetEnv(key.String(), ""); v != "" {
+	if v := envs.GetEnv(key.String(), ""); v != "" {
 		return vc.SetVersion(key, v)
 	}
 
@@ -158,7 +162,7 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 	case ProtocGenGoConnectVersion:
 		return vc.SetVersion(key, vc.getGithubVersion("connectrpc/connect-go"))
 	case ProtocGenGoGRPCVersion:
-		v, err := HTTPGetLatestGitHubReleaseMatchingTag("grpc/grpc-go", regexp.MustCompile(`^cmd/protoc-gen-go-grpc/`))
+		v, err := web.HTTPGetLatestGitHubReleaseMatchingTag("grpc/grpc-go", regexp.MustCompile(`^cmd/protoc-gen-go-grpc/`))
 		if err != nil {
 			return latestTag
 		}
@@ -198,7 +202,7 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 }
 
 func (vc VersionCache) getGithubVersion(slug string) string {
-	ver, _ := HTTPGetLatestGitHubVersion(slug)
+	ver, _ := web.HTTPGetLatestGitHubVersion(slug)
 	return ver
 }
 
@@ -211,7 +215,7 @@ func (vc VersionCache) getGolangcilintVersion() string {
 }
 
 func (vc VersionCache) getProtocVersion() string {
-	protocVer, err := HTTPGetLatestGitHubVersion("protocolbuffers/protobuf")
+	protocVer, err := web.HTTPGetLatestGitHubVersion("protocolbuffers/protobuf")
 	if err != nil {
 		loga.PrintWarning("Protocol Buffer Error: %s", err)
 		return "latest"

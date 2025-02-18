@@ -9,7 +9,8 @@ import (
 	"os"
 
 	"github.com/dosquad/mage/dyndep"
-	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/bins"
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/loga"
 	"github.com/magefile/mage/mg"
 	"github.com/na4ma4/go-permbits"
@@ -19,16 +20,16 @@ import (
 type CFSSL mg.Namespace
 
 func mustCertDir(path ...string) string {
-	return helper.MustGetArtifactPath(append([]string{"certs"}, path...)...)
+	return paths.MustGetArtifactPath(append([]string{"certs"}, path...)...)
 }
 
 // Install CFSSL binaries.
 func (CFSSL) Install(_ context.Context) error {
-	if err := helper.BinCfssl().Ensure(); err != nil {
+	if err := bins.Cfssl().Ensure(); err != nil {
 		panic(err)
 	}
 
-	if err := helper.BinCfsslJSON().Ensure(); err != nil {
+	if err := bins.CfsslJSON().Ensure(); err != nil {
 		panic(err)
 	}
 
@@ -40,7 +41,7 @@ func cfsslGenCert(_ context.Context, outputFile, configFileName, profile, srcFil
 	var initCA []byte
 	{
 		var err error
-		initCA, err = helper.Command(string(helper.BinCfssl().Command(fmt.Sprintf(
+		initCA, err = bins.Command(string(bins.Cfssl().Command(fmt.Sprintf(
 			`gencert -initca -config="%s" -profile="%s" "%s"`,
 			configFileName, profile, srcFileName,
 		))))
@@ -71,7 +72,7 @@ func cfsslSignCert(_ context.Context, outputFile, configFileName, profile, srcFi
 	var initCA []byte
 	{
 		var err error
-		initCA, err = helper.Command(string(helper.BinCfssl().Command(fmt.Sprintf(
+		initCA, err = bins.Command(string(bins.Cfssl().Command(fmt.Sprintf(
 			`sign -ca="%s" -ca-key="%s" -config="%s" -profile="%s" -csr="%s" "%s"`,
 			mustCertDir("ca.pem"),
 			mustCertDir("ca-key.pem"),
@@ -104,7 +105,7 @@ func cfsslSignCert(_ context.Context, outputFile, configFileName, profile, srcFi
 func cfsslJSON(_ context.Context, outputBase, inputFile string) error {
 	loga.PrintDebug("cfsslJSON(ctx, %s, %s)", outputBase, inputFile)
 
-	err := helper.BinCfsslJSON().Command(fmt.Sprintf(
+	err := bins.CfsslJSON().Command(fmt.Sprintf(
 		`-f %s -bare %s`,
 		inputFile, outputBase,
 	)).Run()
@@ -119,11 +120,11 @@ func cfsslInitCA(ctx context.Context) error {
 	loga.PrintDebug("cfsslInitCA(ctx)")
 	loga.PrintInfo("Generating and signing CA certificate")
 
-	if helper.FileExists(mustCertDir("ca.pem")) {
+	if paths.FileExists(mustCertDir("ca.pem")) {
 		loga.PrintDebug("Target exists, skipping: %s", mustCertDir("ca.pem"))
 		return nil
 	}
-	helper.MustMakeDir(mustCertDir(), permbits.MustString("ug=rwx,o=rx"))
+	paths.MustMakeDir(mustCertDir(), permbits.MustString("ug=rwx,o=rx"))
 
 	// Init CA
 	if err := cfsslGenCert(
@@ -131,7 +132,7 @@ func cfsslInitCA(ctx context.Context) error {
 		mustCertDir("ca.json"),
 		mustCertDir("ca-config.json"),
 		"ca",
-		helper.MustGetWD("testdata", "ca-csr.json"),
+		paths.MustGetWD("testdata", "ca-csr.json"),
 	); err != nil {
 		return err
 	}
@@ -149,7 +150,7 @@ func cfsslInitCA(ctx context.Context) error {
 		mustCertDir("ca-sign.json"),
 		mustCertDir("ca-config.json"),
 		"ca",
-		helper.MustGetWD("testdata", "ca-csr.json"),
+		paths.MustGetWD("testdata", "ca-csr.json"),
 		mustCertDir("ca"),
 	); err != nil {
 		return err
@@ -169,11 +170,11 @@ func cfsslCert(ctx context.Context, profile, baseName string) error {
 	loga.PrintDebug("cfsslCert(ctx, %s, %s)", profile, baseName)
 	loga.PrintInfo("Generating and signing certificate: %s", profile)
 
-	if helper.FileExists(mustCertDir(baseName + ".pem")) {
+	if paths.FileExists(mustCertDir(baseName + ".pem")) {
 		loga.PrintDebug("Target exists, skipping: %s", mustCertDir(baseName+".pem"))
 		return nil
 	}
-	helper.MustMakeDir(mustCertDir(), permbits.MustString("ug=rwx,o=rx"))
+	paths.MustMakeDir(mustCertDir(), permbits.MustString("ug=rwx,o=rx"))
 
 	// Generate Cert
 	if err := cfsslGenCert(
@@ -181,7 +182,7 @@ func cfsslCert(ctx context.Context, profile, baseName string) error {
 		mustCertDir(baseName+".json"),
 		mustCertDir("ca-config.json"),
 		profile,
-		helper.MustGetWD("testdata", baseName+".json"),
+		paths.MustGetWD("testdata", baseName+".json"),
 	); err != nil {
 		return err
 	}
@@ -199,7 +200,7 @@ func cfsslCert(ctx context.Context, profile, baseName string) error {
 		mustCertDir(baseName+"-sign.json"),
 		mustCertDir("ca-config.json"),
 		profile,
-		helper.MustGetWD("testdata", baseName+".json"),
+		paths.MustGetWD("testdata", baseName+".json"),
 		mustCertDir(baseName),
 	); err != nil {
 		return err
@@ -218,28 +219,28 @@ func cfsslCert(ctx context.Context, profile, baseName string) error {
 func (CFSSL) Generate(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Cfssl)
 
-	if err := helper.BinInstall(helper.BinCfssl()); err != nil {
+	if err := bins.Install(bins.Cfssl()); err != nil {
 		return err
 	}
-	if err := helper.BinInstall(helper.BinCfsslJSON()); err != nil {
+	if err := bins.Install(bins.CfsslJSON()); err != nil {
 		return err
 	}
 
-	caConfig := helper.MustGetWD("testdata", "ca-config.json")
-	if !helper.FileExists(caConfig) {
+	caConfig := paths.MustGetWD("testdata", "ca-config.json")
+	if !paths.FileExists(caConfig) {
 		return errors.New("testdata/ca-config.json not found")
 	}
 
-	helper.MustMakeDir(
-		helper.MustGetArtifactPath("certs"),
+	paths.MustMakeDir(
+		paths.MustGetArtifactPath("certs"),
 		permbits.MustString("a=rx,ug=w"),
 	)
 
-	if err := helper.FileCopy(
+	if err := paths.FileCopy(
 		"testdata/ca-config.json",
 		"artifacts/certs/ca-config.json",
 		false,
-	); err != nil && !errors.Is(err, helper.ErrFileExists) {
+	); err != nil && !errors.Is(err, paths.ErrFileExists) {
 		return fmt.Errorf("unable to copy testdata/ca-config.json to artifacts/certs/ca-config.json: %w", err)
 	}
 
@@ -258,12 +259,12 @@ func (CFSSL) Generate(ctx context.Context) error {
 		return err
 	}
 
-	if helper.FileExists(helper.MustGetWD("testdata", "cert.json")) {
+	if paths.FileExists(paths.MustGetWD("testdata", "cert.json")) {
 		if err := cfsslCert(ctx, "client", "cert"); err != nil {
 			return err
 		}
-		if !helper.FileExists(mustCertDir("key.pem")) {
-			if err := helper.FileCopy(
+		if !paths.FileExists(mustCertDir("key.pem")) {
+			if err := paths.FileCopy(
 				mustCertDir("cert-key.pem"),
 				mustCertDir("key.pem"),
 				false,
@@ -277,7 +278,7 @@ func (CFSSL) Generate(ctx context.Context) error {
 }
 
 func cfsslIfFileExists(ctx context.Context, profile, name string, path ...string) error {
-	if helper.FileExists(helper.MustGetWD(path...)) {
+	if paths.FileExists(paths.MustGetWD(path...)) {
 		return cfsslCert(ctx, profile, name)
 	}
 

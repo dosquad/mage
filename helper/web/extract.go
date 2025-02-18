@@ -1,4 +1,4 @@
-package helper
+package web
 
 import (
 	"archive/tar"
@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/loga"
 	"github.com/go-resty/resty/v2"
 	"github.com/h2non/filetype"
@@ -106,7 +107,7 @@ func DownloadToPath(src, dest string, opts ...RestyOpt) (string, error) {
 			return "", err
 		}
 
-		if v := filepath.Join(dest, filename); FileExists(v) {
+		if v := filepath.Join(dest, filename); paths.FileExists(v) {
 			return v, nil
 		}
 	}

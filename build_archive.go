@@ -11,6 +11,8 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/loga"
 	"github.com/magefile/mage/mg"
 	"github.com/na4ma4/go-permbits"
@@ -21,11 +23,11 @@ func (Build) Archive(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Build)
 	mg.CtxDeps(ctx, Build.Release)
 
-	paths := helper.MustCommandPaths()
+	pathList := paths.MustCommandPaths()
 
-	helper.MustMakeDir(helper.MustGetArtifactPath("archives"), permbits.MustString("ug=rwx,o=rx"))
+	paths.MustMakeDir(paths.MustGetArtifactPath("archives"), permbits.MustString("ug=rwx,o=rx"))
 
-	for _, cmdPath := range paths {
+	for _, cmdPath := range pathList {
 		ct := helper.NewCommandTemplate(false, cmdPath)
 
 		if err := buildPlatformIterator(ctx, ct, func(_ context.Context, ct *helper.CommandTemplate) error {
@@ -54,7 +56,7 @@ func buildTar(ct *helper.CommandTemplate) error {
 		fileName = fmt.Sprintf("%s_%s_%s_%s.tar.gz", ct.CommandName, ct.GoOS, ct.GoArch, ct.GoArm)
 	}
 
-	archivePath := helper.MustGetArtifactPath("archives", fileName)
+	archivePath := paths.MustGetArtifactPath("archives", fileName)
 
 	var f *os.File
 	{
@@ -71,13 +73,13 @@ func buildTar(ct *helper.CommandTemplate) error {
 	tarWriter := tar.NewWriter(gzipWriter)
 	defer tarWriter.Close()
 
-	if readmeFile := helper.MustGetWD("README.md"); helper.FileExists(readmeFile) {
+	if readmeFile := paths.MustGetWD("README.md"); paths.FileExists(readmeFile) {
 		if err := tarAddFile(tarWriter, readmeFile, permbits.MustString("ugo=r")); err != nil {
 			return err
 		}
 	}
 
-	if binFile := ct.OutputArtifact; helper.FileExists(binFile) {
+	if binFile := ct.OutputArtifact; paths.FileExists(binFile) {
 		if err := tarAddFile(tarWriter, binFile, permbits.MustString("ug=rwx,o=rx")); err != nil {
 			return err
 		}
@@ -109,7 +111,7 @@ func tarAddFile(tarWriter *tar.Writer, filename string, mode os.FileMode) error 
 		Name:    filepath.Base(filename),
 		Mode:    int64(mode),
 		Size:    srcStat.Size(),
-		ModTime: helper.GitCommitTime(),
+		ModTime: build.GitCommitTime(),
 	}
 
 	if err := tarWriter.WriteHeader(hdr); err != nil {

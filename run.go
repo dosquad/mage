@@ -7,6 +7,10 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/envs"
+	"github.com/dosquad/mage/helper/must"
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/magefile/mage/mg"
 	"github.com/princjef/mageutil/shellcmd"
 )
@@ -39,15 +43,15 @@ func (Run) Mirrord(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Run)
 	dyndep.CtxDeps(ctx, dyndep.Mirrord)
 
-	cfg := helper.Must[*helper.DockerConfig](helper.DockerLoadConfig())
-	cfgFile := helper.MustGetGitTopLevel("mirrord.yaml")
+	cfg := must.Must[*build.DockerConfig](build.DockerLoadConfig())
+	cfgFile := paths.MustGetGitTopLevel("mirrord.yaml")
 
-	if !helper.FileExists(cfgFile) {
+	if !paths.FileExists(cfgFile) {
 		return fmt.Errorf("Mirrord configuration file (%s) missing", cfgFile)
 	}
 
 	mg.CtxDeps(ctx, Build.Debug)
-	ct := helper.NewCommandTemplate(true, "./cmd/"+helper.Must[string](helper.FirstCommandName()))
+	ct := helper.NewCommandTemplate(true, "./cmd/"+must.Must[string](build.FirstCommandName()))
 
 	// targetCmd := fmt.Sprintf("artifacts/build/debug/%s/%s/%s", Cfg.OOS, Cfg.Arch, Cfg.BaseDir)
 
@@ -67,8 +71,8 @@ func (Run) Mirrord(ctx context.Context) error {
 			panic(errors.New("kubernetes.pod-selector in .docker.yml must not be empty, " +
 				"example: 'deployment=slackrobot-router'"))
 		}
-		targetPod = helper.Must[string](
-			helper.KubernetesGetPodWithSelector(cfg.Kubernetes.PodSelector),
+		targetPod = must.Must[string](
+			build.KubernetesGetPodWithSelector(cfg.Kubernetes.PodSelector),
 		)
 	}
 	return shellcmd.Command(
@@ -76,7 +80,7 @@ func (Run) Mirrord(ctx context.Context) error {
 			"mirrord exec --config-file %s -t %s -n %s %s",
 			cfgFile,
 			targetPod,
-			helper.Must[string](helper.KubernetesGetCurrentContext()),
+			must.Must[string](build.KubernetesGetCurrentContext()),
 			ct.OutputArtifact,
 		),
 	).Run()
@@ -87,7 +91,7 @@ func (Run) Mirrord(ctx context.Context) error {
 func RunE(ctx context.Context, args string) error {
 	dyndep.CtxDeps(ctx, dyndep.Run)
 
-	cmdName := helper.GetEnv("RUN_CMD", helper.Must[string](helper.FirstCommandName()))
+	cmdName := envs.GetEnv("RUN_CMD", must.Must[string](build.FirstCommandName()))
 	ct := helper.NewCommandTemplate(true, "./cmd/"+cmdName)
 
 	if err := buildArtifact(ctx, ct); err != nil {

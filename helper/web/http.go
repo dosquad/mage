@@ -1,4 +1,4 @@
-package helper
+package web
 
 import (
 	"errors"
@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/loga"
 	"github.com/go-resty/resty/v2"
 	"github.com/magefile/mage/mg"
@@ -23,7 +24,7 @@ func HTTPWriteFile(rawURL, filename string, eTag *ETagItem, fileperm os.FileMode
 	}
 
 	eTagVal := ""
-	if eTag != nil && FileExists(filename) {
+	if eTag != nil && paths.FileExists(filename) {
 		eTagVal = eTag.Value
 	}
 

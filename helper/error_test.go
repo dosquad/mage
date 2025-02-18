@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/must"
 )
 
 func TestIfErrorf(t *testing.T) {
@@ -27,7 +27,7 @@ func TestIfErrorf(t *testing.T) {
 		t.Run(fmt.Sprintf(tt.format, tt.args...), func(t *testing.T) {
 			t.Parallel()
 
-			err := helper.IfErrorf(tt.format, tt.args...)
+			err := must.IfErrorf(tt.format, tt.args...)
 			if v := (err != nil); v != tt.expectError {
 				t.Errorf("helper.IfErrorf(): error == nil : got '%t', want '%t'", v, tt.expectError)
 			}

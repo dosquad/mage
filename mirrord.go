@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/magefile/mage/mg"
 	"github.com/na4ma4/go-permbits"
 )
@@ -43,7 +43,7 @@ func (Mirrord) VsCodeDebugConfig(_ context.Context) error {
 `
 
 	launchItems := []string{}
-	for _, cmdPath := range helper.MustCommandPaths() {
+	for _, cmdPath := range paths.MustCommandPaths() {
 		cmdPath = filepath.Base(cmdPath)
 		launchItems = append(launchItems,
 			fmt.Sprintf(launchItemCfg, cmdPath, cmdPath),
@@ -52,9 +52,9 @@ func (Mirrord) VsCodeDebugConfig(_ context.Context) error {
 
 	launchBody := fmt.Sprintf(launchCfg, strings.Join(launchItems, ","))
 
-	helper.MustMakeDir(helper.MustGetVSCodePath(), permbits.MustString("ug=rwx,o=rx"))
+	paths.MustMakeDir(paths.MustGetVSCodePath(), permbits.MustString("ug=rwx,o=rx"))
 
-	cfgFilePath := filepath.Join(helper.MustGetVSCodePath(), "launch.json")
+	cfgFilePath := filepath.Join(paths.MustGetVSCodePath(), "launch.json")
 
 	f, err := os.Create(cfgFilePath)
 	if err != nil {

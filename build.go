@@ -9,6 +9,8 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/envs"
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/magefile/mage/mg"
 	"github.com/na4ma4/go-permbits"
 	"github.com/princjef/mageutil/shellcmd"
@@ -61,9 +63,9 @@ func (Build) ReleaseCommand(ctx context.Context, cmd string) error {
 
 func buildCommand(ctx context.Context, debug bool, cmd string) error {
 	dyndep.CtxDeps(ctx, dyndep.Build)
-	paths := helper.MustCommandPaths()
+	pathList := paths.MustCommandPaths()
 
-	for _, cmdPath := range paths {
+	for _, cmdPath := range pathList {
 		if cmd != "" && filepath.Base(cmdPath) != cmd {
 			continue
 		}
@@ -83,7 +85,7 @@ func buildPlatformIterator(
 	f func(context.Context, *helper.CommandTemplate) error,
 ) error {
 	var err error
-	platforms := strings.Split(helper.GetEnv("PLATFORMS", runtime.GOOS+"/"+runtime.GOARCH), ",")
+	platforms := strings.Split(envs.GetEnv("PLATFORMS", runtime.GOOS+"/"+runtime.GOARCH), ",")
 
 	for _, platform := range platforms {
 		ctp := helper.NewCommandTemplate(ct.Debug, ct.CommandDir)

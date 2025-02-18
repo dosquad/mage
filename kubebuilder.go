@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/bins"
+	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/must"
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/magefile/mage/mg"
 	"github.com/na4ma4/go-permbits"
 	"github.com/princjef/mageutil/shellcmd"
@@ -16,33 +19,33 @@ type Kubebuilder mg.Namespace
 
 // Manifests Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 func (Kubebuilder) Manifests(_ context.Context) error {
-	_ = helper.BinKubeControllerGen().Ensure()
+	_ = bins.KubeControllerGen().Ensure()
 
-	return helper.BinKubeControllerGen().Command(
+	return bins.KubeControllerGen().Command(
 		`rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases`,
 	).Run()
 }
 
 // Generate Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 func (Kubebuilder) Generate(_ context.Context) error {
-	_ = helper.BinKubeControllerGen().Ensure()
+	_ = bins.KubeControllerGen().Ensure()
 
-	return helper.BinKubeControllerGen().Command(`object:headerFile="hack/boilerplate.go.txt" paths="./..."`).Run()
+	return bins.KubeControllerGen().Command(`object:headerFile="hack/boilerplate.go.txt" paths="./..."`).Run()
 }
 
 func kustomizeBuildCommand(cmd, filename string) (string, error) {
-	out, err := helper.Command(string(helper.BinKustomize().Command(cmd)))
+	out, err := bins.Command(string(bins.Kustomize().Command(cmd)))
 	if err != nil {
 		return "", err
 	}
 
-	k8sPath := helper.MustGetArtifactPath("k8s")
-	helper.MustMakeDir(
+	k8sPath := paths.MustGetArtifactPath("k8s")
+	paths.MustMakeDir(
 		k8sPath,
 		permbits.MustString("u=rwx,go=rx"),
 	)
 
-	return filepath.Join(k8sPath, filename), helper.FileWrite(
+	return filepath.Join(k8sPath, filename), paths.FileWrite(
 		out,
 		filepath.Join(k8sPath, filename),
 	)
@@ -98,20 +101,20 @@ func (Kubebuilder) Uninstall(ctx context.Context) error {
 func (Kubebuilder) Deploy(ctx context.Context) error {
 	mg.CtxDeps(ctx, Kubebuilder.Manifests)
 
-	_ = helper.BinKustomize()
+	_ = bins.Kustomize()
 
-	var dcfg *helper.DockerConfig
+	var dcfg *build.DockerConfig
 	{
 		var err error
-		dcfg, err = helper.DockerLoadConfig()
-		helper.PanicIfError(err, "unable to load docker config")
+		dcfg, err = build.DockerLoadConfig()
+		must.PanicIfError(err, "unable to load docker config")
 	}
 
 	{
 		err := shellcmd.Command(
 			fmt.Sprintf(`cd %s; %s edit set image controller=%s`,
-				helper.MustGetGitTopLevel("config", "manager"),
-				helper.MustGetArtifactPath("bin", "kustomize"),
+				paths.MustGetGitTopLevel("config", "manager"),
+				paths.MustGetArtifactPath("bin", "kustomize"),
 				dcfg.GetImageRef(),
 			),
 		).Run()

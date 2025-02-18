@@ -1,4 +1,4 @@
-package helper
+package pbuf
 
 import (
 	"bytes"
@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"time"
+
+	"github.com/dosquad/mage/helper/bins"
+	"github.com/dosquad/mage/helper/paths"
 )
 
 // Module is a module returned by `go list`.
@@ -41,7 +44,7 @@ func GolangListModules() ([]Module, error) {
 	var modList []byte
 	{
 		var err error
-		modList, err = Command(`go list -json -m all`)
+		modList, err = bins.Command(`go list -json -m all`)
 		if err != nil {
 			return out, fmt.Errorf("unable execute 'go list': %w", err)
 		}
@@ -76,15 +79,15 @@ type ProtobufTargetFunc func() []string
 // and another that returns [/root/blah2/testa.proto /root/blah2/testb.proto].
 func ProtobufTargets() []ProtobufTargetFunc {
 	// Use a map to create a unique list of directories that contain `*.proto`.
-	paths := map[string]interface{}{}
-	for _, match := range FilesMatch(MustGetGitTopLevel(), "*.proto") {
-		paths[filepath.Dir(match)] = nil
+	pathMap := map[string]interface{}{}
+	for _, match := range paths.FilesMatch(paths.MustGetGitTopLevel(), "*.proto") {
+		pathMap[filepath.Dir(match)] = nil
 	}
 
 	// Create slice of functions with length of map.
-	out := make([]ProtobufTargetFunc, len(paths))
+	out := make([]ProtobufTargetFunc, len(pathMap))
 	idx := 0
-	for path := range paths {
+	for path := range pathMap {
 		out[idx] = func() []string {
 			matches, _ := filepath.Glob(filepath.Join(path, "*.proto"))
 			return matches
@@ -101,7 +104,7 @@ func ProtobufIncludePaths() []string {
 	out := []string{}
 	modules, _ := GolangListModules()
 	for _, module := range modules {
-		if len(FilesMatch(module.Dir, "*.proto")) > 0 {
+		if len(paths.FilesMatch(module.Dir, "*.proto")) > 0 {
 			out = append(out,
 				fmt.Sprintf("--proto_path=%s=%s", module.Path, module.Dir),
 			)

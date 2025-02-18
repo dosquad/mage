@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/dosquad/mage/dyndep"
-	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/bins"
 	"github.com/magefile/mage/mg"
 )
 
@@ -13,7 +13,7 @@ type Wire mg.Namespace
 
 // installWireBinary installs govulncheck.
 func (Wire) installWireBinary(_ context.Context) error {
-	return helper.BinWire().Ensure()
+	return bins.Wire().Ensure()
 }
 
 // Generate install and generate golang wire dependency files.
@@ -22,7 +22,7 @@ func (Wire) Generate(ctx context.Context) error {
 
 	mg.CtxDeps(ctx, Wire.installWireBinary)
 
-	return helper.BinWire().Command("gen ./...").Run()
+	return bins.Wire().Command("gen ./...").Run()
 }
 
 // Generate install and generate golang wire dependency files.
@@ -32,5 +32,5 @@ func (Wire) Lint(ctx context.Context) error {
 
 	mg.CtxDeps(ctx, Wire.installWireBinary)
 
-	return helper.BinWire().Command("check ./...").Run()
+	return bins.Wire().Command("check ./...").Run()
 }

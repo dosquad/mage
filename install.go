@@ -6,6 +6,10 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/envs"
+	"github.com/dosquad/mage/helper/must"
+	"github.com/dosquad/mage/helper/paths"
 	"github.com/magefile/mage/mg"
 	"github.com/princjef/mageutil/shellcmd"
 )
@@ -19,15 +23,15 @@ type Install mg.Namespace
 func (Install) CommandAll(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Install)
 
-	paths := helper.MustCommandPaths()
+	pathList := paths.MustCommandPaths()
 
-	for _, cmdPath := range paths {
+	for _, cmdPath := range pathList {
 		ct := helper.NewCommandTemplate(false, cmdPath)
 		if err := buildArtifact(ctx, ct); err != nil {
 			return err
 		}
 
-		installDir := helper.GetEnv("INSTALL_DIR", helper.MustGetHomeDir("go", "bin"))
+		installDir := envs.GetEnv("INSTALL_DIR", paths.MustGetHomeDir("go", "bin"))
 
 		if err := shellcmd.Command(fmt.Sprintf(
 			`install "%s" "%s"`, ct.OutputArtifact, installDir,
@@ -48,7 +52,7 @@ func (Install) Command(ctx context.Context, cmd string) error {
 		return err
 	}
 
-	installDir := helper.GetEnv("INSTALL_DIR", helper.MustGetHomeDir("go", "bin"))
+	installDir := envs.GetEnv("INSTALL_DIR", paths.MustGetHomeDir("go", "bin"))
 
 	return shellcmd.Command(fmt.Sprintf(
 		`install "%s" "%s"`,
@@ -62,7 +66,7 @@ func (Install) Command(ctx context.Context, cmd string) error {
 func InstallE(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Install)
 
-	cmdName := helper.GetEnv("INSTALL_CMD", helper.Must[string](helper.FirstCommandName()))
+	cmdName := envs.GetEnv("INSTALL_CMD", must.Must[string](build.FirstCommandName()))
 
 	cmdDep := mg.F(Install.Command, cmdName)
 	mg.CtxDeps(ctx, cmdDep)
