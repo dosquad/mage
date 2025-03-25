@@ -126,7 +126,7 @@ func (Golang) Lint(ctx context.Context) error {
 		return err
 	}
 
-	return bins.GolangCILint().Command("run ./... --sort-results --max-same-issues 0 --max-issues-per-linter 0").Run()
+	return bins.GolangCILint().Command("run ./... --max-same-issues 0 --max-issues-per-linter 0").Run()
 }
 
 // Fmt run go fmt.

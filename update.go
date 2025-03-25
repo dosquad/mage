@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	golangciLintConfigURL = "https://gist.githubusercontent.com/na4ma4/f165f6c9af35cda6b330efdcc07a9e26/raw/.golangci.yml"
+	golangciLintConfigURL = "https://raw.githubusercontent.com/dosquad/mage/refs/heads/main/.golangci.yml"
 )
 
 // Update namespace is defined to group Update functions.
