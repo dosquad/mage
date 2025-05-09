@@ -19,7 +19,7 @@ import (
 // Install namespace is defined to group Install functions.
 type Install mg.Namespace
 
-// Command installs a release version of a supplied command.
+// CommandAll installs a release version of a supplied command.
 func (Install) CommandAll(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Install)
 

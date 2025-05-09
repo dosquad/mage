@@ -15,7 +15,7 @@ type Lint mg.Namespace
 // 	mg.CtxDeps(ctx, LintGolangci)
 // }
 
-// Golangci Golang linters.
+// Golang Golang linters.
 func (Lint) Golang(ctx context.Context) {
 	dyndep.CtxDeps(ctx, dyndep.Lint)
 	dyndep.CtxDeps(ctx, dyndep.Golang)

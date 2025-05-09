@@ -1,18 +1,20 @@
 module github.com/dosquad/mage/magefiles
 
-go 1.22.2
+go 1.23.0
+
+toolchain go1.24.0
 
 replace github.com/dosquad/mage => ../
 
 require (
 	github.com/dosquad/mage v0.1.23
 	github.com/magefile/mage v1.15.0
-	github.com/na4ma4/go-permbits v0.5.1
+	github.com/na4ma4/go-permbits v0.5.2
 )
 
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
-	github.com/cheggaaa/pb/v3 v3.1.6 // indirect
+	github.com/cheggaaa/pb/v3 v3.1.7 // indirect
 	github.com/dosquad/go-cliversion v0.2.1 // indirect
 	github.com/dosquad/go-giturl v0.1.1 // indirect
 	github.com/fatih/color v1.18.0 // indirect
@@ -24,8 +26,8 @@ require (
 	github.com/princjef/mageutil v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/net v0.35.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -81,16 +81,18 @@ func (Protobuf) GenerateWithConnect(ctx context.Context) {
 
 func runProtoCommand(cmd *bintool.BinTool, args []string) error {
 	origPath := os.Getenv("PATH")
-	defer func() { os.Setenv("PATH", origPath) }()
+	defer func() { _ = os.Setenv("PATH", origPath) }()
 
-	os.Setenv("PATH", paths.MustGetProtobufPath()+":"+origPath)
+	if err := os.Setenv("PATH", paths.MustGetProtobufPath()+":"+origPath); err != nil {
+		return err
+	}
 
 	// loga.PrintInfo("runProtoCommand: PATH=%s", os.Getenv("PATH"))
 
 	return cmd.Command(strings.Join(args, " ")).Run()
 }
 
-// ProtobufGenGo run protoc-gen-go to generate code.
+// GenGo run protoc-gen-go to generate code.
 func (Protobuf) GenGo(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Protobuf)
 

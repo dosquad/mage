@@ -162,7 +162,10 @@ func (vc VersionCache) GetVersion(key VersionKey) string {
 	case ProtocGenGoConnectVersion:
 		return vc.SetVersion(key, vc.getGithubVersion("connectrpc/connect-go"))
 	case ProtocGenGoGRPCVersion:
-		v, err := web.HTTPGetLatestGitHubReleaseMatchingTag("grpc/grpc-go", regexp.MustCompile(`^cmd/protoc-gen-go-grpc/`))
+		v, err := web.HTTPGetLatestGitHubReleaseMatchingTag(
+			"grpc/grpc-go",
+			regexp.MustCompile(`^cmd/protoc-gen-go-grpc/`),
+		)
 		if err != nil {
 			return latestTag
 		}

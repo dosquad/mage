@@ -25,7 +25,7 @@ func (Wire) Generate(ctx context.Context) error {
 	return bins.Wire().Command("gen ./...").Run()
 }
 
-// Generate install and generate golang wire dependency files.
+// Lint golang wire dependency files.
 func (Wire) Lint(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Lint)
 	dyndep.CtxDeps(ctx, dyndep.Wire)

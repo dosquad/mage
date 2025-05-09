@@ -26,7 +26,9 @@ func (Goreleaser) Build(ctx context.Context) error {
 
 	mg.CtxDeps(ctx, Goreleaser.installGoreleaser)
 
-	os.Setenv("GOVERSION_NR", runtime.Version())
+	if err := os.Setenv("GOVERSION_NR", runtime.Version()); err != nil {
+		return err
+	}
 
 	args := envs.GetEnv("GORELEASER_ARGS", "")
 

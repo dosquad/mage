@@ -7,7 +7,7 @@ import (
 	"github.com/magefile/mage/mg"
 )
 
-// PrintWarn prints the passed warning message to stdout in white text with yellow chevron.
+// PrintWarning prints the passed warning message to stdout in white text with yellow chevron.
 //
 //nolint:forbidigo // printing output
 func PrintWarning(format string, v ...any) {

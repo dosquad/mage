@@ -21,19 +21,21 @@ type CommandEnv struct {
 	old string
 }
 
-func SetEnv(key, value string) func() {
+func SetEnv(key, value string) (func() error, error) {
 	e := &CommandEnv{
 		key: key,
 		old: os.Getenv(key),
 	}
 
-	os.Setenv(key, value)
+	if err := os.Setenv(key, value); err != nil {
+		return nil, err
+	}
 
-	return e.Revert
+	return e.Revert, nil
 }
 
-func (e *CommandEnv) Revert() {
-	os.Setenv(e.key, e.old)
+func (e *CommandEnv) Revert() error {
+	return os.Setenv(e.key, e.old)
 }
 
 func GoEnv(key, fallback string) string {

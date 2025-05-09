@@ -179,7 +179,7 @@ func DownloadToCache(src string, opts ...RestyOpt) (string, error) {
 	return DownloadToPath(src, mg.CacheDir(), opts...)
 }
 
-// Sanitize archive file pathing from "G305: Zip Slip vulnerability".
+// SanitizeArchivePath archive file pathing from "G305: Zip Slip vulnerability".
 func SanitizeArchivePath(dest, target string) (string, error) {
 	v := filepath.Join(dest, target)
 	if strings.HasPrefix(v, filepath.Clean(dest)) {
@@ -387,7 +387,10 @@ func Untargz(src, dest string) error {
 			if _, err := copyBlocks(outFile, tarReader); err != nil {
 				return fmt.Errorf("unable to write file[%s]: %w", target, err)
 			}
-			outFile.Close()
+
+			if err := outFile.Close(); err != nil {
+				return fmt.Errorf("unable to close file[%s]: %w", target, err)
+			}
 		default:
 			return fmt.Errorf("unknown record type in tarball[%s]: type is %d", header.Name, header.Typeflag)
 		}
@@ -429,7 +432,7 @@ func Unzip(src, dest string) error {
 		}
 	}()
 
-	if err := os.MkdirAll(dest, 0755); err != nil {
+	if err := os.MkdirAll(dest, permbits.MustString("u=rwx,go=rw")); err != nil {
 		return err
 	}
 
