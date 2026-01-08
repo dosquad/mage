@@ -89,16 +89,40 @@ func MustMakeDir(path string, fileperm os.FileMode) {
 // 	return outPath
 // }
 
-func FilesMatch(baseDir, pattern string) []string {
+type FilesMatchOptions func(fs.DirEntry) error
+
+func IgnoreDirNames(names ...string) FilesMatchOptions {
+	nameSet := map[string]struct{}{}
+	for _, name := range names {
+		nameSet[name] = struct{}{}
+	}
+
+	return func(d fs.DirEntry) error {
+		if d.IsDir() {
+			if _, ok := nameSet[d.Name()]; ok {
+				return filepath.SkipDir
+			}
+		}
+		return nil
+	}
+}
+
+func FilesMatch(baseDir, pattern string, opts ...FilesMatchOptions) []string {
 	matches := []string{}
 	_ = filepath.WalkDir(baseDir, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
 
+		for _, opt := range opts {
+			if err := opt(d); err != nil {
+				return err
+			}
+		}
+
 		if d.IsDir() {
 			switch d.Name() {
-			case "artifacts", "protobuf":
+			case "artifacts", "protobuf", "vendor", ".git":
 				return filepath.SkipDir
 			}
 
