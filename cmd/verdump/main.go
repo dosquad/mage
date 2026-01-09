@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os/exec"
@@ -21,7 +22,7 @@ type ModCmd struct {
 
 //nolint:forbidigo // display version.
 func (r *ModCmd) Run(_ *Context) error {
-	out, err := exec.Command( //nolint:gosec // shellescape clean
+	out, err := exec.CommandContext(context.Background(), //nolint:gosec // shellescape clean
 		"go", "version", "-m",
 		r.Path,
 	).Output()
@@ -63,8 +64,8 @@ func (v VersionFlag) BeforeApply(app *kong.Kong, _ kong.Vars) error {
 }
 
 func main() {
-	ctx := kong.Parse(&cli)
+	kongCtx := kong.Parse(&cli)
 	// Call the Run() method of the selected parsed command.
-	err := ctx.Run(&Context{Debug: cli.Debug})
-	ctx.FatalIfErrorf(err)
+	err := kongCtx.Run(&Context{Debug: cli.Debug})
+	kongCtx.FatalIfErrorf(err)
 }

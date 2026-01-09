@@ -29,10 +29,12 @@ func (Build) Archive(ctx context.Context) error {
 
 	for _, cmdPath := range pathList {
 		ct := helper.NewCommandTemplate(false, cmdPath)
+		ct.AdditionalArtifacts = dyndep.GetArchiveSideloadDeps(ctx)
+		loga.PrintDebugf("ct.AdditionalArtifacts: %+v", ct.AdditionalArtifacts)
 
 		if err := buildPlatformIterator(ctx, ct, func(_ context.Context, ct *helper.CommandTemplate) error {
 			// buildArtifact(ctx, ct)
-			loga.PrintInfo("Create Archive for %s/%s (%s)",
+			loga.PrintInfof("Create Archive for %s/%s (%s)",
 				ct.GoOS, ct.GoArch,
 				ct.OutputArtifact,
 			)
@@ -52,6 +54,7 @@ func (Build) Archive(ctx context.Context) error {
 
 func buildTar(ct *helper.CommandTemplate) error {
 	fileName := fmt.Sprintf("%s_%s_%s.tar.gz", ct.CommandName, ct.GoOS, ct.GoArch)
+	loga.PrintDebugf("buildTar(%s, %s, %s): %s", ct.CommandName, ct.GoOS, ct.GoArch, fileName)
 	if ct.GoArm != "" {
 		fileName = fmt.Sprintf("%s_%s_%s_%s.tar.gz", ct.CommandName, ct.GoOS, ct.GoArch, ct.GoArm)
 	}
@@ -76,6 +79,33 @@ func buildTar(ct *helper.CommandTemplate) error {
 	if readmeFile := paths.MustGetWD("README.md"); paths.FileExists(readmeFile) {
 		if err := tarAddFile(tarWriter, readmeFile, permbits.MustString("ugo=r")); err != nil {
 			return err
+		}
+	}
+
+	for artifactName, artifactPath := range ct.AdditionalArtifacts {
+		loga.PrintDebugf("Adding additional artifact [%s]: %s", artifactName, artifactPath)
+		{
+			var err error
+			artifactPath, err = ct.Render(artifactPath)
+			if err != nil {
+				return fmt.Errorf("unable to render additional artifact path [%s]: %w", artifactName, err)
+			}
+		}
+
+		loga.PrintDebugf("Artifact Path: %s", artifactPath)
+		if paths.FileExists(artifactPath) {
+			loga.PrintDebugf("Artifact Path[exists]: %s", artifactPath)
+			var stat os.FileInfo
+			{
+				var err error
+				stat, err = os.Stat(artifactPath)
+				if err != nil {
+					return fmt.Errorf("unable to stat additional artifact [%s]: %w", artifactName, err)
+				}
+			}
+			if err := tarAddFile(tarWriter, artifactPath, stat.Mode()); err != nil {
+				return fmt.Errorf("unable to add additional artifact [%s]: %w", artifactName, err)
+			}
 		}
 	}
 

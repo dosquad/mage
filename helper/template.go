@@ -37,6 +37,8 @@ type CommandTemplate struct {
 	CommandDir     string
 	CommandName    string
 	HomeDir        string
+
+	AdditionalArtifacts map[string]string
 }
 
 func NewCommandTemplate(debug bool, commandDir string) *CommandTemplate {
@@ -46,7 +48,7 @@ func NewCommandTemplate(debug bool, commandDir string) *CommandTemplate {
 		CGO:       envs.GetEnv("CGO_ENABLED", "0"),
 		GoOS:      runtime.GOOS,
 		GoArch:    runtime.GOARCH,
-		GoArm:     must.Must[string](bins.CommandString(`go env GOARM`)),
+		GoArm:     must.Must(bins.CommandString(`go env GOARM`)),
 		GoVersion: runtime.Version(),
 
 		GitRev:     build.GitHeadRev(),

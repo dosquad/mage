@@ -113,7 +113,7 @@ func (vc VersionCache) Save() error {
 	{
 		if !paths.FileExists(paths.MustGetArtifactPath()) {
 			if err := os.MkdirAll(paths.MustGetArtifactPath(), permbits.MustString("ug=rwx,o=rx")); err != nil {
-				loga.PrintWarning("unable to create artifact directory: %s", err)
+				loga.PrintWarningf("unable to create artifact directory: %s", err)
 				return err
 			}
 		}
@@ -123,14 +123,14 @@ func (vc VersionCache) Save() error {
 		var err error
 		f, err = os.Create(paths.MustGetArtifactPath(".versioncache.yaml"))
 		if err != nil {
-			loga.PrintWarning("unable to create version cache: %s", err)
+			loga.PrintWarningf("unable to create version cache: %s", err)
 			return err
 		}
 	}
 	defer f.Close()
 
 	if err := yaml.NewEncoder(f).Encode(vc); err != nil {
-		loga.PrintWarning("unable to encode version cache: %s", err)
+		loga.PrintWarningf("unable to encode version cache: %s", err)
 		return err
 	}
 
@@ -220,7 +220,7 @@ func (vc VersionCache) getGolangcilintVersion() string {
 func (vc VersionCache) getProtocVersion() string {
 	protocVer, err := web.HTTPGetLatestGitHubVersion("protocolbuffers/protobuf")
 	if err != nil {
-		loga.PrintWarning("Protocol Buffer Error: %s", err)
+		loga.PrintWarningf("Protocol Buffer Error: %s", err)
 		return "latest"
 	}
 
@@ -230,7 +230,7 @@ func (vc VersionCache) getProtocVersion() string {
 func (vc VersionCache) getProtobufVersion() string {
 	ver, err := Command(`go list -f '{{.Version}}' -m "google.golang.org/protobuf"`)
 	if err != nil {
-		loga.PrintWarning("Warning: did not find google.golang.org/protobuf in go.mod, defaulting to latest")
+		loga.PrintWarningf("Warning: did not find google.golang.org/protobuf in go.mod, defaulting to latest")
 		return "latest"
 	}
 

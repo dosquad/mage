@@ -25,7 +25,7 @@ func Clean(ctx context.Context) error {
 	}
 
 	rmFunc := func(path string) error {
-		loga.PrintInfo("Removing path: %s", path)
+		loga.PrintInfof("Removing path: %s", path)
 		return sh.Rm(path)
 	}
 
@@ -48,7 +48,7 @@ func CleanLight(ctx context.Context) error {
 	}
 
 	rmFunc := func(path string) error {
-		loga.PrintInfo("Removing path: %s", path)
+		loga.PrintInfof("Removing path: %s", path)
 		return sh.Rm(path)
 	}
 

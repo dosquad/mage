@@ -13,7 +13,7 @@ func CommandString(cmd string) (string, error) {
 }
 
 func Command(cmd string) ([]byte, error) {
-	loga.PrintCommand("%s", cmd)
+	loga.PrintCommandf("%s", cmd)
 	out, err := shellcmd.Command(cmd).Output()
 	return out, err
 }

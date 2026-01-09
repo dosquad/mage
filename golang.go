@@ -94,7 +94,7 @@ func (Golang) VisualTest(ctx context.Context) error {
 	var output []byte
 	{
 		var err error
-		loga.PrintCommandAlways("`%s` writing to %s", cmd, vgtFileName)
+		loga.PrintCommandAlwaysf("`%s` writing to %s", cmd, vgtFileName)
 		output, err = shellcmd.Command(cmd).Output()
 		if err != nil {
 			return err

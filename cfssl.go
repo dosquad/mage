@@ -37,7 +37,7 @@ func (CFSSL) Install(_ context.Context) error {
 }
 
 func cfsslGenCert(_ context.Context, outputFile, configFileName, profile, srcFileName string) error {
-	loga.PrintDebug("cfsslGenCert(ctx, %s, %s, %s, %s)", outputFile, configFileName, profile, srcFileName)
+	loga.PrintDebugf("cfsslGenCert(ctx, %s, %s, %s, %s)", outputFile, configFileName, profile, srcFileName)
 	var initCA []byte
 	{
 		var err error
@@ -68,7 +68,7 @@ func cfsslGenCert(_ context.Context, outputFile, configFileName, profile, srcFil
 }
 
 func cfsslSignCert(_ context.Context, outputFile, configFileName, profile, srcFileName, baseName string) error {
-	loga.PrintDebug("cfsslSignCert(ctx, %s, %s, %s, %s)", outputFile, configFileName, profile, srcFileName)
+	loga.PrintDebugf("cfsslSignCert(ctx, %s, %s, %s, %s)", outputFile, configFileName, profile, srcFileName)
 	var initCA []byte
 	{
 		var err error
@@ -103,7 +103,7 @@ func cfsslSignCert(_ context.Context, outputFile, configFileName, profile, srcFi
 }
 
 func cfsslJSON(_ context.Context, outputBase, inputFile string) error {
-	loga.PrintDebug("cfsslJSON(ctx, %s, %s)", outputBase, inputFile)
+	loga.PrintDebugf("cfsslJSON(ctx, %s, %s)", outputBase, inputFile)
 
 	err := bins.CfsslJSON().Command(fmt.Sprintf(
 		`-f %s -bare %s`,
@@ -117,11 +117,11 @@ func cfsslJSON(_ context.Context, outputBase, inputFile string) error {
 }
 
 func cfsslInitCA(ctx context.Context) error {
-	loga.PrintDebug("cfsslInitCA(ctx)")
-	loga.PrintInfo("Generating and signing CA certificate")
+	loga.PrintDebugf("cfsslInitCA(ctx)")
+	loga.PrintInfof("Generating and signing CA certificate")
 
 	if paths.FileExists(mustCertDir("ca.pem")) {
-		loga.PrintDebug("Target exists, skipping: %s", mustCertDir("ca.pem"))
+		loga.PrintDebugf("Target exists, skipping: %s", mustCertDir("ca.pem"))
 		return nil
 	}
 	paths.MustMakeDir(mustCertDir(), permbits.MustString("ug=rwx,o=rx"))
@@ -167,11 +167,11 @@ func cfsslInitCA(ctx context.Context) error {
 }
 
 func cfsslCert(ctx context.Context, profile, baseName string) error {
-	loga.PrintDebug("cfsslCert(ctx, %s, %s)", profile, baseName)
-	loga.PrintInfo("Generating and signing certificate: %s", profile)
+	loga.PrintDebugf("cfsslCert(ctx, %s, %s)", profile, baseName)
+	loga.PrintInfof("Generating and signing certificate: %s", profile)
 
 	if paths.FileExists(mustCertDir(baseName + ".pem")) {
-		loga.PrintDebug("Target exists, skipping: %s", mustCertDir(baseName+".pem"))
+		loga.PrintDebugf("Target exists, skipping: %s", mustCertDir(baseName+".pem"))
 		return nil
 	}
 	paths.MustMakeDir(mustCertDir(), permbits.MustString("ug=rwx,o=rx"))

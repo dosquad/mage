@@ -36,7 +36,7 @@ func DynamicDeps(ctx context.Context) error {
 	_ = os.Remove(dyndepFileName)
 
 	writeFile := func(ctx context.Context) error {
-		loga.PrintInfo("Running Dynamic Dependency for dyndep.Test")
+		loga.PrintInfof("Running Dynamic Dependency for dyndep.Test")
 		_ = os.MkdirAll("artifacts", permbits.MustString("ug=rwx,o=rx"))
 		_ = os.Remove(dyndepFileName)
 		var f *os.File

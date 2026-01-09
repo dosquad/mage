@@ -27,9 +27,9 @@ const (
 )
 
 func ExtractArchive(src, dest string, opts ...RestyOpt) error {
-	loga.PrintDebug("Extract Archive: %s", src)
+	loga.PrintDebugf("Extract Archive: %s", src)
 	if _, statErr := os.Stat(dest); os.IsNotExist(statErr) {
-		loga.PrintDebug("Create Directory: %s", dest)
+		loga.PrintDebugf("Create Directory: %s", dest)
 		if err := os.MkdirAll(dest, permbits.MustString("ug=rwx,o=rx")); err != nil {
 			return err
 		}
@@ -43,7 +43,7 @@ func ExtractArchive(src, dest string, opts ...RestyOpt) error {
 			return err
 		}
 	}
-	loga.PrintDebug("URL: %s", u)
+	loga.PrintDebugf("URL: %s", u)
 
 	if u.Scheme == "http" || u.Scheme == "https" { // URL
 		destArchive, err := DownloadToCache(src, opts...)
@@ -51,13 +51,13 @@ func ExtractArchive(src, dest string, opts ...RestyOpt) error {
 			return err
 		}
 
-		defer loga.PrintDebug("ExtractArchive finished")
+		defer loga.PrintDebugf("ExtractArchive finished")
 
 		return Uncompress(destArchive, dest)
 	}
 
 	if strings.HasPrefix(src, "/") { // absolute path
-		defer loga.PrintDebug("ExtractArchive finished")
+		defer loga.PrintDebugf("ExtractArchive finished")
 
 		return Uncompress(src, dest)
 	}
@@ -100,7 +100,7 @@ func GetFilenameForURL(src string, opts ...RestyOpt) (string, error) {
 }
 
 func DownloadToPath(src, dest string, opts ...RestyOpt) (string, error) {
-	loga.PrintDebug("DownloadToPath(src:%s, dest:%s opts...)", src, dest)
+	loga.PrintDebugf("DownloadToPath(src:%s, dest:%s opts...)", src, dest)
 	{
 		filename, err := GetFilenameForURL(src, opts...)
 		if err != nil {
@@ -124,7 +124,7 @@ func DownloadToPath(src, dest string, opts ...RestyOpt) (string, error) {
 		// }
 	}
 	defer func() { _ = os.Remove(tmpFile) }()
-	loga.PrintDebug("Temporary File: %s", tmpFile)
+	loga.PrintDebugf("Temporary File: %s", tmpFile)
 
 	var resp *resty.Response
 	{
@@ -175,7 +175,7 @@ func DownloadToPath(src, dest string, opts ...RestyOpt) (string, error) {
 }
 
 func DownloadToCache(src string, opts ...RestyOpt) (string, error) {
-	loga.PrintDebug("DownloadToCache(src:%s, opts...)", src)
+	loga.PrintDebugf("DownloadToCache(src:%s, opts...)", src)
 	return DownloadToPath(src, mg.CacheDir(), opts...)
 }
 
@@ -311,9 +311,9 @@ func Uncompress(src, dest string) error {
 	return nil
 }
 
-//nolint:gocognit // untar+decompress(gzip).
+//nolint:funlen,gocognit // untar+decompress(gzip).
 func Untargz(src, dest string) error {
-	loga.PrintDebug("Untargz(%s, %s)", src, dest)
+	loga.PrintDebugf("Untargz(%s, %s)", src, dest)
 	dest = filepath.Clean(dest) + string(os.PathSeparator)
 
 	var srcStream io.ReadCloser
@@ -362,6 +362,12 @@ func Untargz(src, dest string) error {
 				}
 			}
 
+			if stat, err := os.Stat(target); err == nil {
+				if !stat.IsDir() {
+					return fmt.Errorf("expected directory but found file[%s]", target)
+				}
+				continue
+			}
 			if err := os.Mkdir(target, fs.FileMode(header.Mode)); err != nil { //nolint:gosec // G115 overflow possible.
 				return fmt.Errorf("mkdir failed[%s]: %w", target, err)
 			}
@@ -415,7 +421,7 @@ func copyBlocks(dst io.Writer, src io.Reader) (int64, error) {
 }
 
 func Unzip(src, dest string) error {
-	loga.PrintDebug("Unzip(%s, %s)", src, dest)
+	loga.PrintDebugf("Unzip(%s, %s)", src, dest)
 	dest = filepath.Clean(dest) + string(os.PathSeparator)
 
 	var r *zip.ReadCloser

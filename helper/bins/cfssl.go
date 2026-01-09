@@ -14,7 +14,7 @@ func Cfssl() *bintool.BinTool {
 	if cfsslCmd == nil {
 		_ = Verdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(CFSSLVersion)
-		loga.PrintInfo("cfssl Version: %s", ver)
+		loga.PrintInfof("cfssl Version: %s", ver)
 		cfsslCmd = bintool.Must(bintool.NewGo(
 			"github.com/cloudflare/cfssl/cmd/cfssl",
 			ver,
@@ -34,7 +34,7 @@ func CfsslJSON() *bintool.BinTool {
 	if cfsslJSONCmd == nil {
 		_ = Verdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(CFSSLVersion)
-		loga.PrintInfo("cfssl Version: %s", ver)
+		loga.PrintInfof("cfssl Version: %s", ver)
 		cfsslJSONCmd = bintool.Must(bintool.NewGo(
 			"github.com/cloudflare/cfssl/cmd/cfssljson",
 			ver,

@@ -64,7 +64,7 @@ func dockerBuildCommand(ctx context.Context, args []string) error {
 	for _, tag := range tags {
 		tagArg, err := cfg.ArgsTag(tag)
 		if err != nil {
-			loga.PrintWarning("Unable to build Docker Image: %s", err)
+			loga.PrintWarningf("Unable to build Docker Image: %s", err)
 			continue
 		}
 
@@ -79,7 +79,7 @@ func dockerBuildCommand(ctx context.Context, args []string) error {
 			}
 		}
 
-		loga.PrintInfo("Building Docker Image[%s]: %s:%s", strings.Join(cfg.Platforms, ","), cfg.GetImage(), tag)
+		loga.PrintInfof("Building Docker Image[%s]: %s:%s", strings.Join(cfg.Platforms, ","), cfg.GetImage(), tag)
 
 		// return nil
 		dockerErr = multierr.Append(dockerErr, dockerCommand(

@@ -181,7 +181,7 @@ func FileNameModifyReplace(from string, to ...string) func(string) []string {
 			st[strings.Replace(s, from, item, 1)] = nil
 		}
 
-		out := []string{}
+		out := make([]string, 0, len(st))
 		for item := range st {
 			out = append(out, item)
 		}
@@ -256,7 +256,7 @@ func FileCopy(src string, dst string, overwrite bool) error {
 
 func FileHash(filename string) (string, error) {
 	h := sha256.New()
-	defer loga.PrintDebug("FileHash(%s): %s", filename, hex.EncodeToString(h.Sum(nil)))
+	defer loga.PrintDebugf("FileHash(%s): %s", filename, hex.EncodeToString(h.Sum(nil)))
 	var f *os.File
 	{
 		var err error

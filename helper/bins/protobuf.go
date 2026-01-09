@@ -30,7 +30,7 @@ func Protoc() *bintool.BinTool {
 
 		protocVer := MustVersionLoadCache().GetVersion(ProtocVersion)
 
-		loga.PrintInfo("Protocol Buffer Version: %s", protocVer)
+		loga.PrintInfof("Protocol Buffer Version: %s", protocVer)
 		must.PanicIfError(web.ExtractArchive(
 			"https://github.com/protocolbuffers/protobuf/releases/download/v"+protocVer+"/"+
 				"protoc-"+protocVer+"-"+goOperatingSystem+"-"+goArch+".zip",
@@ -57,7 +57,7 @@ func ProtocGenGo() *bintool.BinTool {
 	if protocGenGo == nil {
 		// ver := GetEnv("PROTOCGENGO_VERSION", GetProtobufVersion())
 		ver := MustVersionLoadCache().GetVersion(ProtocGenGoVersion)
-		loga.PrintInfo("Protocol Buffer Golang Version: %s", ver)
+		loga.PrintInfof("Protocol Buffer Golang Version: %s", ver)
 		protocGenGo = bintool.Must(bintool.NewGo(
 			"google.golang.org/protobuf/cmd/protoc-gen-go",
 			ver,
@@ -76,7 +76,7 @@ func ProtocGenGoGRPC() *bintool.BinTool {
 	if protocGenGoGRPC == nil {
 		_ = Verdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(ProtocGenGoGRPCVersion)
-		loga.PrintInfo("Protocol Buffer Golang gRPC Version: %s", ver)
+		loga.PrintInfof("Protocol Buffer Golang gRPC Version: %s", ver)
 		protocGenGoGRPC = bintool.Must(bintool.NewGo(
 			"google.golang.org/grpc/cmd/protoc-gen-go-grpc",
 			ver,
@@ -96,7 +96,7 @@ func ProtocGenGoTwirp() *bintool.BinTool {
 	if protocGenGoTwirp == nil {
 		// ver := GetEnv("PROTOCGENGOTWIRP_VERSION", protocGenGoTwirpVersion)
 		ver := MustVersionLoadCache().GetVersion(ProtocGenGoTwirpVersion)
-		loga.PrintInfo("Protocol Buffer Golang Twirp Version: %s", ver)
+		loga.PrintInfof("Protocol Buffer Golang Twirp Version: %s", ver)
 		protocGenGoTwirp = bintool.Must(bintool.NewGo(
 			"github.com/twitchtv/twirp/protoc-gen-twirp",
 			ver,
@@ -115,7 +115,7 @@ func ProtocGenGoConnect() *bintool.BinTool {
 	if protocGenGoConnect == nil {
 		// ver := GetEnv("PROTOCGENGOCONNECT_VERSION", protocGenGoConnectVersion)
 		ver := MustVersionLoadCache().GetVersion(ProtocGenGoConnectVersion)
-		loga.PrintInfo("Protocol Buffer Golang ConnectRPC Version: %s", ver)
+		loga.PrintInfof("Protocol Buffer Golang ConnectRPC Version: %s", ver)
 		protocGenGoConnect = bintool.Must(bintool.NewGo(
 			"connectrpc.com/connect/cmd/protoc-gen-connect-go",
 			ver,

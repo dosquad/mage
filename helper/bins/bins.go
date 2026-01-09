@@ -20,7 +20,7 @@ var bufTool *bintool.BinTool
 func Buf() *bintool.BinTool {
 	if bufTool == nil {
 		ver := MustVersionLoadCache().GetVersion(BufVersion)
-		loga.PrintInfo("Buf Version: %s", ver)
+		loga.PrintInfof("Buf Version: %s", ver)
 		bufTool = bintool.Must(bintool.NewGo(
 			"github.com/bufbuild/buf/cmd/buf",
 			ver,
@@ -39,7 +39,7 @@ func GolangCILint() *bintool.BinTool {
 	if golangciLint == nil {
 		// ver := GetEnv("GOLANGCILINT_VERSION", golangciLintVersion)
 		ver := MustVersionLoadCache().GetVersion(GolangciLintVersion)
-		loga.PrintInfo("Golang CI Lint Version: %s", ver)
+		loga.PrintInfof("Golang CI Lint Version: %s", ver)
 		golangciLint = bintool.Must(bintool.New(
 			"golangci-lint{{.BinExt}}",
 			ver,
@@ -60,7 +60,7 @@ func Govulncheck() *bintool.BinTool {
 	if govulncheck == nil {
 		// ver := GetEnv("GOVULNCHECK_VERSION", govulncheckVersion)
 		ver := MustVersionLoadCache().GetVersion(GovulncheckVersion)
-		loga.PrintInfo("Golang Vulnerability Check Version: %s", ver)
+		loga.PrintInfof("Golang Vulnerability Check Version: %s", ver)
 		govulncheck = bintool.Must(bintool.NewGo(
 			"golang.org/x/vuln/cmd/govulncheck",
 			ver,
@@ -79,7 +79,7 @@ var goreleaser *bintool.BinTool
 func Goreleaser() *bintool.BinTool {
 	if goreleaser == nil {
 		ver := MustVersionLoadCache().GetVersion(GoreleaserVersion)
-		loga.PrintInfo("Goreleaser Version: %s", ver)
+		loga.PrintInfof("Goreleaser Version: %s", ver)
 
 		goOperatingSystem, goArch := runtime.GOOS, runtime.GOARCH
 		goOperatingSystem = cases.Title(language.English).String(goOperatingSystem)
@@ -90,7 +90,7 @@ func Goreleaser() *bintool.BinTool {
 
 		url := "https://github.com/goreleaser/goreleaser/releases/download/v" + ver + "/" +
 			"goreleaser_" + goOperatingSystem + "_" + goArch + "{{.ArchiveExt}}"
-		loga.PrintDebug("Goreleaser URL: %s", url)
+		loga.PrintDebugf("Goreleaser URL: %s", url)
 
 		goreleaser = bintool.Must(bintool.New(
 			"goreleaser{{.BinExt}}",
@@ -110,7 +110,7 @@ var yq *bintool.BinTool
 func YQ() *bintool.BinTool {
 	if yq == nil {
 		ver := MustVersionLoadCache().GetVersion(YQVersion)
-		loga.PrintInfo("YQ Version: %s", ver)
+		loga.PrintInfof("YQ Version: %s", ver)
 		yq = bintool.Must(bintool.NewGo(
 			"github.com/mikefarah/yq/v4",
 			ver,
@@ -129,7 +129,7 @@ func Wire() *bintool.BinTool {
 	if wirebin == nil {
 		_ = Verdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(WireVersion)
-		loga.PrintInfo("Wire Version: %s", ver)
+		loga.PrintInfof("Wire Version: %s", ver)
 		wirebin = bintool.Must(bintool.NewGo(
 			"github.com/google/wire/cmd/wire",
 			ver,
@@ -148,7 +148,7 @@ var verdump *bintool.BinTool
 func Verdump() *bintool.BinTool {
 	if verdump == nil {
 		ver := MustVersionLoadCache().GetVersion(VerdumpVersion)
-		loga.PrintInfo("Verdump Version: %s", ver)
+		loga.PrintInfof("Verdump Version: %s", ver)
 		verdump = bintool.Must(bintool.NewGo(
 			"github.com/dosquad/mage/cmd/verdump",
 			ver,
@@ -175,7 +175,7 @@ func installKustomize() error {
 	}
 
 	ver := MustVersionLoadCache().GetVersion(KustomizeVersion)
-	loga.PrintInfo("Kustomize Version: %s", ver)
+	loga.PrintInfof("Kustomize Version: %s", ver)
 	instCmd := shellcmd.Command(
 		fmt.Sprintf(
 			`bash "%s" "%s" "%s"`,
@@ -188,7 +188,7 @@ func installKustomize() error {
 		return err
 	}
 
-	loga.PrintDebug("Install script completed")
+	loga.PrintDebugf("Install script completed")
 
 	return nil
 }
@@ -216,7 +216,7 @@ var kubeControllerGen *bintool.BinTool
 func KubeControllerGen() *bintool.BinTool {
 	if kubeControllerGen == nil {
 		ver := MustVersionLoadCache().GetVersion(KubeControllerGenVersion)
-		loga.PrintInfo("sigs.k8s.io Controller Gen Version: %s", ver)
+		loga.PrintInfof("sigs.k8s.io Controller Gen Version: %s", ver)
 		kubeControllerGen = bintool.Must(bintool.NewGo(
 			"sigs.k8s.io/controller-tools/cmd/controller-gen",
 			ver,
@@ -234,7 +234,7 @@ var kubeControllerEnvTest *bintool.BinTool
 func KubeControllerEnvTest() *bintool.BinTool {
 	if kubeControllerEnvTest == nil {
 		ver := MustVersionLoadCache().GetVersion(KubeControllerEnvTestVersion)
-		loga.PrintInfo("sigs.k8s.io Controller Runtime Version: %s", ver)
+		loga.PrintInfof("sigs.k8s.io Controller Runtime Version: %s", ver)
 		kubeControllerEnvTest = bintool.Must(bintool.NewGo(
 			"sigs.k8s.io/controller-runtime/tools/setup-envtest",
 			ver,
@@ -253,7 +253,7 @@ func VGT() *bintool.BinTool {
 	if vgtCmd == nil {
 		_ = Verdump().Ensure()
 		ver := MustVersionLoadCache().GetVersion(VGTVersion)
-		loga.PrintInfo("vgt Version: %s", ver)
+		loga.PrintInfof("vgt Version: %s", ver)
 		vgtCmd = bintool.Must(bintool.NewGo(
 			"github.com/roblaszczak/vgt",
 			ver,

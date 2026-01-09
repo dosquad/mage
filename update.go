@@ -52,7 +52,7 @@ func (Update) GolangciLint(ctx context.Context) error {
 	etag := must.Must[web.ETag](web.ETagLoadConfig())
 
 	if !paths.FileExists(golangciLocalFile) {
-		loga.PrintDebug("Downloading file directly")
+		loga.PrintDebugf("Downloading file directly")
 		if err := web.HTTPWriteFile(
 			golangciLintConfigURL,
 			golangciRemoteFile,
@@ -62,7 +62,7 @@ func (Update) GolangciLint(ctx context.Context) error {
 			return fmt.Errorf("unable to retrieve HTTP source file: %w", err)
 		}
 		if paths.FileChanged(golangciLintFile, golangciRemoteFile) {
-			loga.PrintFileUpdate("Updating .golangci.yml from remote")
+			loga.PrintFileUpdatef("Updating .golangci.yml from remote")
 		}
 		if err := paths.FileCopy(golangciRemoteFile, golangciLintFile, true); err != nil {
 			return fmt.Errorf("unable to copy file: %w", err)
@@ -71,7 +71,7 @@ func (Update) GolangciLint(ctx context.Context) error {
 		return sh.Rm(golangciRemoteFile)
 	}
 
-	loga.PrintDebug("Downloading remote config to .golangci.remote.yml")
+	loga.PrintDebugf("Downloading remote config to .golangci.remote.yml")
 	if err := web.HTTPWriteFile(
 		golangciLintConfigURL,
 		golangciRemoteFile,
@@ -81,21 +81,21 @@ func (Update) GolangciLint(ctx context.Context) error {
 		return fmt.Errorf("unable to retrieve HTTP source file: %w", err)
 	}
 	defer func() {
-		loga.PrintDebug("Removing remote config cache .golangci.remote.yml")
+		loga.PrintDebugf("Removing remote config cache .golangci.remote.yml")
 		_ = os.Remove(golangciRemoteFile)
 	}()
 
 	var yamlData []byte
 	{
 		var err error
-		loga.PrintDebug("Merging .golangci.remote.yml and .golangci.local.yml")
+		loga.PrintDebugf("Merging .golangci.remote.yml and .golangci.local.yml")
 		yamlData, err = helper.MergeYaml(golangciRemoteFile, golangciLocalFile)
 		if err != nil {
 			return fmt.Errorf("unable to merge remote and local config: %w", err)
 		}
 	}
 
-	loga.PrintDebug("Writing merged config to .golangci.yml")
+	loga.PrintDebugf("Writing merged config to .golangci.yml")
 	if err := os.WriteFile(golangciLintFile, yamlData, permbits.MustString("ug=rw,o=r")); err != nil {
 		return fmt.Errorf("unable to write golangci ling config: %w", err)
 	}
@@ -122,7 +122,7 @@ func (Update) GitIgnore(ctx context.Context) error {
 					_ = paths.FileAppendLine(gitignoreFile, 0, "")
 				}
 			})
-			loga.PrintFileUpdate("Adding path to .gitignore: %s", path)
+			loga.PrintFileUpdatef("Adding path to .gitignore: %s", path)
 			if err := paths.FileAppendLine(gitignoreFile, 0, path); err != nil {
 				return err
 			}
@@ -154,7 +154,7 @@ func (Update) DockerIgnore(ctx context.Context) error {
 					_ = paths.FileAppendLine(dockerignoreFile, 0, "")
 				}
 			})
-			loga.PrintFileUpdate("Adding path to .dockerignore: %s", line)
+			loga.PrintFileUpdatef("Adding path to .dockerignore: %s", line)
 			if err := paths.FileAppendLine(dockerignoreFile, 0, line); err != nil {
 				return err
 			}

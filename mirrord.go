@@ -42,8 +42,10 @@ func (Mirrord) VsCodeDebugConfig(_ context.Context) error {
 			}
 `
 
-	launchItems := []string{}
-	for _, cmdPath := range paths.MustCommandPaths() {
+	cmdPaths := paths.MustCommandPaths()
+
+	launchItems := make([]string, 0, len(cmdPaths))
+	for _, cmdPath := range cmdPaths {
 		cmdPath = filepath.Base(cmdPath)
 		launchItems = append(launchItems,
 			fmt.Sprintf(launchItemCfg, cmdPath, cmdPath),

@@ -89,6 +89,7 @@ func buildPlatformIterator(
 
 	for _, platform := range platforms {
 		ctp := helper.NewCommandTemplate(ct.Debug, ct.CommandDir)
+		ctp.AdditionalArtifacts = ct.AdditionalArtifacts
 		sp := strings.Split(platform, "/")
 		if len(sp) != 2 { //nolint:mnd // "os/arch"
 			continue

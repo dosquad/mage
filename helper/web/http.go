@@ -31,7 +31,7 @@ func HTTPWriteFile(rawURL, filename string, eTag *ETagItem, fileperm os.FileMode
 	var resp *resty.Response
 	{
 		var err error
-		loga.PrintDebug("Downloading %s", rawURL)
+		loga.PrintDebugf("Downloading %s", rawURL)
 		resp, err = client.R().
 			SetOutput(filename+".tmp").
 			SetHeader("If-None-Match", eTagVal).
@@ -46,7 +46,7 @@ func HTTPWriteFile(rawURL, filename string, eTag *ETagItem, fileperm os.FileMode
 		}
 	}
 
-	loga.PrintDebug("[%s] Status Code: %d", rawURL, resp.StatusCode())
+	loga.PrintDebugf("[%s] Status Code: %d", rawURL, resp.StatusCode())
 
 	switch resp.StatusCode() {
 	case http.StatusNotModified:
@@ -57,19 +57,19 @@ func HTTPWriteFile(rawURL, filename string, eTag *ETagItem, fileperm os.FileMode
 		if eTag != nil {
 			eTag.Value = resp.Header().Get("etag")
 			if err := eTag.Save(); err != nil {
-				loga.PrintDebug("Unable to write etag file: %s", err)
+				loga.PrintDebugf("Unable to write etag file: %s", err)
 				return err
 			}
 		}
 		if err := os.Rename(filename+".tmp", filename); err != nil {
-			loga.PrintDebug("Unable to rename from tmp file: %s", err)
+			loga.PrintDebugf("Unable to rename from tmp file: %s", err)
 			return fmt.Errorf("unable to replace file with temporary file: %w", err)
 		}
 	}
 
 	if fileperm != 0 {
 		if err := os.Chmod(filename, fileperm); err != nil {
-			loga.PrintDebug("Unable to change mode on file: %s", err)
+			loga.PrintDebugf("Unable to change mode on file: %s", err)
 			return err
 		}
 	}
@@ -144,36 +144,36 @@ func HTTPGetLatestGitHubReleaseMatchingTag(slug string, r *regexp.Regexp, opts .
 
 func RestyTrace(resp *resty.Response, err error) {
 	// Explore response object
-	loga.PrintDebug("Response Info:")
-	loga.PrintDebug("  Error      : %s", err)
-	loga.PrintDebug("  Status Code: %d", resp.StatusCode())
-	loga.PrintDebug("  Status     : %s", resp.Status())
-	loga.PrintDebug("  Proto      : %s", resp.Proto())
-	loga.PrintDebug("  Time       : %s", resp.Time())
-	loga.PrintDebug("  Received At: %s", resp.ReceivedAt())
-	loga.PrintDebug("  Headers    : %s", resp.Header())
-	loga.PrintDebug("  Body       : %s\n", resp)
-	loga.PrintDebug("")
+	loga.PrintDebugf("Response Info:")
+	loga.PrintDebugf("  Error      : %s", err)
+	loga.PrintDebugf("  Status Code: %d", resp.StatusCode())
+	loga.PrintDebugf("  Status     : %s", resp.Status())
+	loga.PrintDebugf("  Proto      : %s", resp.Proto())
+	loga.PrintDebugf("  Time       : %s", resp.Time())
+	loga.PrintDebugf("  Received At: %s", resp.ReceivedAt())
+	loga.PrintDebugf("  Headers    : %s", resp.Header())
+	loga.PrintDebugf("  Body       : %s\n", resp)
+	loga.PrintDebugf("")
 
-	loga.PrintDebug("Request Info:")
-	loga.PrintDebug("  URL        : %s", resp.Request.URL)
-	loga.PrintDebug("  Headers    : %s", resp.Request.Header)
-	loga.PrintDebug("")
+	loga.PrintDebugf("Request Info:")
+	loga.PrintDebugf("  URL        : %s", resp.Request.URL)
+	loga.PrintDebugf("  Headers    : %s", resp.Request.Header)
+	loga.PrintDebugf("")
 
 	// Explore trace info
-	loga.PrintDebug("Request Trace Info:")
+	loga.PrintDebugf("Request Trace Info:")
 	ti := resp.Request.TraceInfo()
-	loga.PrintDebug("  DNSLookup     : %s", ti.DNSLookup)
-	loga.PrintDebug("  ConnTime      : %s", ti.ConnTime)
-	loga.PrintDebug("  TCPConnTime   : %s", ti.TCPConnTime)
-	loga.PrintDebug("  TLSHandshake  : %s", ti.TLSHandshake)
-	loga.PrintDebug("  ServerTime    : %s", ti.ServerTime)
-	loga.PrintDebug("  ResponseTime  : %s", ti.ResponseTime)
-	loga.PrintDebug("  TotalTime     : %s", ti.TotalTime)
-	loga.PrintDebug("  IsConnReused  : %t", ti.IsConnReused)
-	loga.PrintDebug("  IsConnWasIdle : %t", ti.IsConnWasIdle)
-	loga.PrintDebug("  ConnIdleTime  : %s", ti.ConnIdleTime)
-	loga.PrintDebug("  RequestAttempt: %d", ti.RequestAttempt)
-	loga.PrintDebug("  RemoteAddr    : %s", ti.RemoteAddr.String())
-	loga.PrintDebug("")
+	loga.PrintDebugf("  DNSLookup     : %s", ti.DNSLookup)
+	loga.PrintDebugf("  ConnTime      : %s", ti.ConnTime)
+	loga.PrintDebugf("  TCPConnTime   : %s", ti.TCPConnTime)
+	loga.PrintDebugf("  TLSHandshake  : %s", ti.TLSHandshake)
+	loga.PrintDebugf("  ServerTime    : %s", ti.ServerTime)
+	loga.PrintDebugf("  ResponseTime  : %s", ti.ResponseTime)
+	loga.PrintDebugf("  TotalTime     : %s", ti.TotalTime)
+	loga.PrintDebugf("  IsConnReused  : %t", ti.IsConnReused)
+	loga.PrintDebugf("  IsConnWasIdle : %t", ti.IsConnWasIdle)
+	loga.PrintDebugf("  ConnIdleTime  : %s", ti.ConnIdleTime)
+	loga.PrintDebugf("  RequestAttempt: %d", ti.RequestAttempt)
+	loga.PrintDebugf("  RemoteAddr    : %s", ti.RemoteAddr.String())
+	loga.PrintDebugf("")
 }
