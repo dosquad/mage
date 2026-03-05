@@ -6,7 +6,7 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
-	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/builder"
 	"github.com/dosquad/mage/helper/envs"
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
@@ -66,7 +66,7 @@ func (Install) Command(ctx context.Context, cmd string) error {
 func InstallE(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Install)
 
-	cmdName := envs.GetEnv("INSTALL_CMD", must.Must[string](build.FirstCommandName()))
+	cmdName := envs.GetEnv("INSTALL_CMD", must.Must[string](builder.FirstCommandName()))
 
 	cmdDep := mg.F(Install.Command, cmdName)
 	mg.CtxDeps(ctx, cmdDep)

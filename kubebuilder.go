@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/dosquad/mage/helper/bins"
-	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/builder"
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
 	"github.com/magefile/mage/mg"
@@ -103,10 +103,10 @@ func (Kubebuilder) Deploy(ctx context.Context) error {
 
 	_ = bins.Kustomize()
 
-	var dcfg *build.DockerConfig
+	var dcfg *builder.DockerConfig
 	{
 		var err error
-		dcfg, err = build.DockerLoadConfig()
+		dcfg, err = builder.DockerLoadConfig()
 		must.PanicIfError(err, "unable to load docker config")
 	}
 

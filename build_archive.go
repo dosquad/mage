@@ -11,7 +11,7 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
-	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/builder"
 	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/loga"
 	"github.com/magefile/mage/mg"
@@ -141,7 +141,7 @@ func tarAddFile(tarWriter *tar.Writer, filename string, mode os.FileMode) error 
 		Name:    filepath.Base(filename),
 		Mode:    int64(mode),
 		Size:    srcStat.Size(),
-		ModTime: build.GitCommitTime(),
+		ModTime: builder.GitCommitTime(),
 	}
 
 	if err := tarWriter.WriteHeader(hdr); err != nil {

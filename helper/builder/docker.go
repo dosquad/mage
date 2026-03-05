@@ -1,4 +1,4 @@
-package build
+package builder
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 type DockerConfig struct {
 	Image       string                 `yaml:"image,omitempty"`
 	Platforms   []string               `yaml:"platforms,omitempty"`
-	Tag         interface{}            `yaml:"tag,omitempty"`
+	Tag         any                    `yaml:"tag,omitempty"`
 	BlockedTags []string               `yaml:"blocked_tags,omitempty"`
 	BuildArgs   map[string]string      `yaml:"build_args,omitempty"`
 	Kubernetes  DockerConfigKubernetes `yaml:"kubernetes,omitempty"`

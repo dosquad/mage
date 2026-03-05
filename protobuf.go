@@ -7,7 +7,7 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper/bins"
-	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/builder"
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/helper/pbuf"
@@ -101,7 +101,7 @@ func (Protobuf) GenGo(ctx context.Context) error {
 
 	return protobufGen(ctx, []string{
 		"--proto_path=" + paths.MustGetArtifactPath("protobuf", "include"),
-		"--go_opt=module=" + must.Must[string](build.GetModuleName()),
+		"--go_opt=module=" + must.Must[string](builder.GetModuleName()),
 		"--go_out=.",
 	})
 }
@@ -115,7 +115,7 @@ func (Protobuf) GenGoGRPC(ctx context.Context) error {
 
 	return protobufGen(ctx, []string{
 		"--proto_path=" + paths.MustGetArtifactPath("protobuf", "include"),
-		"--go-grpc_opt=module=" + must.Must[string](build.GetModuleName()),
+		"--go-grpc_opt=module=" + must.Must[string](builder.GetModuleName()),
 		"--go-grpc_out=.",
 		"--go-grpc_opt=require_unimplemented_servers=false",
 	})
@@ -131,9 +131,9 @@ func (Protobuf) GenGoTwirp(ctx context.Context) error {
 
 	return protobufGen(ctx, []string{
 		"--proto_path=" + paths.MustGetArtifactPath("protobuf", "include"),
-		"--go_opt=module=" + must.Must[string](build.GetModuleName()),
+		"--go_opt=module=" + must.Must[string](builder.GetModuleName()),
 		"--go_out=.",
-		"--twirp_opt=module=" + must.Must[string](build.GetModuleName()),
+		"--twirp_opt=module=" + must.Must[string](builder.GetModuleName()),
 		"--twirp_out=.",
 	})
 }
@@ -148,9 +148,9 @@ func (Protobuf) GenGoConnect(ctx context.Context) error {
 
 	return protobufGen(ctx, []string{
 		"--proto_path=" + paths.MustGetArtifactPath("protobuf", "include"),
-		"--go_opt=module=" + must.Must[string](build.GetModuleName()),
+		"--go_opt=module=" + must.Must[string](builder.GetModuleName()),
 		"--go_out=.",
-		"--connect-go_opt=module=" + must.Must[string](build.GetModuleName()),
+		"--connect-go_opt=module=" + must.Must[string](builder.GetModuleName()),
 		"--connect-go_out=.",
 	})
 }

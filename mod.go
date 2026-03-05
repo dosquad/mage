@@ -9,7 +9,7 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper/bins"
-	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/builder"
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
 	"github.com/fatih/color"
@@ -39,7 +39,7 @@ func ModTidy(ctx context.Context) error {
 				return err
 			}
 
-			if err := shellcmd.Command("go mod tidy -go=" + build.GolangVersionRaw()).Run(); err != nil {
+			if err := shellcmd.Command("go mod tidy -go=" + builder.GolangVersionRaw()).Run(); err != nil {
 				return err
 			}
 		}

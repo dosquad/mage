@@ -8,7 +8,7 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
-	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/builder"
 	"github.com/dosquad/mage/helper/ctxval"
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
@@ -32,7 +32,7 @@ func dockerCommand(
 // Docker namespace is defined to group Docker functions.
 type Docker mg.Namespace
 
-func dockerBuildArtifacts(ctx context.Context, cfg *build.DockerConfig) error {
+func dockerBuildArtifacts(ctx context.Context, cfg *builder.DockerConfig) error {
 	paths := paths.MustCommandPaths()
 
 	for _, cmdPath := range paths {
@@ -50,13 +50,13 @@ func dockerBuildArtifacts(ctx context.Context, cfg *build.DockerConfig) error {
 }
 
 func dockerBuildCommand(ctx context.Context, args []string) error {
-	cfg := must.Must[*build.DockerConfig](build.DockerLoadConfig())
+	cfg := must.Must[*builder.DockerConfig](builder.DockerLoadConfig())
 
 	var once sync.Once
 	tags := cfg.GetTags()
 
 	if len(tags) == 0 {
-		cfg.Tag = build.SemverBumpPatch(build.GitSemver()) + "-" + build.GitHash()
+		cfg.Tag = builder.SemverBumpPatch(builder.GitSemver()) + "-" + builder.GitHash()
 		tags = cfg.GetTags()
 	}
 
