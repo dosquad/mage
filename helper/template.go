@@ -8,7 +8,7 @@ import (
 	"text/template"
 
 	"github.com/dosquad/mage/helper/bins"
-	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/builder"
 	"github.com/dosquad/mage/helper/envs"
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
@@ -51,12 +51,12 @@ func NewCommandTemplate(debug bool, commandDir string) *CommandTemplate {
 		GoArm:     must.Must(bins.CommandString(`go env GOARM`)),
 		GoVersion: runtime.Version(),
 
-		GitRev:     build.GitHeadRev(),
-		GitHash:    build.GitHash(),
-		GitHeadTag: build.GitHeadTag(),
-		GitSlug:    build.GitSlug(),
+		GitRev:     builder.GitHeadRev(),
+		GitHash:    builder.GitHash(),
+		GitHeadTag: builder.GitHeadTag(),
+		GitSlug:    builder.GitSlug(),
 
-		LDFlags: strings.Join(build.LDFlags(debug), " "),
+		LDFlags: strings.Join(builder.LDFlags(debug), " "),
 
 		CWD: paths.MustGetGitTopLevel(),
 		// BaseDir: baseDir,

@@ -164,7 +164,23 @@ func DownloadToPath(src, dest string, opts ...RestyOpt) (string, error) {
 		}
 	}
 
-	if err := os.Rename(
+	{
+		base, err := filepath.Abs(filepath.Clean(dest))
+		if err != nil {
+			return "", fmt.Errorf("resolve destination path: %w", err)
+		}
+
+		rel, err := filepath.Rel(base, destArchive)
+		if err != nil {
+			return "", fmt.Errorf("resolve archive relative path: %w", err)
+		}
+
+		if rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
+			return "", fmt.Errorf("%s: %s", "content filepath is tainted", rel)
+		}
+	}
+
+	if err := os.Rename( //nolint:gosec // destArchive is constrained under dest by SanitizeArchivePath and Rel checks above.
 		tmpFile,
 		destArchive,
 	); err != nil {
@@ -181,8 +197,18 @@ func DownloadToCache(src string, opts ...RestyOpt) (string, error) {
 
 // SanitizeArchivePath archive file pathing from "G305: Zip Slip vulnerability".
 func SanitizeArchivePath(dest, target string) (string, error) {
-	v := filepath.Join(dest, target)
-	if strings.HasPrefix(v, filepath.Clean(dest)) {
+	base, err := filepath.Abs(filepath.Clean(dest))
+	if err != nil {
+		return "", fmt.Errorf("resolve destination path: %w", err)
+	}
+
+	v := filepath.Clean(filepath.Join(base, target))
+	rel, err := filepath.Rel(base, v)
+	if err != nil {
+		return "", fmt.Errorf("resolve relative path: %w", err)
+	}
+
+	if rel == "." || (rel != ".." && !strings.HasPrefix(rel, ".."+string(os.PathSeparator))) {
 		return v, nil
 	}
 

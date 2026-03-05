@@ -8,7 +8,7 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
-	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/builder"
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/helper/web"
@@ -136,10 +136,10 @@ func (Update) GitIgnore(ctx context.Context) error {
 func (Update) DockerIgnore(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Update)
 
-	var dcfg *build.DockerConfig
+	var dcfg *builder.DockerConfig
 	{
 		var err error
-		dcfg, err = build.DockerLoadConfig()
+		dcfg, err = builder.DockerLoadConfig()
 		must.PanicIfError(err, "unable to load docker config")
 	}
 

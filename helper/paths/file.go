@@ -176,7 +176,7 @@ func FileNameModify(target string, fn func(string) []string) []string {
 
 func FileNameModifyReplace(from string, to ...string) func(string) []string {
 	return func(s string) []string {
-		st := map[string]interface{}{}
+		st := map[string]any{}
 		for _, item := range to {
 			st[strings.Replace(s, from, item, 1)] = nil
 		}
@@ -190,9 +190,7 @@ func FileNameModifyReplace(from string, to ...string) func(string) []string {
 	}
 }
 
-var (
-	ErrFileExists = errors.New("file exists")
-)
+var ErrFileExists = errors.New("file exists")
 
 func FileCopy(src string, dst string, overwrite bool) error {
 	{

@@ -7,7 +7,7 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
-	"github.com/dosquad/mage/helper/build"
+	"github.com/dosquad/mage/helper/builder"
 	"github.com/dosquad/mage/helper/envs"
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
@@ -43,7 +43,7 @@ func (Run) Mirrord(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Run)
 	dyndep.CtxDeps(ctx, dyndep.Mirrord)
 
-	cfg := must.Must[*build.DockerConfig](build.DockerLoadConfig())
+	cfg := must.Must[*builder.DockerConfig](builder.DockerLoadConfig())
 	cfgFile := paths.MustGetGitTopLevel("mirrord.yaml")
 
 	if !paths.FileExists(cfgFile) {
@@ -51,7 +51,7 @@ func (Run) Mirrord(ctx context.Context) error {
 	}
 
 	mg.CtxDeps(ctx, Build.Debug)
-	ct := helper.NewCommandTemplate(true, "./cmd/"+must.Must[string](build.FirstCommandName()))
+	ct := helper.NewCommandTemplate(true, "./cmd/"+must.Must[string](builder.FirstCommandName()))
 
 	// targetCmd := fmt.Sprintf("artifacts/build/debug/%s/%s/%s", Cfg.OOS, Cfg.Arch, Cfg.BaseDir)
 
@@ -72,7 +72,7 @@ func (Run) Mirrord(ctx context.Context) error {
 				"example: 'deployment=slackrobot-router'"))
 		}
 		targetPod = must.Must[string](
-			build.KubernetesGetPodWithSelector(cfg.Kubernetes.PodSelector),
+			builder.KubernetesGetPodWithSelector(cfg.Kubernetes.PodSelector),
 		)
 	}
 	return shellcmd.Command(
@@ -80,7 +80,7 @@ func (Run) Mirrord(ctx context.Context) error {
 			"mirrord exec --config-file %s -t %s -n %s %s",
 			cfgFile,
 			targetPod,
-			must.Must[string](build.KubernetesGetCurrentContext()),
+			must.Must[string](builder.KubernetesGetCurrentContext()),
 			ct.OutputArtifact,
 		),
 	).Run()
@@ -91,7 +91,7 @@ func (Run) Mirrord(ctx context.Context) error {
 func RunE(ctx context.Context, args string) error {
 	dyndep.CtxDeps(ctx, dyndep.Run)
 
-	cmdName := envs.GetEnv("RUN_CMD", must.Must[string](build.FirstCommandName()))
+	cmdName := envs.GetEnv("RUN_CMD", must.Must[string](builder.FirstCommandName()))
 	ct := helper.NewCommandTemplate(true, "./cmd/"+cmdName)
 
 	if err := buildArtifact(ctx, ct); err != nil {

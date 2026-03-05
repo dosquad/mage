@@ -11,7 +11,7 @@ func initMap() {
 	}
 }
 
-func Add(target Type, f interface{}) {
+func Add(target Type, f any) {
 	initMap()
 
 	dMap.Add(target, f)
