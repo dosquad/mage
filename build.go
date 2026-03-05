@@ -85,9 +85,9 @@ func buildPlatformIterator(
 	f func(context.Context, *helper.CommandTemplate) error,
 ) error {
 	var err error
-	platforms := strings.Split(envs.GetEnv("PLATFORMS", runtime.GOOS+"/"+runtime.GOARCH), ",")
+	platforms := strings.SplitSeq(envs.GetEnv("PLATFORMS", runtime.GOOS+"/"+runtime.GOARCH), ",")
 
-	for _, platform := range platforms {
+	for platform := range platforms {
 		ctp := helper.NewCommandTemplate(ct.Debug, ct.CommandDir)
 		ctp.AdditionalArtifacts = ct.AdditionalArtifacts
 		sp := strings.Split(platform, "/")
