@@ -50,7 +50,7 @@ func dockerBuildArtifacts(ctx context.Context, cfg *builder.DockerConfig) error 
 }
 
 func dockerBuildCommand(ctx context.Context, args []string) error {
-	cfg := must.Must[*builder.DockerConfig](builder.DockerLoadConfig())
+	cfg := must.Must(builder.DockerLoadConfig())
 
 	var once sync.Once
 	tags := cfg.GetTags()
@@ -68,7 +68,7 @@ func dockerBuildCommand(ctx context.Context, args []string) error {
 			continue
 		}
 
-		{
+		if !cfg.Options.BuildInDocker {
 			var outErr error
 			once.Do(func() {
 				mg.CtxDeps(ctx, Update.DockerIgnore)

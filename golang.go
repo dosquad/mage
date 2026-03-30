@@ -114,6 +114,41 @@ func (Golang) VisualTest(ctx context.Context) error {
 func (Golang) Generate(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Golang)
 
+	// loga.PrintInfof("Checking generate dependencies")
+	// var buf []byte
+	// {
+	// 	var err error
+	// 	buf, err = shellcmd.Command(`go generate -n ./... 2>&1`).Output()
+	// 	loga.PrintInfof("go generate output: %s", buf)
+	// 	loga.PrintInfof("go generate error: %s", err)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
+
+	// loga.PrintInfof("Go Generate Tool List: %s", buf)
+
+	// tools := make(map[string]struct{})
+
+	// scanner := bufio.NewScanner(bytes.NewReader(buf))
+	// for scanner.Scan() {
+	// 	cmdLine := scanner.Text()
+	// 	spCmd := strings.Split(cmdLine, " ")
+	// 	tool := spCmd[0]
+	// 	loga.PrintInfof("Found tool: %s", tool)
+	// 	tools[tool] = struct{}{}
+	// }
+
+	// for tool := range tools {
+	// 	if err := shellcmd.Command("which " + tool).Run(); err != nil {
+	// 		loga.PrintInfof("go generate tool not found: %s", tool)
+
+	// 		if _, err := bins.Support(tool); err != nil {
+	// 			loga.PrintWarningf("unsupported tool: %s", tool)
+	// 		}
+	// 	}
+	// }
+
 	return shellcmd.Command(`go generate ./...`).Run()
 }
 

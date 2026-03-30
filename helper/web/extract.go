@@ -180,7 +180,8 @@ func DownloadToPath(src, dest string, opts ...RestyOpt) (string, error) {
 		}
 	}
 
-	if err := os.Rename( //nolint:gosec // destArchive is constrained under dest by SanitizeArchivePath and Rel checks above.
+	//nolint:gosec,nolintlint // destArchive is constrained under dest by SanitizeArchivePath and Rel checks above.
+	if err := os.Rename(
 		tmpFile,
 		destArchive,
 	); err != nil {

@@ -13,6 +13,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type DockerConfigOptions struct {
+	BuildInDocker bool `yaml:"build_in_docker,omitempty"`
+}
+
 type DockerConfig struct {
 	Image       string                 `yaml:"image,omitempty"`
 	Platforms   []string               `yaml:"platforms,omitempty"`
@@ -22,6 +26,7 @@ type DockerConfig struct {
 	Kubernetes  DockerConfigKubernetes `yaml:"kubernetes,omitempty"`
 	Mirrord     DockerConfigMirrord    `yaml:"mirrord,omitempty"`
 	Ignore      []string               `yaml:"ignore,omitempty"`
+	Options     DockerConfigOptions    `yaml:"options,omitempty"`
 }
 
 type DockerConfigMirrord struct {
@@ -156,6 +161,9 @@ func DockerLoadConfig() (*DockerConfig, error) {
 			".makefiles",
 			".github",
 			".git",
+		},
+		Options: DockerConfigOptions{
+			BuildInDocker: false,
 		},
 	}
 
