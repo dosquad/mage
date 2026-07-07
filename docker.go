@@ -1,4 +1,4 @@
-//nolint:goconst // constant would reduce readability in this case
+//nolint:goconst // constant would reduce readability in this case.
 package mage
 
 import (
