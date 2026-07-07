@@ -10,6 +10,7 @@ import (
 	"github.com/dosquad/mage/helper/envs"
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
+
 	"github.com/magefile/mage/mg"
 	"github.com/princjef/mageutil/shellcmd"
 )

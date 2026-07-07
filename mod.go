@@ -12,6 +12,7 @@ import (
 	"github.com/dosquad/mage/helper/builder"
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
+
 	"github.com/fatih/color"
 	"github.com/princjef/mageutil/shellcmd"
 )

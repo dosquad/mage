@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/dosquad/mage/loga"
+
 	"github.com/magefile/mage/mg"
 )
 

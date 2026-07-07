@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/dosquad/mage/loga"
+
 	"github.com/na4ma4/go-permbits"
 )
 

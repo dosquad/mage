@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/dosquad/mage/loga"
+
 	"github.com/princjef/mageutil/shellcmd"
 )
 

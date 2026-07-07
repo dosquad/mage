@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/dosquad/mage/dyndep"
+
 	"github.com/magefile/mage/mg"
 )
 

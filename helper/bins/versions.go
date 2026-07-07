@@ -11,6 +11,7 @@ import (
 	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/helper/web"
 	"github.com/dosquad/mage/loga"
+
 	"github.com/na4ma4/go-permbits"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"

@@ -5,6 +5,7 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper/bins"
+
 	"github.com/magefile/mage/mg"
 )
 

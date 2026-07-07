@@ -3,6 +3,7 @@ package bins
 import (
 	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/loga"
+
 	"github.com/princjef/mageutil/bintool"
 )
 

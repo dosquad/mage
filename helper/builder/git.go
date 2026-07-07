@@ -5,10 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dosquad/go-giturl"
 	"github.com/dosquad/mage/helper/bins"
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/semver"
+
+	"github.com/dosquad/go-giturl"
 )
 
 func GitHash() string {

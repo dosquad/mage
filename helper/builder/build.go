@@ -6,8 +6,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/dosquad/go-cliversion/makever"
 	"github.com/dosquad/mage/helper/paths"
+
+	"github.com/dosquad/go-cliversion/makever"
 )
 
 func boolToString(in bool) string {
