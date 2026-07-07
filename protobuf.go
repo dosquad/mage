@@ -1,3 +1,4 @@
+//nolint:goconst // constant would reduce readability in this case
 package mage
 
 import (
@@ -11,6 +12,7 @@ import (
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/helper/pbuf"
+
 	"github.com/magefile/mage/mg"
 	"github.com/princjef/mageutil/bintool"
 )

@@ -5,10 +5,13 @@ import (
 	"testing"
 
 	"github.com/dosquad/mage/helper/paths"
+
 	"github.com/na4ma4/go-permbits"
 )
 
 func TestFileExistsInPath(t *testing.T) {
+	t.Parallel()
+
 	if v := paths.FileExistsInPath("*.randomfile", "artifacts"); v {
 		t.Errorf("FileExistsInPath: [artifacts](*.randomfile) got '%t', want '%t'", v, false)
 	}

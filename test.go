@@ -5,6 +5,7 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper/paths"
+
 	"github.com/magefile/mage/mg"
 )
 

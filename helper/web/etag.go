@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/dosquad/mage/helper/paths"
+
 	"github.com/na4ma4/go-permbits"
 	"gopkg.in/yaml.v3"
 )

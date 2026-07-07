@@ -8,6 +8,7 @@ import (
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper/bins"
 	"github.com/dosquad/mage/helper/envs"
+
 	"github.com/magefile/mage/mg"
 )
 

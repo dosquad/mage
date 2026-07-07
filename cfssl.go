@@ -12,6 +12,7 @@ import (
 	"github.com/dosquad/mage/helper/bins"
 	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/loga"
+
 	"github.com/magefile/mage/mg"
 	"github.com/na4ma4/go-permbits"
 )

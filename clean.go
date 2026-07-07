@@ -6,6 +6,7 @@ import (
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper/bins"
 	"github.com/dosquad/mage/loga"
+
 	"github.com/magefile/mage/sh"
 	"go.uber.org/multierr"
 )

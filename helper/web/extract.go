@@ -16,6 +16,7 @@ import (
 
 	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/loga"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/h2non/filetype"
 	"github.com/magefile/mage/mg"

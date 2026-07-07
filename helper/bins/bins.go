@@ -8,6 +8,7 @@ import (
 	"github.com/dosquad/mage/helper/paths"
 	"github.com/dosquad/mage/helper/web"
 	"github.com/dosquad/mage/loga"
+
 	"github.com/princjef/mageutil/bintool"
 	"github.com/princjef/mageutil/shellcmd"
 	"golang.org/x/text/cases"
