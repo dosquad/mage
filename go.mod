@@ -13,7 +13,7 @@ require (
 	github.com/na4ma4/go-permbits v0.5.4
 	github.com/princjef/mageutil v1.0.0
 	go.uber.org/multierr v1.11.0
-	golang.org/x/text v0.39.0
+	golang.org/x/text v0.40.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
