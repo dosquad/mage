@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/dosquad/mage/compare/v0.4.0...v0.5.0) (2026-07-13)
+
+
+### Features
+
+* Add support for building AWS Lambda artifacts ([#11](https://github.com/dosquad/mage/issues/11)) ([de8a655](https://github.com/dosquad/mage/commit/de8a6550023d686de455460c37a7b727bc64e276))
+
 ## [0.4.0](https://github.com/dosquad/mage/compare/v0.3.4...v0.4.0) (2026-03-30)
 
 
