@@ -2,6 +2,7 @@ package mage
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -89,21 +90,39 @@ func buildPlatformIterator(
 	platforms := strings.SplitSeq(envs.GetEnv("PLATFORMS", runtime.GOOS+"/"+runtime.GOARCH), ",")
 
 	for platform := range platforms {
-		ctp := helper.NewCommandTemplate(ct.Debug, ct.CommandDir)
-		ctp.AdditionalArtifacts = ct.AdditionalArtifacts
-		sp := strings.Split(platform, "/")
-		if len(sp) != 2 { //nolint:mnd // "os/arch"
-			continue
-		}
-		if after, ok := strings.CutPrefix(sp[1], "armv"); ok {
-			ctp.SetPlatform(sp[0], "arm", after)
-		} else {
-			ctp.SetPlatform(sp[0], sp[1], "")
+		var ctp *helper.CommandTemplate
+		{
+			var ctpErr error
+			ctp, ctpErr = buildPlatformCommandTemplate(ctx, ct, platform)
+			if ctpErr != nil {
+				err = multierr.Append(err, ctpErr)
+				continue
+			}
 		}
 		err = multierr.Append(err, f(ctx, ctp))
 	}
 
 	return err
+}
+
+func buildPlatformCommandTemplate(
+	_ context.Context,
+	ct *helper.CommandTemplate,
+	platform string,
+) (*helper.CommandTemplate, error) {
+	ctp := helper.NewCommandTemplate(ct.Debug, ct.CommandDir)
+	ctp.AdditionalArtifacts = ct.AdditionalArtifacts
+	ctp.CommandName = ct.CommandName
+	sp := strings.Split(platform, "/")
+	if len(sp) != 2 { //nolint:mnd // "os/arch"
+		return nil, fmt.Errorf("invalid platform: %s", platform)
+	}
+	if after, ok := strings.CutPrefix(sp[1], "armv"); ok {
+		ctp.SetPlatform(sp[0], "arm", after)
+	} else {
+		ctp.SetPlatform(sp[0], sp[1], "")
+	}
+	return ctp, nil
 }
 
 func buildArtifact(_ context.Context, ct *helper.CommandTemplate) error {
