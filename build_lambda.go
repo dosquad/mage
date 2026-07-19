@@ -53,7 +53,7 @@ func (Build) Lambda(ctx context.Context) error {
 }
 
 func buildLambdaZip(ctx context.Context, ct *helper.CommandTemplate) error {
-	zipPath := paths.MustGetArtifactPath("lambda", ct.CommandName+"_"+ct.GoOS+"_"+ct.GoArch+".zip")
+	zipPath := paths.MustGetArtifactPath("lambda", ct.CommandName+"_"+ct.GoOS+"_"+ct.GoArch+"-lambda-bootstrap.zip")
 	loga.PrintDebugf("buildLambdaZip(%s, %s, %s): %s", ct.CommandName, ct.GoOS, ct.GoArch, zipPath)
 
 	var srcFile *os.File
