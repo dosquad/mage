@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/dosquad/mage/compare/v0.5.0...v0.5.1) (2026-07-19)
+
+
+### Bug Fixes
+
+* add "-lambda-bootstrap" to the end of the lambda archive file name ([636c066](https://github.com/dosquad/mage/commit/636c066c13907c9aee7dd8fc8bbc55cbf2ce0ef3))
+
 ## [0.5.0](https://github.com/dosquad/mage/compare/v0.4.0...v0.5.0) (2026-07-13)
 
 
