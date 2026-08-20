@@ -3,7 +3,7 @@ module github.com/dosquad/mage
 go 1.25.0
 
 require (
-	github.com/alecthomas/kong v1.16.0
+	github.com/alecthomas/kong v1.16.1
 	github.com/dosquad/go-cliversion v0.3.0
 	github.com/dosquad/go-giturl v0.1.1
 	github.com/fatih/color v1.19.0
@@ -13,7 +13,7 @@ require (
 	github.com/na4ma4/go-permbits v0.5.4
 	github.com/princjef/mageutil v1.0.0
 	go.uber.org/multierr v1.11.0
-	golang.org/x/text v0.40.0
+	golang.org/x/text v0.41.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
