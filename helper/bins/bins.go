@@ -1,16 +1,12 @@
 package bins
 
 import (
-	"fmt"
 	"runtime"
 
-	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
-	"github.com/dosquad/mage/helper/web"
 	"github.com/dosquad/mage/loga"
 
 	"github.com/princjef/mageutil/bintool"
-	"github.com/princjef/mageutil/shellcmd"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -163,47 +159,46 @@ func Verdump() *bintool.BinTool {
 //nolint:gochecknoglobals // ignore globals
 var kustomize *bintool.BinTool
 
-func installKustomize() error {
-	var instScript string
-	{
-		var err error
-		instScript, err = web.DownloadToCache(
-			"https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh",
-		)
-		if err != nil {
-			return err
-		}
-	}
+// func installKustomize() error {
+// 	var instScript string
+// 	{
+// 		var err error
+// 		instScript, err = web.DownloadToCache(
+// 			"https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh",
+// 		)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
 
-	ver := MustVersionLoadCache().GetVersion(KustomizeVersion)
-	loga.PrintInfof("Kustomize Version: %s", ver)
-	instCmd := shellcmd.Command(
-		fmt.Sprintf(
-			`bash "%s" "%s" "%s"`,
-			instScript,
-			ver,
-			paths.MustGetArtifactPath("bin"),
-		),
-	)
-	if err := instCmd.Run(); err != nil {
-		return err
-	}
+// 	ver := MustVersionLoadCache().GetVersion(KustomizeVersion)
+// 	loga.PrintInfof("Kustomize Version: %s", ver)
+// 	instCmd := shellcmd.Command(
+// 		fmt.Sprintf(
+// 			`bash "%s" "%s" "%s"`,
+// 			instScript,
+// 			ver,
+// 			paths.MustGetArtifactPath("bin"),
+// 		),
+// 	)
+// 	if err := instCmd.Run(); err != nil {
+// 		return err
+// 	}
 
-	loga.PrintDebugf("Install script completed")
+// 	loga.PrintDebugf("Install script completed")
 
-	return nil
-}
+// 	return nil
+// }
 
 // Kustomize returns a singleton for kustomize.
 func Kustomize() *bintool.BinTool {
 	if kustomize == nil {
-		if !paths.FileExists(paths.MustGetArtifactPath("bin", "kustomize")) {
-			must.PanicIfError(installKustomize(), "unable to install kustomize")
-		}
-
-		kustomize = bintool.Must(bintool.New("kustomize", "", "",
-			bintool.WithFolder(paths.MustGetArtifactPath("bin")),
-			bintool.WithVersionCmd(`{{.FullCmd}} version`),
+		ver := MustVersionLoadCache().GetVersion(KustomizeVersion)
+		loga.PrintInfof("sigs.k8s.io Kustomize Version: %s", ver)
+		kustomize = bintool.Must(bintool.NewGo(
+			"sigs.k8s.io/kustomize/kustomize/v5",
+			ver,
+			bintool.WithFolder(paths.MustGetGoBin()),
 		))
 	}
 

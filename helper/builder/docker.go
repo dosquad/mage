@@ -111,6 +111,10 @@ func (d DockerConfig) OSArch() []Platform {
 			continue
 		}
 
+		if !IsValidTarget(sp[0], sp[1]) {
+			continue
+		}
+
 		out = append(out, Platform{
 			OS:   sp[0],
 			Arch: sp[1],
@@ -129,7 +133,7 @@ func (d DockerConfig) ArgsTag(tag string) (string, error) {
 		return "", errors.New("image is not set")
 	}
 
-	return `--tag "` + d.GetImage() + `:` + tag + `"`, nil
+	return `--tag=` + d.GetImage() + `:` + tag, nil
 }
 
 func (d DockerConfig) Args(ctx context.Context) []string {
@@ -143,7 +147,7 @@ func (d DockerConfig) Args(ctx context.Context) []string {
 
 	if len(d.BuildArgs) > 0 {
 		for key, arg := range d.BuildArgs {
-			out = append(out, `--build-arg "`+key+`=`+arg+`"`)
+			out = append(out, `--build-arg=`+key+`=`+arg)
 		}
 	}
 

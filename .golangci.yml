@@ -23,12 +23,12 @@ issues:
 
 formatters:
   enable:
-    # - goimports # checks if the code and import statements are formatted according to the 'goimports' command
+    - goimports # checks if the code and import statements are formatted according to the 'goimports' command
     - golines # checks if code is formatted, and fixes long lines
 
     ## you may want to enable
-    - gci # checks if code and import statements are formatted, with additional rules
-    - gofmt # checks if the code is formatted according to 'gofmt' command
+    #- gci # checks if code and import statements are formatted, with additional rules
+    #- gofmt # checks if the code is formatted according to 'gofmt' command
     - gofumpt # enforces a stricter format than 'gofmt', while being backwards compatible
     - swaggo # formats swaggo comments
 
@@ -40,13 +40,6 @@ formatters:
       # Default: []
       local-prefixes:
         - github.com/dosquad/mage
-
-    gci:
-      custom-order: true
-      sections:
-        - standard
-        - localmodule
-        - default
 
     golines:
       # Target maximum line length.
@@ -86,7 +79,7 @@ linters:
     - gocyclo # computes and checks the cyclomatic complexity of functions
     - godoclint # checks Golang's documentation practice
     - godot # checks if comments end in a period
-    # - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
+    - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
     - goprintffuncname # checks that printf-like functions are named with f at the end
     - gosec # inspects source code for security problems
     - govet # reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
@@ -140,7 +133,7 @@ linters:
     - decorder # checks declaration order and count of types, constants, variables and functions
     #- exhaustruct # [highly recommend to enable] checks if all structure fields are initialized
     #- ginkgolinter # [if you use ginkgo/gomega] enforces standards of using ginkgo and gomega
-    - godox # detects usage of FIXME, TODO and other keywords inside comments
+    #- godox # detects usage of FIXME, TODO and other keywords inside comments
     - goheader # checks is file header matches to pattern
     - inamedparam # [great idea, but too strict, need to ignore a lot of cases by default] reports interfaces with unnamed method parameters
     #- interfacebloat # checks the number of methods inside an interface
@@ -169,7 +162,7 @@ linters:
     #- misspell # [useless] finds commonly misspelled English words in comments
     #- nlreturn # [too strict and mostly code is not more readable] checks for a new line before return and branch statements to increase code clarity
     #- tagliatelle # checks the struct tags
-    - thelper # detects golang test helpers without t.Helper() call and checks the consistency of test helpers
+    #- thelper # detects golang test helpers without t.Helper() call and checks the consistency of test helpers
     #- wsl_v5 # [too strict and mostly code is not more readable] add or remove empty lines
 
   # All settings can be found here https://github.com/golangci/golangci-lint/blob/HEAD/.golangci.reference.yml
@@ -275,7 +268,6 @@ linters:
         - ^github.com/prometheus/client_golang/.+Opts$
         - ^github.com/spf13/cobra.Command$
         - ^github.com/spf13/cobra.CompletionOptions$
-        - ^github.com/go-openapi/testify/mock.Mock$
         - ^github.com/stretchr/testify/mock.Mock$
         - ^github.com/testcontainers/testcontainers-go.+Request$
         - ^github.com/testcontainers/testcontainers-go.FromDockerfile$
@@ -300,7 +292,7 @@ linters:
       # If lower than 0, disable the check.
       # Default: 40
       statements: 50
-  
+
     gochecksumtype:
       # Presence of `default` case in switch statements satisfies exhaustiveness, if all members are not listed.
       # Default: true
@@ -452,7 +444,7 @@ linters:
   exclusions:
     # Log a warning if an exclusion rule is unused.
     # Default: false
-    warn-unused: true
+    warn-unused: false
     # Predefined exclusion rules.
     # Default: []
     presets:

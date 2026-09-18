@@ -85,7 +85,7 @@ func VersionLoadCache() (*VersionCache, error) {
 		GoreleaserVersion:            "",
 		WireVersion:                  "",
 		VerdumpVersion:               "",
-		KustomizeVersion:             "",
+		KustomizeVersion:             latestTag,
 		KubeControllerGenVersion:     "",
 		KubeControllerEnvTestVersion: "",
 		CFSSLVersion:                 "",

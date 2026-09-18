@@ -2,7 +2,6 @@ package mage
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
@@ -11,6 +10,7 @@ import (
 	"github.com/dosquad/mage/helper/must"
 	"github.com/dosquad/mage/helper/paths"
 
+	"al.essio.dev/pkg/shellescape"
 	"github.com/magefile/mage/mg"
 	"github.com/princjef/mageutil/shellcmd"
 )
@@ -34,9 +34,8 @@ func (Install) CommandAll(ctx context.Context) error {
 
 		installDir := envs.GetEnv("INSTALL_DIR", paths.MustGetHomeDir("go", "bin"))
 
-		if err := shellcmd.Command(fmt.Sprintf(
-			`install "%s" "%s"`, ct.OutputArtifact, installDir,
-		)).Run(); err != nil {
+		if err := shellcmd.Command(shellescape.QuoteCommand([]string{"install", ct.OutputArtifact, installDir})).
+			Run(); err != nil {
 			return err
 		}
 	}
@@ -55,11 +54,7 @@ func (Install) Command(ctx context.Context, cmd string) error {
 
 	installDir := envs.GetEnv("INSTALL_DIR", paths.MustGetHomeDir("go", "bin"))
 
-	return shellcmd.Command(fmt.Sprintf(
-		`install "%s" "%s"`,
-		ct.OutputArtifact,
-		installDir,
-	)).Run()
+	return shellcmd.Command(shellescape.QuoteCommand([]string{"install", ct.OutputArtifact, installDir})).Run()
 }
 
 // InstallE installs with release tags and the supplied arguments the command specified by INSTALL_CMD

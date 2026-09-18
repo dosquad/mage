@@ -10,6 +10,7 @@ import (
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
+	"github.com/dosquad/mage/helper/builder"
 	"github.com/dosquad/mage/helper/envs"
 	"github.com/dosquad/mage/helper/paths"
 
@@ -115,6 +116,9 @@ func buildPlatformCommandTemplate(
 	ctp.CommandName = ct.CommandName
 	sp := strings.Split(platform, "/")
 	if len(sp) != 2 { //nolint:mnd // "os/arch"
+		return nil, fmt.Errorf("invalid platform: %s", platform)
+	}
+	if !builder.IsValidTarget(sp[0], sp[1]) {
 		return nil, fmt.Errorf("invalid platform: %s", platform)
 	}
 	if after, ok := strings.CutPrefix(sp[1], "armv"); ok {

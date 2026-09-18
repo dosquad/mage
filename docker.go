@@ -3,9 +3,10 @@ package mage
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"sync"
+
+	"al.essio.dev/pkg/shellescape"
 
 	"github.com/dosquad/mage/dyndep"
 	"github.com/dosquad/mage/helper"
@@ -24,11 +25,9 @@ func dockerCommand(
 	action string,
 	args ...any,
 ) error {
-	return shellcmd.Command(fmt.Sprintf(
-		"docker %s %s",
-		action,
-		strings.Join(helper.ArgsFromAny(args), " "),
-	)).Run()
+	return shellcmd.Command(
+		shellescape.QuoteCommand(append([]string{"docker", action}, helper.ArgsFromAny(args)...)),
+	).Run()
 }
 
 // Docker namespace is defined to group Docker functions.
@@ -101,7 +100,8 @@ func (Docker) Build(ctx context.Context) error {
 	ctx = context.WithValue(ctx, ctxval.DockerLocalPlatform, true)
 	dyndep.CtxDeps(ctx, dyndep.Build)
 	dyndep.CtxDeps(ctx, dyndep.Docker)
-	return dockerBuildCommand(ctx,
+	return dockerBuildCommand(
+		ctx,
 		[]string{
 			"--pull",
 			"--load",
@@ -115,7 +115,8 @@ func (Docker) Build(ctx context.Context) error {
 func (Docker) Test(ctx context.Context) error {
 	dyndep.CtxDeps(ctx, dyndep.Docker)
 	dyndep.CtxDeps(ctx, dyndep.Test)
-	return dockerBuildCommand(ctx,
+	return dockerBuildCommand(
+		ctx,
 		[]string{
 			"--pull",
 			".",
@@ -126,7 +127,8 @@ func (Docker) Test(ctx context.Context) error {
 // Push Builds docker images for each target platform and pushes
 // those images, and a manifest list to the registry.
 func (Docker) Push(ctx context.Context) error {
-	return dockerBuildCommand(ctx,
+	return dockerBuildCommand(
+		ctx,
 		[]string{
 			"--pull",
 			"--push",
